@@ -19,3 +19,15 @@ export function makeFolder({ parentDir, childDir }) {
     return path;
   }
 }
+
+export function changeKeyOnArr(arr, keys) {
+  return arr.map((data) => {
+    const newData = {};
+    for (const key in keys) {
+      if (keys.hasOwnProperty(key) && data.hasOwnProperty(keys[key])) {
+        newData[key] = data[keys[key]];
+      }
+    }
+    return newData;
+  });
+}

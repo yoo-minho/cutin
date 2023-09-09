@@ -23,14 +23,14 @@ export const cutVideo = async (option) => {
   for (const [idx, seek] of seekArr.entries()) {
     const option = {
       idx,
-      inputPath: videoPath[seek.v],
+      inputPath: videoPath.find((v) => v.includes(seek.v)),
       outputPath: `${highlightPath}/${idx}.mp4`,
       gameInfo,
       ...seek,
     };
     highlightArr.push(option);
     await createVideo(option);
-    if (idx === 0) return;
+    // if (idx === 0) return;
   }
 
   //   //#2. 쿼터
