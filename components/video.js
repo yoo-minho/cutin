@@ -111,13 +111,13 @@ function createVideo(option) {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
-      .inputOptions(["-hwaccel nvdec"])
+      // .inputOptions(["-hwaccel nvdec"])
       .seekInput(time)
       .duration(`00:00:${beforeSec / playbackSpeed}`)
       // .videoCodec("libx264")
       // .audioCodec("aac")
       .output(outputPath)
-      .outputOption("-c:v h264_nvenc")
+      // .outputOption("-c:v h264_nvenc")
       .videoFilter([
         `crop=in_w/${zoom}:in_h/${zoom}:in_w*${x}:in_h*${y}`,
         `setpts=${1 / playbackSpeed}*PTS`,

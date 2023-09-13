@@ -1,6 +1,7 @@
 temp/
 _input/
 _output/
+output_frames/
 
 # Logs
 logs

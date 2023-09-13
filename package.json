@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "fluent-ffmpeg": "^2.1.2",
+    "jimp": "^0.22.10",
     "xlsx": "^0.18.5"
   },
   "type": "module"
