@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>드래그 앤 드롭 비디오 플레이어</title>
+  </head>
+  <body>
+    <input id="fileee" type="file" />
+    <video id="videoPlayer" width="960" height="540"></video>
+    <div id="time-display">
+      <span id="current-time">0:00</span> / <span id="duration">0:00</span>
+    </div>
+    <div id="custom-controls">
+      <button id="play-pause">Play</button>
+      <input type="range" id="seek-bar" value="0" />
+      <button id="mute">Mute</button>
+      <input
+        type="range"
+        id="volume-bar"
+        min="0"
+        max="1"
+        step="0.1"
+        value="1"
+      />
+      <button id="speed-up">Speed Up</button>
+      <button id="speed-down">Speed Down</button>
+    </div>
+    <div id="store"></div>
+    <script>
+      const store = [];
+
+      const fileee = document.getElementById("fileee");
+      const video = document.getElementById("videoPlayer");
+
+      // 속도 조절 버튼 및 이벤트 리스너 추가
+      const speedUpButton = document.getElementById("speed-up");
+      const speedDownButton = document.getElementById("speed-down");
+
+      speedUpButton.addEventListener("click", () => changePlaybackSpeed(1.5)); // 1.5배 속도로 재생
+      speedDownButton.addEventListener("click", () => changePlaybackSpeed(0.5)); // 0.5배 속도로 재생
+
+      // 비디오 속도 변경 함수 추가
+      function changePlaybackSpeed(speed) {
+        video.playbackRate = speed;
+      }
+
+      function playVideo(file) {
+        const videoURL = URL.createObjectURL(file);
+        video.src = videoURL;
+        video.play();
+      }
+
+      fileee.addEventListener("change", (e) => {
+        e.preventDefault();
+        const file = e.target.files[0];
+        playVideo(file);
+      });
+
+      video.addEventListener("loadedmetadata", function () {
+        document.addEventListener("keydown", handleKeyPress);
+      });
+
+      function handleKeyPress(event) {
+        event.preventDefault();
+        const currentTime = video.currentTime;
+        const duration = video.duration;
+        console.log(event.key);
+        switch (event.key) {
+          case "ArrowLeft":
+            video.currentTime = Math.max(currentTime - 3, 0);
+            break;
+          case "ArrowRight":
+            video.currentTime = Math.min(currentTime + 3, duration);
+            break;
+          case "c":
+            store.push({ time: video.currentTime });
+            document.getElementById("store").innerText = JSON.stringify(store);
+            break;
+          default:
+            break;
+        }
+      }
+
+      // 비디오와 컨트롤 요소 가져오기
+      const playPauseButton = document.getElementById("play-pause");
+      const seekBar = document.getElementById("seek-bar");
+      const muteButton = document.getElementById("mute");
+      const volumeBar = document.getElementById("volume-bar");
+      const currentTimeDisplay = document.getElementById("current-time");
+      const durationDisplay = document.getElementById("duration");
+
+      // 비디오 이벤트 리스너 수정
+      video.addEventListener("timeupdate", () => {
+        updateSeekBar();
+        updateTimeDisplay(); // 시간 표시 업데이트
+      });
+
+      video.addEventListener("loadedmetadata", () => {
+        setDurationDisplay(); // 비디오의 전체 시간 설정
+      });
+
+      // 현재 재생 시간 및 전체 시간 업데이트 함수 추가
+      function updateTimeDisplay() {
+        const currentTime = video.currentTime;
+        currentTimeDisplay.textContent = formatTime(currentTime);
+      }
+
+      function setDurationDisplay() {
+        const duration = video.duration;
+        durationDisplay.textContent = formatTime(duration);
+      }
+
+      // 시간 포맷팅 함수 추가 (초를 "분:초" 형식으로 변환)
+      function formatTime(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+      }
+
+      // 재생 또는 일시 중지 버튼 클릭 시 토글 함수
+      function togglePlayPause() {
+        if (video.paused || video.ended) {
+          video.play();
+          playPauseButton.textContent = "Pause";
+        } else {
+          video.pause();
+          playPauseButton.textContent = "Play";
+        }
+      }
+
+      // 비디오 현재 위치를 업데이트하고 시크 바 이동
+      function updateSeekBar() {
+        const currentTime = video.currentTime;
+        const duration = video.duration;
+        seekBar.value = (currentTime / duration) * 100;
+      }
+
+      // 시크 바를 클릭하여 비디오 위치 설정
+      function setVideoPosition() {
+        const duration = video.duration;
+        const newPosition = (seekBar.value / 100) * duration;
+        video.currentTime = newPosition;
+      }
+
+      // 음소거 상태를 토글하고 버튼 텍스트 업데이트
+      function toggleMute() {
+        if (video.muted) {
+          video.muted = false;
+          muteButton.textContent = "Mute";
+        } else {
+          video.muted = true;
+          muteButton.textContent = "Unmute";
+        }
+      }
+
+      // 볼륨 바 조절
+      function setVolume() {
+        video.volume = volumeBar.value;
+      }
+
+      // 비디오 이벤트 리스너 추가
+      video.addEventListener(
+        "play",
+        () => (playPauseButton.textContent = "Pause")
+      );
+      video.addEventListener(
+        "pause",
+        () => (playPauseButton.textContent = "Play")
+      );
+      video.addEventListener("timeupdate", updateSeekBar);
+      video.addEventListener(
+        "ended",
+        () => (playPauseButton.textContent = "Play")
+      );
+
+      // 버튼 및 바 이벤트 리스너 추가
+      playPauseButton.addEventListener("click", togglePlayPause);
+      seekBar.addEventListener("input", setVideoPosition);
+      muteButton.addEventListener("click", toggleMute);
+      volumeBar.addEventListener("input", setVolume);
+    </script>
+  </body>
+</html>
