@@ -64,7 +64,6 @@
         event.preventDefault();
         const currentTime = video.currentTime;
         const duration = video.duration;
-        console.log(event.key);
         switch (event.key) {
           case "ArrowLeft":
             video.currentTime = Math.max(currentTime - 3, 0);
