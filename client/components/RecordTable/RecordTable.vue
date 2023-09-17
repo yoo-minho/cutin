@@ -1,0 +1,114 @@
+<script setup lang="ts">
+const props = defineProps<{ currTime: string }>();
+const emits = defineEmits<{ moveSeekPoint: (time: string) => void }>();
+
+const currTime = toRef(props, "currTime");
+
+const cutStore = useCutStore();
+const currGame = useCurrGame();
+const gameTab = ref("1g");
+const quaterTab = ref("1q");
+const tab = ref("");
+
+watch(
+  [gameTab, quaterTab],
+  () => {
+    tab.value = gameTab.value + quaterTab.value;
+    currGame.value = gameTab.value + quaterTab.value;
+  },
+  { immediate: true }
+);
+
+const columns = [
+  {
+    label: "time",
+    name: "time",
+    field: "time",
+    align: "center",
+    style: { width: "72px" },
+  },
+  {
+    label: "scorer",
+    name: "scorer",
+    field: "scorer",
+    align: "center",
+    style: { width: "30%" },
+  },
+  {
+    label: "assister",
+    name: "assister",
+    field: "assister",
+    align: "center",
+    style: { width: "30%" },
+  },
+  {
+    label: "skill",
+    name: "skill",
+    field: "skill",
+    align: "center",
+    style: { width: "30%" },
+  },
+];
+</script>
+<template>
+  <div class="bg-dark" style="height: 100%; border-left: 0.5px solid grey">
+    <q-tabs
+      v-model="gameTab"
+      dense
+      class="text-grey"
+      active-color="white"
+      align="left"
+    >
+      <q-tab name="1g" label="1게임" />
+      <q-tab name="2g" label="2게임" />
+    </q-tabs>
+    <q-tabs
+      v-model="quaterTab"
+      dense
+      class="text-grey"
+      active-color="white"
+      align="left"
+    >
+      <q-tab name="1q" label="1쿼터" />
+      <q-tab name="2q" label="2쿼터" />
+      <q-tab name="3q" label="3쿼터" />
+      <q-tab name="4q" label="4쿼터" />
+    </q-tabs>
+    <q-separator />
+    <q-tab-panels v-model="tab">
+      <q-tab-panel :name="tab" class="q-pa-md">
+        <q-table
+          dark
+          flat
+          dense
+          :columns="columns"
+          :rows="cutStore.filter((cut) => cut.game === currGame)"
+          :rows-per-page-options="[0]"
+        >
+          <template #body="props">
+            <q-tr
+              :props="props"
+              :class="props.row.time === currTime ? 'text-orange' : ''"
+            >
+              <q-td key="time" :props="props">
+                <div
+                  class="text-pre-wrap cursor-pointer"
+                  @click="emits('moveSeekPoint', String(props.row.time))"
+                >
+                  {{ props.row.time }}
+                </div>
+              </q-td>
+              <q-td key="scorer" :props="props">{{ props.row.scorer }} </q-td>
+              <q-td key="assister" :props="props">
+                {{ props.row.assister }}
+              </q-td>
+              <q-td key="skill" :props="props">{{ props.row.skill }}</q-td>
+            </q-tr>
+          </template>
+        </q-table>
+      </q-tab-panel>
+    </q-tab-panels>
+  </div>
+</template>
+
+<style lang="scss" scoped></style>
