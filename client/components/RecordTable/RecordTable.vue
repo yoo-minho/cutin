@@ -96,6 +96,15 @@ const columns = [
       <q-tab name="4q" label="4쿼터" />
     </q-tabs>
     <q-separator />
+    <q-btn
+      color="green"
+      text-color="white"
+      class="q-ma-md"
+      icon="file_download"
+      @click="downGameData"
+    >
+      게임 데이터 JSON 내려받기
+    </q-btn>
     <q-tab-panels v-model="tab">
       <q-tab-panel :name="tab" class="q-pa-md">
         <div v-if="!currVideoName">비디오를 업로드해주세요!</div>
@@ -132,16 +141,5 @@ const columns = [
         </div>
       </q-tab-panel>
     </q-tab-panels>
-    <q-btn
-      color="green"
-      text-color="white"
-      class="q-ma-md"
-      icon="file_download"
-      @click="downGameData"
-    >
-      게임 데이터 JSON 내려받기
-    </q-btn>
   </div>
 </template>
-
-<style lang="scss" scoped></style>
