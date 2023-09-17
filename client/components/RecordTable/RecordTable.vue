@@ -3,12 +3,13 @@ const props = defineProps<{ currTime: string }>();
 const emits = defineEmits<{ moveSeekPoint: (time: string) => void }>();
 
 const currTime = toRef(props, "currTime");
+const currVideoName = useCurrVideoName();
 
-const cutStore = useCutStore();
 const currGame = useCurrGame();
 const gameTab = ref("1g");
 const quaterTab = ref("1q");
 const tab = ref("");
+let cutStore = useCutStore();
 
 watch(
   [gameTab, quaterTab],
@@ -18,6 +19,26 @@ watch(
   },
   { immediate: true }
 );
+
+watch(currVideoName, () => {
+  cutStore = useCutStore(currVideoName.value);
+});
+
+const downGameData = () => {
+  const data = cutStore.value.map((cut) => ({
+    ...cut,
+    videoName: currVideoName.value,
+  }));
+  const jsonString = JSON.stringify(data);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const blobUrl = URL.createObjectURL(blob);
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = blobUrl;
+  downloadLink.download = currVideoName.value.replace(".mp4", ".json");
+
+  downloadLink.click();
+};
 
 const columns = [
   {
@@ -77,37 +98,49 @@ const columns = [
     <q-separator />
     <q-tab-panels v-model="tab">
       <q-tab-panel :name="tab" class="q-pa-md">
-        <q-table
-          dark
-          flat
-          dense
-          :columns="columns"
-          :rows="cutStore.filter((cut) => cut.game === currGame)"
-          :rows-per-page-options="[0]"
-        >
-          <template #body="props">
-            <q-tr
-              :props="props"
-              :class="props.row.time === currTime ? 'text-orange' : ''"
-            >
-              <q-td key="time" :props="props">
-                <div
-                  class="text-pre-wrap cursor-pointer"
-                  @click="emits('moveSeekPoint', String(props.row.time))"
-                >
-                  {{ props.row.time }}
-                </div>
-              </q-td>
-              <q-td key="scorer" :props="props">{{ props.row.scorer }} </q-td>
-              <q-td key="assister" :props="props">
-                {{ props.row.assister }}
-              </q-td>
-              <q-td key="skill" :props="props">{{ props.row.skill }}</q-td>
-            </q-tr>
-          </template>
-        </q-table>
+        <div v-if="!currVideoName">비디오를 업로드해주세요!</div>
+        <div v-else>
+          <q-table
+            dark
+            flat
+            dense
+            :columns="columns"
+            :rows="cutStore?.filter((cut) => cut.game === currGame)"
+            :rows-per-page-options="[0]"
+          >
+            <template #body="props">
+              <q-tr
+                :props="props"
+                :class="props.row.time === currTime ? 'text-orange' : ''"
+              >
+                <q-td key="time" :props="props">
+                  <div
+                    class="text-pre-wrap cursor-pointer"
+                    @click="emits('moveSeekPoint', String(props.row.time))"
+                  >
+                    {{ props.row.time }}
+                  </div>
+                </q-td>
+                <q-td key="scorer" :props="props">{{ props.row.scorer }} </q-td>
+                <q-td key="assister" :props="props">
+                  {{ props.row.assister }}
+                </q-td>
+                <q-td key="skill" :props="props">{{ props.row.skill }}</q-td>
+              </q-tr>
+            </template>
+          </q-table>
+        </div>
       </q-tab-panel>
     </q-tab-panels>
+    <q-btn
+      color="green"
+      text-color="white"
+      class="q-ma-md"
+      icon="file_download"
+      @click="downGameData"
+    >
+      게임 데이터 JSON 내려받기
+    </q-btn>
   </div>
 </template>
 

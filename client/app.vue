@@ -10,6 +10,7 @@ const currVideoName = useCurrVideoName();
 const playerStoreA = usePlayerStore("A");
 const playerStoreB = usePlayerStore("B");
 const currTime = ref("");
+const currSpeed = ref(1);
 
 const upload = (file: any) => {
   currVideoName.value = file.name;
@@ -89,19 +90,34 @@ function handleKeyPress(event: any, pressedKeys: any) {
     return;
   }
 
+  if ("C" === event.key.toUpperCase()) {
+    addCut(currTime.value);
+    stopPlayer();
+    return;
+  }
+
   switch (event.key) {
     case "ArrowLeft":
       video.value.currentTime = Math.max(currentTime - 3, 0);
       break;
     case "ArrowRight":
-      video.value.currentTime = Math.min(currentTime + 3, duration);
+      if (video.value.paused || video.value.ended) {
+        video.value.currentTime = Math.min(currentTime + 3, duration);
+        return;
+      }
+
+      const highSpeed = 8;
+      if (currSpeed.value === highSpeed) return;
+
+      currSpeed.value = video.value.playbackRate;
+      video.value.playbackRate = highSpeed;
+      setTimeout(() => {
+        video.value.playbackRate = currSpeed.value;
+      }, 500);
       break;
     case " ":
       togglePlayPause();
       break;
-    case "c":
-      addCut(currTime.value);
-      stopPlayer();
     default:
       break;
   }

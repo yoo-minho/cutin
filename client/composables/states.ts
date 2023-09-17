@@ -34,30 +34,29 @@ export const usePlayerStore = (name: string) => {
 export const useSkillStore = () => {
   return useState<SkillType[]>(`SkillStore`, () => defaultSkill);
 };
-export const useCutStore = (name?: string) => {
+export const useCutStore = (name: string = "") => {
   const currVideoName = useCurrVideoName();
-  return useState<CutType[]>(
-    `${name || currVideoName.value}CutStore`,
-    () => []
-  );
+  name = name || currVideoName.value;
+  return useState<CutType[]>(`${name}CutStore`, () => loadCutStore());
 };
 
 export const addCut = (cutTime: string) => {
+  const currVideoName = useCurrVideoName();
   const currGame = useCurrGame();
-  const cutStore = useCutStore();
-  const newStore = cutStore.value.filter((c) => c.time !== cutTime);
+  const cutStore = useCutStore(currVideoName.value);
+  const newStore = [...cutStore.value].filter((c) => c.time !== cutTime);
   const isCancelCut = newStore.length < cutStore.value.length;
   if (isCancelCut) {
     cutStore.value = newStore;
     Notify.create(`같은 컷에서 [C]를 누르면 삭제됩니다`);
+    saveCutStore();
     return;
   }
 
   cutStore.value = [...newStore, { game: currGame.value, time: cutTime }].sort(
     (a, b) => time2sec(a.time) - time2sec(b.time)
   );
-
-  console.log("addCut", cutTime, currGame.value, cutStore.value);
+  saveCutStore();
 };
 
 export const updateCut = (
@@ -86,4 +85,25 @@ export const updateCut = (
   cutStore.value = cutStore.value.map((c) =>
     c.time === cutTime ? { ...c, ...data } : c
   );
+  saveCutStore();
 };
+
+function saveCutStore() {
+  const currVideoName = useCurrVideoName();
+  const cutStore = useCutStore(currVideoName.value);
+  localStorage.setItem(
+    `cut_${currVideoName.value}`,
+    JSON.stringify(cutStore.value)
+  );
+}
+
+function loadCutStore() {
+  const currVideoName = useCurrVideoName();
+  try {
+    return JSON.parse(
+      localStorage.getItem(`cut_${currVideoName.value}`) || "[]"
+    );
+  } catch (e) {
+    return [];
+  }
+}
