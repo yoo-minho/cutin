@@ -1,4 +1,4 @@
-import { Notify } from "quasar";
+import { Notify, Dialog } from "quasar";
 import { defaultSkill } from "./constants";
 
 type CutType = {
@@ -29,7 +29,8 @@ export const useCurrGame = () => {
   return useState<string>("useCurrGame", () => "1g1q"); //1게임 1쿼터
 };
 export const usePlayerStore = (name: string) => {
-  return useState<PlayerType[]>(`${name}PlayerStore`, () => []);
+  const defStore = loadPlayerStore(name);
+  return useState<PlayerType[]>(`${name}PlayerStore`, () => defStore);
 };
 export const useSkillStore = () => {
   return useState<SkillType[]>(`SkillStore`, () => defaultSkill);
@@ -47,9 +48,14 @@ export const addCut = (cutTime: string) => {
   const newStore = [...cutStore.value].filter((c) => c.time !== cutTime);
   const isCancelCut = newStore.length < cutStore.value.length;
   if (isCancelCut) {
-    cutStore.value = newStore;
-    Notify.create(`같은 컷에서 [C]를 누르면 삭제됩니다`);
-    saveCutStore();
+    Dialog.create({
+      title: "컷 삭제",
+      ok: "삭제",
+      cancel: "취소",
+    }).onOk(() => {
+      cutStore.value = newStore;
+      saveCutStore();
+    });
     return;
   }
 
@@ -102,6 +108,43 @@ function loadCutStore() {
   try {
     return JSON.parse(
       localStorage.getItem(`cut_${currVideoName.value}`) || "[]"
+    );
+  } catch (e) {
+    return [];
+  }
+}
+
+export function addPlayer(teamName: string, playerName: string) {
+  const playerStore = usePlayerStore(teamName);
+  playerStore.value.push({ name: playerName });
+  savePlayerStore(teamName);
+}
+
+export function removePlayer(teamName: string, playerName: string) {
+  const playerStore = usePlayerStore(teamName);
+  playerStore.value = playerStore.value.filter(
+    (player) => player.name !== playerName
+  );
+  savePlayerStore(teamName);
+}
+
+function savePlayerStore(teamName: string) {
+  const currVideoName = useCurrVideoName();
+  const [team, date] = currVideoName.value.split("_");
+  const playerStore = usePlayerStore(teamName);
+  localStorage.setItem(
+    `player_${teamName}_${team + date}`,
+    JSON.stringify(playerStore.value)
+  );
+}
+
+function loadPlayerStore(teamName: string) {
+  const currVideoName = useCurrVideoName();
+  const [team, date] = currVideoName.value.split("_");
+  console.log("loadPlayerStore", `player_${teamName}_${team + date}`);
+  try {
+    return JSON.parse(
+      localStorage.getItem(`player_${teamName}_${team + date}`) || "[]"
     );
   } catch (e) {
     return [];

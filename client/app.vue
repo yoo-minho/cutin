@@ -7,10 +7,8 @@ const file = ref();
 const videoOn = ref(false);
 const videoPlayOn = ref(true);
 const currVideoName = useCurrVideoName();
-const playerStoreA = usePlayerStore("A");
-const playerStoreB = usePlayerStore("B");
 const currTime = ref("");
-const currSpeed = ref(1);
+const currSpeed = ref(1.5);
 
 const upload = (file: any) => {
   currVideoName.value = file.name;
@@ -22,6 +20,7 @@ watch(
   () => video.value,
   () => {
     video.value.addEventListener("loadedmetadata", function () {
+      video.value.playbackRate = currSpeed.value;
       const pressedKeys = new Set<string>();
 
       playPlayer();
@@ -50,6 +49,9 @@ function handleKeyPress(event: any, pressedKeys: any) {
   event.preventDefault();
   if (video.value === null) return;
 
+  const playerStoreA = usePlayerStore("A");
+  const playerStoreB = usePlayerStore("B");
+
   const isCommandS =
     [...pressedKeys].filter((key) => key?.toUpperCase() === "S").length > 0;
   const isCommandA =
@@ -66,6 +68,11 @@ function handleKeyPress(event: any, pressedKeys: any) {
     : isCommandS
     ? "skill"
     : "scorer";
+
+  if (["assister", "skill"].includes(currentCommand) && event.key === " ") {
+    updateCut(currentCommand, currTime.value, "");
+    return;
+  }
 
   if ("skill" === currentCommand && keyIdx1 > -1) {
     updateCut("skill", currTime.value, defaultSkill[keyIdx1].name);
@@ -92,7 +99,7 @@ function handleKeyPress(event: any, pressedKeys: any) {
 
   if ("C" === event.key.toUpperCase()) {
     addCut(currTime.value);
-    stopPlayer();
+    moveSeekPoint(currTime.value);
     return;
   }
 
@@ -101,13 +108,16 @@ function handleKeyPress(event: any, pressedKeys: any) {
       video.value.currentTime = Math.max(currentTime - 3, 0);
       break;
     case "ArrowRight":
-      if (video.value.paused || video.value.ended) {
-        video.value.currentTime = Math.min(currentTime + 3, duration);
+      if (video.value.paused || video.value.ended || event.ctrlKey) {
+        video.value.currentTime = Math.min(currentTime + 10, duration);
         return;
       }
 
       const highSpeed = 8;
-      if (currSpeed.value === highSpeed) return;
+      if (video.value.playbackRate === highSpeed) {
+        video.value.playbackRate = currSpeed.value;
+        return;
+      }
 
       currSpeed.value = video.value.playbackRate;
       video.value.playbackRate = highSpeed;
@@ -146,7 +156,7 @@ function togglePlayPause() {
     <q-layout
       view="lHh lpr lFf"
       container
-      style="max-width: 1920px; min-width: 1280px; min-height: 960px"
+      style="max-width: 1920px; min-width: 1280px; height: 100vh"
       class="shadow-2 rounded-borders"
     >
       <header-bar />
@@ -175,8 +185,13 @@ function togglePlayPause() {
                 </q-file>
               </div>
               <div class="col bg-dark q-pa-md">
-                <player-list teamName="A" />
-                <player-list teamName="B" />
+                <template v-if="videoOn">
+                  <player-list teamName="A" />
+                  <player-list teamName="B" />
+                </template>
+                <template v-else>
+                  <div class="text-white q-mb-md">비디오를 업로드해주세요!</div>
+                </template>
                 <skill-list />
               </div>
             </div>

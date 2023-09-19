@@ -3,10 +3,15 @@ import { useQuasar } from "quasar";
 import { keySet } from "~/composables/constants";
 
 const props = defineProps<{ teamName: string }>();
-const playerStore = usePlayerStore(props.teamName);
-const teamName = props.teamName;
+const teamName = toRef(props, "teamName");
+const playerStore = usePlayerStore(teamName.value);
+
 const keyCommand =
-  "A" === teamName ? keySet.first : "B" === teamName ? keySet.second : [];
+  "A" === teamName.value
+    ? keySet.first
+    : "B" === teamName.value
+    ? keySet.second
+    : [];
 
 const prompt = ref(false);
 const playerName = ref("");
@@ -18,20 +23,19 @@ const openPop = () => {
   playerName.value = "";
 };
 
-const addPlayer = () => {
-  playerStore.value.push({ name: playerName.value });
+const _addPlayer = () => {
+  addPlayer(teamName.value, playerName.value);
   prompt.value = false;
   playerName.value = "";
 };
 
-const removePlayer = (name: string) => {
+const _removePlayer = (name: string) => {
   $q.dialog({
     title: "선수제거",
     ok: "제거",
     cancel: "취소",
   }).onOk(() => {
-    const newStore = playerStore.value.filter((player) => player.name !== name);
-    playerStore.value = newStore;
+    removePlayer(teamName.value, name);
   });
 };
 </script>
@@ -45,7 +49,7 @@ const removePlayer = (name: string) => {
       :command="keyCommand[idx]"
       :label="player.name"
       clickable
-      @click="() => removePlayer(player.name)"
+      @click="() => _removePlayer(player.name)"
     />
     <q-chip
       clickable
@@ -69,12 +73,12 @@ const removePlayer = (name: string) => {
             dense
             autofocus
             color="orange"
-            @keyup.enter="addPlayer()"
+            @keyup.enter="_addPlayer()"
           />
         </q-card-section>
         <q-card-actions align="right" class="text-orange">
           <q-btn flat label="취소" v-close-popup />
-          <q-btn flat label="추가" v-close-popup @click="addPlayer()" />
+          <q-btn flat label="추가" v-close-popup @click="_addPlayer()" />
         </q-card-actions>
       </q-card>
     </q-dialog>

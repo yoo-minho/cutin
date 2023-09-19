@@ -1,33 +1,45 @@
 import { cutVideo } from "./components/video.js";
-import { getArrByExcel } from "./core/excel.js";
 import { changeKeyOnArr } from "./util.js";
+import fs from "node:fs";
 
-const COL_INFO = {
-  v: "비디오명",
-  t: "시간(분:초)",
-  g: "게임",
-  q: "쿼터",
-  s: "득점선수명",
-  a: "어시선수명",
-  k: "스킬이름",
+const COL_INFO_V2 = {
+  v: "videoName",
+  t: "time",
+  g: "g",
+  q: "q",
+  s: "scorer",
+  a: "assister",
+  k: "skill",
 };
+
+const conv = (jsonFileName) =>
+  JSON.parse(fs.readFileSync(`_input/${jsonFileName}`, "utf8")).map((v) => {
+    const [g, q] = v.game.split(/g|q/);
+    return { ...v, g, q };
+  });
 
 await cutVideo(
   {
     gameInfo: {
       title: "GBA",
-      date: "20230902",
+      date: "20230916",
       place: "영등포 제2스포츠센터",
     },
     bgmPath: "assets/Flying.mp3",
     videoPath: [
-      "_input/gba_20230902_1.mp4",
-      "_input/gba_20230902_2.mp4",
-      // "_input/gba_20230902_3.mp4",
+      "_input/gba_20230916_1_A.mp4",
+      "_input/gba_20230916_1_B.mp4",
+      "_input/gba_20230916_2_A.mp4",
+      "_input/gba_20230916_2_B.mp4",
     ],
     seekArr: changeKeyOnArr(
-      getArrByExcel("_input/gba_20230902.xlsx"),
-      COL_INFO
+      [
+        ...conv("gba_20230916_1_A.json"),
+        ...conv("gba_20230916_1_B.json"),
+        ...conv("gba_20230916_2_A.json"),
+        ...conv("gba_20230916_2_B.json"),
+      ],
+      COL_INFO_V2
     ),
   },
   { step: 1 }

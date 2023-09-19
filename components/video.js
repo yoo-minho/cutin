@@ -21,25 +21,37 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
     await concatenateAudio(bgmPath, path + "/bgm.mp3", 3);
   }
 
-  //#1. 하이라이트
-  const highlightArr = [];
-  for (const [idx, seek] of seekArr.entries()) {
-    const inputPath = videoPath.find((v) => v.includes(seek.v));
-    const option = {
-      idx,
-      inputPath: inputPath,
-      outputPath: `${highlightPath}/${idx}.mp4`,
-      gameInfo,
-      ...seek,
-    };
-    highlightArr.push(option);
-    if (step === 1) {
-      await createVideo(option);
+  function chunkArray(array, chunkSize) {
+    const chunkedArray = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      const chunk = array.slice(i, i + chunkSize);
+      chunkedArray.push(chunk);
     }
-    // if (idx === 1) return;
+    return chunkedArray;
   }
 
-  if (step === 2) {
+  //#1. 하이라이트
+  const highlightArr = [];
+  for (const [idx, chunk] of chunkArray(seekArr, 3).entries()) {
+    await Promise.all(
+      chunk.map((seek) => {
+        const inputPath = videoPath.find((v) => v.includes(seek.v));
+        const option = {
+          idx,
+          inputPath: inputPath,
+          outputPath: `${highlightPath}/${idx}.mp4`,
+          gameInfo,
+          ...seek,
+        };
+        highlightArr.push(option);
+        if (step === 1 || step === 0) {
+          return createVideo(option);
+        }
+      })
+    );
+  }
+
+  if (step === 2 || step === 0) {
     // #3. 게임
     // for (let game = 1; game <= 4; game++) {
     //   const concatFileArr = highlightArr
@@ -65,7 +77,10 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
       const playerInfo = highlightArr.filter(({ s, a }) =>
         [s, a].includes(player)
       );
-      let concatFileArr = playerInfo.map((o) => o.outputPath);
+      const concatFileArr = [...playerInfo]
+        .map((p) => ({ ...p, idx: String(p.g) + String(p.q) }))
+        .sort((a, b) => a.idx - b.idx)
+        .map((o) => o.outputPath);
 
       if (concatFileArr.length === 0) return;
 
@@ -98,30 +113,23 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
 function createVideo(option) {
   const start = performance.now();
   const playbackSpeed = 1.5;
-  const brightness = 0;
   const beforeSec = 9; //(9초=>6초, 12초=>8초)
   const { g, q, s, a, k, t } = option;
   const { inputPath, outputPath, gameInfo, idx } = option;
   const { title, date, place } = gameInfo;
-  const zoom = 1;
-  const x = (1 - 1 / zoom) / 2;
-  const y = (1 - 1 / zoom) / 4;
   const time = calculateTimeBefore(`00:${t}`, beforeSec - 1);
   const scene = `#${idx + 1}`;
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
-      // .inputOptions(["-hwaccel nvdec"])
+      .inputOptions(["-hwaccel cuda"])
       .seekInput(time)
       .duration(`00:00:${beforeSec / playbackSpeed}`)
-      // .videoCodec("libx264")
-      // .audioCodec("aac")
       .output(outputPath)
-      // .outputOption("-c:v h264_nvenc")
+      .outputOptions(["-crf 28", "-c:v nvenc_h264"])
+      .fps(24)
       .videoFilter([
-        `crop=in_w/${zoom}:in_h/${zoom}:in_w*${x}:in_h*${y}`,
         `setpts=${1 / playbackSpeed}*PTS`,
-        `eq=brightness=${brightness}`,
         drawLeftTopBanner({
           logo: title,
           time: date + ` ${g}G ${q}Q`,
@@ -139,10 +147,10 @@ function createVideo(option) {
       // .size("960x540")
       .audioFilter(`atempo=${playbackSpeed}`) // 오디오 속도 조절 필터
       .on("start", (commandLine) => {
-        console.log(`start createVideo`, { commandLine });
+        // console.log(`start createVideo`, { commandLine });
       })
       .on("progress", (progress) => {
-        console.log("createVideo Processing: " + progress.percent + "% done");
+        // console.log("createVideo Processing: " + progress.percent + "% done");
       })
       .on("end", () => {
         const executionTime = (performance.now() - start).toFixed(2);
@@ -163,13 +171,12 @@ function createIntroVideo(option) {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input("assets/intro.mp4")
-      .inputOptions(["-hwaccel nvdec"])
       .inputFPS(30)
       .input("assets/Flying.mp3")
       .videoCodec("libx264")
       .audioCodec("aac")
       .output(outputPath)
-      .outputOptions(["-map 0:v", "-map 1:a", "-shortest", "-c:v h264_nvenc"])
+      .outputOptions(["-map 0:v", "-map 1:a", "-shortest"])
       .videoFilter([
         drawIntroBanner({ name, record }),
         `setpts=${1 / playbackSpeed}*PTS`,
@@ -177,12 +184,12 @@ function createIntroVideo(option) {
       .size("1280x720")
       .audioFilter("volume=0")
       .on("start", (commandLine) => {
-        console.log(`start mergeVideo`, { commandLine });
+        // console.log(`start mergeVideo`, { commandLine });
       })
       .on("progress", (progress) => {
-        console.log(
-          "createIntroVideo Processing: " + progress.percent + "% done"
-        );
+        // console.log(
+        //   "createIntroVideo Processing: " + progress.percent + "% done"
+        // );
       })
       .on("end", resolve)
       .on("error", reject)
@@ -198,12 +205,11 @@ function mergeVideo(option) {
     concatFileArr.forEach((f) => ffmg.input(f));
 
     ffmg
-      .inputOptions(["-hwaccel nvdec"])
       .on("start", (commandLine) => {
-        console.log(`start mergeVideo`, { commandLine });
+        // console.log(`start mergeVideo`, { commandLine });
       })
       .on("progress", (progress) => {
-        console.log("mergeVideo Processing: " + progress.percent + "% done");
+        // console.log("mergeVideo Processing: " + progress.percent + "% done");
       })
       .on("end", () => {
         const executionTime = (performance.now() - start).toFixed(2);
@@ -237,12 +243,13 @@ function getRecord(playerInfo, player) {
       assist = 0,
       rebound = 0;
     playerInfo.forEach(({ g, s, a, k }) => {
-      if (g === game) {
+      if (+g === game) {
         if (s === player) {
           score = score + (k === "3점슛" ? 3 : 2);
           rebound = rebound + (k === "풋백" ? 1 : 0);
         } else if (a === player) {
           assist++;
+          rebound = rebound + (k === "오펜스리바" ? 1 : 0);
         }
       }
     });
@@ -252,7 +259,7 @@ function getRecord(playerInfo, player) {
           `${game} 게임 | `,
           score > 0 ? `${score}득점` : "",
           assist > 0 ? `${assist}어시` : "",
-          rebound > 0 ? `${rebound}리바` : "",
+          rebound > 0 ? `${rebound}오펜스리바` : "",
         ]
           .filter((v) => !!v)
           .join(" ")

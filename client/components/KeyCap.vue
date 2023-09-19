@@ -7,6 +7,7 @@ defineProps<{ command?: string; label: string; color?: string }>();
     square
     :color="color || 'white'"
     style="letter-spacing: -2px; height: auto"
+    class="q-pa-xs"
   >
     <div class="column">
       <div v-if="command" class="key">
@@ -25,6 +26,7 @@ defineProps<{ command?: string; label: string; color?: string }>();
   border-width: 3px 7px 10px;
   border-style: solid;
   border-radius: 4px;
+  scale: 0.8;
 }
 .key.pressed {
   -webkit-transform: scale(0.95, 0.95);

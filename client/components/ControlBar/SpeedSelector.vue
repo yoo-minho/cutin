@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{ video: HTMLVideoElement }>();
-const speed = ref(1.0);
+const speed = ref(1.5);
 const speedSet = [1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5];
 
 function selectSpeed(s: number) {
