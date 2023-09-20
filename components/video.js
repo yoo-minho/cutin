@@ -30,12 +30,49 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
     return chunkedArray;
   }
 
+  // const playbackSpeed = 1.5;
+  // for (const inputPath of videoPath) {
+  //   const start = performance.now();
+  //   await new Promise((resolve, reject) => {
+  //     ffmpeg()
+  //       .input(inputPath)
+  //       .inputOptions(["-r 24", "-hwaccel cuda"])
+  //       .output(
+  //         inputPath.replace(".mp4", "_re.mp4").replace("_input", "_output")
+  //       )
+  //       .outputOptions(["-c:v h264_nvenc"])
+  //       .videoFilter([`setpts=${1 / playbackSpeed}*PTS`])
+  //       .size("1280x720")
+  //       .fps(24)
+  //       .audioFilter(`atempo=${playbackSpeed}`)
+  //       .on("start", (commandLine) => {
+  //         console.log(`start createVideo`, { commandLine });
+  //       })
+  //       .on("progress", (progress) => {
+  //         console.log("createVideo Processing: " + progress.percent + "% done");
+  //       })
+  //       .on("end", () => {
+  //         const executionTime = (performance.now() - start).toFixed(2);
+  //         console.log(`완료 [${executionTime / 1024}s]`);
+  //         resolve();
+  //       })
+  //       .on("error", (err) => {
+  //         console.error(`createVideo Error`, err);
+  //         reject(err);
+  //       })
+  //       .run();
+  //   });
+  // }
+
   //#1. 하이라이트
   const highlightArr = [];
-  for (const [idx, chunk] of chunkArray(seekArr, 3).entries()) {
+  for (const [idx, chunk] of chunkArray(seekArr, 1).entries()) {
     await Promise.all(
       chunk.map((seek) => {
-        const inputPath = videoPath.find((v) => v.includes(seek.v));
+        let inputPath = videoPath.find((v) => v.includes(seek.v));
+        // inputPath = inputPath
+        //   .replace(".mp4", "_re.mp4")
+        //   .replace("_input", "_output");
         const option = {
           idx,
           inputPath: inputPath,
@@ -110,7 +147,108 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
   console.log(`작업 완료 [${executionTime}ms]`);
 };
 
-function createVideo(option) {
+async function createVideo(option) {
+  if (true) {
+    const start = performance.now();
+    const { inputPath, outputPath, gameInfo, idx } = option;
+    const { g, q, s, a, k, t } = option;
+    const scene = `#${idx + 1}`;
+    const { title, date, place } = gameInfo;
+
+    const filter = 2;
+
+    let beforeSec,
+      time1,
+      playbackSpeed1,
+      duration1,
+      time2,
+      playbackSpeed2,
+      duration2;
+    if (filter === 1) {
+      playbackSpeed1 = 2;
+      duration1 = 6;
+      playbackSpeed2 = 1.5;
+      duration2 = 3;
+      beforeSec = duration1 + duration2; //(9초=>6초, 12초=>8초)
+      time1 = calculateTimeBefore(`00:${t}`, beforeSec - 1); //-8초
+      time2 = calculateTimeBefore(`00:${t}`, beforeSec - 1 - duration1); //-2초
+    } else if (filter === 2) {
+      playbackSpeed1 = 2;
+      duration1 = 5;
+      playbackSpeed2 = 0.75;
+      duration2 = 3;
+      beforeSec = duration1 + duration2; //(9초=>6초, 12초=>8초)
+      const afterSec = duration1 / playbackSpeed1 + duration2 / playbackSpeed2;
+      console.log({ beforeSec, afterSec });
+      time1 = calculateTimeBefore(`00:${t}`, beforeSec - 1); //-8초
+      time2 = calculateTimeBefore(`00:${t}`, beforeSec - 1 - duration1); //-2초
+    }
+
+    console.log({ time1, time2 });
+
+    await new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(inputPath)
+        .seekInput(time1)
+        .duration(`00:00:${duration1 / playbackSpeed1}`)
+        .output(outputPath.replace(".mp4", "_a.mp4"))
+        .videoFilter([`setpts=${1 / playbackSpeed1}*PTS`])
+        .size("1280x720")
+        .audioFilter(`atempo=${playbackSpeed1}`) // 오디오 속도 조절 필터
+        .on("end", () => {
+          const executionTime = (performance.now() - start).toFixed(2);
+          console.log(`${scene} 영상 완료 (${t})  [${executionTime}ms]`);
+          resolve();
+        })
+        .run();
+    });
+    await new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(inputPath)
+        .seekInput(time2)
+        .duration(`00:00:${duration2 / playbackSpeed2}`)
+        .output(outputPath.replace(".mp4", "_b.mp4"))
+        .videoFilter([`setpts=${1 / playbackSpeed2}*PTS`])
+        .size("1280x720")
+        .audioFilter(`atempo=${playbackSpeed2}`) // 오디오 속도 조절 필터
+        .on("end", () => {
+          const executionTime = (performance.now() - start).toFixed(2);
+          console.log(`${scene} 영상 완료 (${t})  [${executionTime}ms]`);
+          resolve();
+        })
+        .run();
+    });
+
+    new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(outputPath.replace(".mp4", "_a.mp4"))
+        .input(outputPath.replace(".mp4", "_b.mp4"))
+        .mergeToFile(outputPath, "./temp")
+        // .videoFilter([
+        //   drawLeftTopBanner({
+        //     logo: title,
+        //     time: date + ` ${g}G ${q}Q`,
+        //     place,
+        //   }),
+        //   drawRightTopBanner({
+        //     title: scene,
+        //     scorer: s,
+        //     assister: !!a ? `assist.${a}` : "",
+        //     skill: !!k ? k : "",
+        //   }),
+        // ])
+        .on("start", (commandLine) => {
+          console.log(`start mergeVideo`, { commandLine });
+        })
+        .on("end", () => {
+          const executionTime = (performance.now() - start).toFixed(2);
+          console.log(`${scene} 영상 완료 (${t})  [${executionTime}ms]`);
+          resolve();
+        });
+    });
+    return;
+  }
+
   const start = performance.now();
   const playbackSpeed = 1.5;
   const beforeSec = 9; //(9초=>6초, 12초=>8초)
