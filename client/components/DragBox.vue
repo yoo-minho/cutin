@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Dialog } from "quasar";
+
 const props = defineProps<{ video: HTMLVideoElement }>();
 const backboardPositionState = useBackboardPositionState();
 
@@ -14,6 +16,8 @@ const initSize = () => {
   width.value = 0;
   height.value = 0;
 };
+
+const headerHeight = 68.96;
 
 watch([top, left, width, height], () => {
   backboardPositionState.value = {
@@ -31,7 +35,9 @@ watch(
       isDragging = true;
       left.value = e.clientX;
       top.value = e.clientY;
-      transform.value = `translate(${e.clientX}px, ${e.clientY}px)`;
+      transform.value = `translate(${e.clientX}px, ${
+        e.clientY - headerHeight
+      }px)`;
       initSize();
     });
 
@@ -46,6 +52,24 @@ watch(
       if (!isDragging) return;
 
       isDragging = false;
+
+      if (width.value < 50 || height.value < 50) {
+        console.log(width.value, height.value);
+        initSize();
+        return;
+      }
+
+      Dialog.create({
+        title: "분석",
+        message: "선택한 영역을 기준으로 변화를 추적할까요?",
+        ok: "네!",
+        cancel: "취소",
+      })
+        .onOk(() => {
+          const videoBack = useBackVideoState();
+          videoBack.value.play();
+        })
+        .onCancel(() => initSize());
     });
   }
 );

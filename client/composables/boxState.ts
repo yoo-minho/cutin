@@ -5,6 +5,21 @@ type Position = {
   height: number;
 };
 
+type Tracking = {
+  start: string;
+  end: string;
+  startIdx: number;
+  endIdx: number;
+};
+
+export const useBackboardTrackingState = () => {
+  return useState<Tracking[]>("BackboardTracking", () => []);
+};
+
+export const useBackVideoState = () => {
+  return useState<HTMLVideoElement>("BackVideo");
+};
+
 export const useBackboardPositionState = () => {
   return useState<Position>("BackboardPostion", () => ({
     top: 0,

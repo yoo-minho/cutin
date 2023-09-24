@@ -14,7 +14,11 @@ const videoSrc = ref("");
 const upload = (file: any) => {
   currVideoName.value = file.name;
   videoOn.value = true;
-  videoSrc.value = URL.createObjectURL(file);
+  const url = URL.createObjectURL(file);
+  videoSrc.value = url;
+  const backVideo = useBackVideoState();
+  backVideo.value.src = url;
+  console.log("upload", url);
 };
 
 watch(
@@ -23,9 +27,6 @@ watch(
     video.value.addEventListener("loadedmetadata", function () {
       video.value.playbackRate = currSpeed.value;
       const pressedKeys = new Set<string>();
-
-      // playPlayer();
-
       document.addEventListener("keydown", (event) => {
         if (document.activeElement?.tagName === "INPUT") return true;
         pressedKeys.add(event.key);
@@ -155,7 +156,6 @@ function togglePlayPause() {
 </script>
 <template>
   <div class="q-pa-none">
-    <drag-box :video="video" />
     <q-layout
       view="lHh lpr lFf"
       container
@@ -168,6 +168,7 @@ function togglePlayPause() {
           <div style="width: 960px">
             <div class="column" style="min-height: calc(960px - 68.96px)">
               <div style="height: 540px; position: relative" class="column">
+                <drag-box :video="video" />
                 <video
                   v-show="videoOn"
                   ref="video"
@@ -175,7 +176,7 @@ function togglePlayPause() {
                   height="540"
                   :src="videoSrc"
                 />
-                <back-video :src="videoSrc" />
+                <back-video />
                 <control-bar
                   v-if="videoOn"
                   :video="video"

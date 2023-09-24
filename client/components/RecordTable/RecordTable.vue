@@ -1,7 +1,9 @@
 <script setup lang="ts">
 const props = defineProps<{ currTime: string }>();
 const emits = defineEmits<{ moveSeekPoint: (time: string) => void }>();
+// const emits = defineEmits<{(e: "moveSeekPoint", title: string): void;}>();
 
+const backboardTracking = useBackboardTrackingState();
 const currTime = toRef(props, "currTime");
 const currVideoName = useCurrVideoName();
 
@@ -141,5 +143,6 @@ const columns = [
         </div>
       </q-tab-panel>
     </q-tab-panels>
+    <div class="text-white">{{ backboardTracking }}1</div>
   </div>
 </template>
