@@ -1,81 +1,146 @@
 import ffmpeg from "fluent-ffmpeg";
+import sharp from "sharp";
+import { PNG } from "pngjs";
+import pixelmatch from "pixelmatch";
 import { existsFile, makeFolder } from "../util.js";
-import { concatenateAudio, mergeAudio } from "./audio.js";
-import {
-  drawLeftTopBanner,
-  drawRightTopBanner,
-  drawIntroBanner,
-} from "./textOverlay.js";
+import { concatenateAudio } from "./audio.js";
+import { ffmpegPromise, cutFunc, chunkArray } from "./videoUtil.js";
+import { drawIntroBanner, drawBanners } from "./textOverlay.js";
+import fs from "node:fs";
+import path from "node:path";
 
 export const cutVideo = async (option, { step = 1 } = {}) => {
   const start = performance.now();
   const { gameInfo, bgmPath, videoPath, seekArr } = option;
   const { title, date } = gameInfo;
 
-  const path = makeFolder({ parentDir: `_output/${title}`, childDir: date });
-  const highlightPath = makeFolder({ parentDir: path, childDir: "highlight" });
-  const gamePath = makeFolder({ parentDir: path, childDir: "game" });
-  const playerPath = makeFolder({ parentDir: path, childDir: "player" });
+  const _path = makeFolder({ parentDir: `_output/${title}`, childDir: date });
+  const highlightPath = makeFolder({ parentDir: _path, childDir: "highlight" });
+  const gamePath = makeFolder({ parentDir: _path, childDir: "game" });
+  const playerPath = makeFolder({ parentDir: _path, childDir: "player" });
+  const framesPath = makeFolder({ parentDir: _path, childDir: "frames" });
+
+  // 디렉토리가 없으면 생성
+  const inputVideo = videoPath[0]; // 입력 비디오 파일 경로
+  const outputDirectory = _path + "frames"; // 이미지를 저장할 디렉토리
+  const frameRate = 2; // 초당 몇 프레임을 추출할 것인지 (0.5초 간격이므로 2프레임/초)
+  const maxDuration = 5 * 60; // 5분까지만 추출 (초 단위)
+
+  if (!fs.existsSync(outputDirectory)) {
+    fs.mkdirSync(outputDirectory);
+  }
+
+  // ffmpeg()
+  //   .input(inputVideo)
+  //   .outputOptions("-vf", `fps=${frameRate}`)
+  //   .outputOptions(`-t ${maxDuration}`)
+  //   .output(path.join(framesPath, "frame-%03d.png"))
+  //   .on("end", () => {
+  //     const executionTime = (performance.now() - start).toFixed(2);
+  //     console.log(`프레임 추출 완료 [${executionTime}ms]`);
+  //   })
+  //   .on("error", (err) => {
+  //     console.error("오류 발생:", err);
+  //   })
+  //   .run();
+
+  // const cropOptions = {
+  //   left: 768, // 좌상단 x 좌표
+  //   top: 300, // 좌상단 y 좌표
+  //   width: 360, // 크롭할 영역의 너비
+  //   height: 200, // 크롭할 영역의 높이
+  // };
+
+  const cropOptions = {
+    left: 884, // 좌상단 x 좌표
+    top: 344, // 좌상단 y 좌표
+    width: 218, // 크롭할 영역의 너비
+    height: 164, // 크롭할 영역의 높이
+  };
+
+  fs.readdir(framesPath, async (err, files) => {
+    if (err) {
+      console.error("폴더 내 파일 목록을 읽는 중 오류 발생:", err);
+      return;
+    }
+
+    files = files.filter((f) => !f.includes("cropped_"));
+
+    console.log({ files });
+
+    // 각 이미지 파일에 대해 크롭 작업 수행
+    let prevPath;
+    for (const file of files) {
+      const inputFilePath = path.join(framesPath, file);
+      const outputFilePath = path.join(framesPath, `cropped_${file}`);
+      await new Promise((res) => {
+        sharp(inputFilePath)
+          .extract(cropOptions)
+          .toFile(outputFilePath, (cropErr) => {
+            if (cropErr) {
+              console.error(`${file}을(를) 크롭하는 중 오류 발생:`, cropErr);
+            } else {
+              let similarity = 0,
+                distance = 0,
+                hashLength = 0;
+              if (prevPath) {
+                const aBuffer = fs.readFileSync(prevPath);
+                const bBuffer = fs.readFileSync(outputFilePath);
+                const img1 = PNG.sync.read(aBuffer);
+                const img2 = PNG.sync.read(bBuffer);
+                const { width, height } = img1;
+                const diff = new PNG({ width, height });
+                const numDiffPixels = pixelmatch(
+                  img1.data,
+                  img2.data,
+                  diff.data,
+                  width,
+                  height,
+                  { alpha: true, threshold: 0.2 }
+                );
+                const similarity = 1 - numDiffPixels / (width * height);
+                if (similarity < 0.999) {
+                  console.log(
+                    `${prevPath} | ${outputFilePath} | ${similarity}`
+                  );
+                }
+                prevPath = outputFilePath;
+                res();
+              } else {
+                prevPath = outputFilePath;
+                res();
+              }
+            }
+          });
+      });
+    }
+  });
+
+  if (true) {
+    return;
+  }
 
   if (!existsFile(path + "/bgm.mp3")) {
     await concatenateAudio(bgmPath, path + "/bgm.mp3", 3);
   }
 
-  function chunkArray(array, chunkSize) {
-    const chunkedArray = [];
-    for (let i = 0; i < array.length; i += chunkSize) {
-      const chunk = array.slice(i, i + chunkSize);
-      chunkedArray.push(chunk);
-    }
-    return chunkedArray;
-  }
-
-  // const playbackSpeed = 1.5;
-  // for (const inputPath of videoPath) {
-  //   const start = performance.now();
-  //   await new Promise((resolve, reject) => {
-  //     ffmpeg()
-  //       .input(inputPath)
-  //       .inputOptions(["-r 24", "-hwaccel cuda"])
-  //       .output(
-  //         inputPath.replace(".mp4", "_re.mp4").replace("_input", "_output")
-  //       )
-  //       .outputOptions(["-c:v h264_nvenc"])
-  //       .videoFilter([`setpts=${1 / playbackSpeed}*PTS`])
-  //       .size("1280x720")
-  //       .fps(24)
-  //       .audioFilter(`atempo=${playbackSpeed}`)
-  //       .on("start", (commandLine) => {
-  //         console.log(`start createVideo`, { commandLine });
-  //       })
-  //       .on("progress", (progress) => {
-  //         console.log("createVideo Processing: " + progress.percent + "% done");
-  //       })
-  //       .on("end", () => {
-  //         const executionTime = (performance.now() - start).toFixed(2);
-  //         console.log(`완료 [${executionTime / 1024}s]`);
-  //         resolve();
-  //       })
-  //       .on("error", (err) => {
-  //         console.error(`createVideo Error`, err);
-  //         reject(err);
-  //       })
-  //       .run();
-  //   });
-  // }
-
   //#1. 하이라이트
+  const splitCount = 4;
+  const avgSecond = 7;
+  console.log(
+    "예상소요시간 : " +
+      Math.round((((seekArr.length / splitCount) * avgSecond) / 60) * 100) /
+        100 +
+      "분"
+  );
+
   const highlightArr = [];
-  for (const [idx, chunk] of chunkArray(seekArr, 1).entries()) {
+  for (const [idx, chunk] of chunkArray(seekArr, splitCount).entries()) {
     await Promise.all(
       chunk.map((seek) => {
-        let inputPath = videoPath.find((v) => v.includes(seek.v));
-        // inputPath = inputPath
-        //   .replace(".mp4", "_re.mp4")
-        //   .replace("_input", "_output");
         const option = {
           idx,
-          inputPath: inputPath,
+          inputPath: videoPath.find((v) => v.includes(seek.v)),
           outputPath: `${highlightPath}/${idx}.mp4`,
           gameInfo,
           ...seek,
@@ -110,6 +175,7 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
           .filter((v) => !!v)
       ),
     ];
+
     player.forEach(async (player) => {
       const playerInfo = highlightArr.filter(({ s, a }) =>
         [s, a].includes(player)
@@ -124,6 +190,7 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
       const playerRecord = getRecord(playerInfo, player);
 
       const introPath = `${playerPath}/${player}_intro.mp4`;
+
       await createIntroVideo({
         outputPath: introPath,
         name: player,
@@ -148,159 +215,27 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
 };
 
 async function createVideo(option) {
-  if (true) {
-    const start = performance.now();
-    const { inputPath, outputPath, gameInfo, idx } = option;
-    const { g, q, s, a, k, t } = option;
-    const scene = `#${idx + 1}`;
-    const { title, date, place } = gameInfo;
-
-    const filter = 2;
-
-    let beforeSec,
-      time1,
-      playbackSpeed1,
-      duration1,
-      time2,
-      playbackSpeed2,
-      duration2;
-    if (filter === 1) {
-      playbackSpeed1 = 2;
-      duration1 = 6;
-      playbackSpeed2 = 1.5;
-      duration2 = 3;
-      beforeSec = duration1 + duration2; //(9초=>6초, 12초=>8초)
-      time1 = calculateTimeBefore(`00:${t}`, beforeSec - 1); //-8초
-      time2 = calculateTimeBefore(`00:${t}`, beforeSec - 1 - duration1); //-2초
-    } else if (filter === 2) {
-      playbackSpeed1 = 2;
-      duration1 = 5;
-      playbackSpeed2 = 0.75;
-      duration2 = 3;
-      beforeSec = duration1 + duration2; //(9초=>6초, 12초=>8초)
-      const afterSec = duration1 / playbackSpeed1 + duration2 / playbackSpeed2;
-      console.log({ beforeSec, afterSec });
-      time1 = calculateTimeBefore(`00:${t}`, beforeSec - 1); //-8초
-      time2 = calculateTimeBefore(`00:${t}`, beforeSec - 1 - duration1); //-2초
-    }
-
-    console.log({ time1, time2 });
-
-    await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(inputPath)
-        .seekInput(time1)
-        .duration(`00:00:${duration1 / playbackSpeed1}`)
-        .output(outputPath.replace(".mp4", "_a.mp4"))
-        .videoFilter([`setpts=${1 / playbackSpeed1}*PTS`])
-        .size("1280x720")
-        .audioFilter(`atempo=${playbackSpeed1}`) // 오디오 속도 조절 필터
-        .on("end", () => {
-          const executionTime = (performance.now() - start).toFixed(2);
-          console.log(`${scene} 영상 완료 (${t})  [${executionTime}ms]`);
-          resolve();
-        })
-        .run();
-    });
-    await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(inputPath)
-        .seekInput(time2)
-        .duration(`00:00:${duration2 / playbackSpeed2}`)
-        .output(outputPath.replace(".mp4", "_b.mp4"))
-        .videoFilter([`setpts=${1 / playbackSpeed2}*PTS`])
-        .size("1280x720")
-        .audioFilter(`atempo=${playbackSpeed2}`) // 오디오 속도 조절 필터
-        .on("end", () => {
-          const executionTime = (performance.now() - start).toFixed(2);
-          console.log(`${scene} 영상 완료 (${t})  [${executionTime}ms]`);
-          resolve();
-        })
-        .run();
-    });
-
-    new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(outputPath.replace(".mp4", "_a.mp4"))
-        .input(outputPath.replace(".mp4", "_b.mp4"))
-        .mergeToFile(outputPath, "./temp")
-        // .videoFilter([
-        //   drawLeftTopBanner({
-        //     logo: title,
-        //     time: date + ` ${g}G ${q}Q`,
-        //     place,
-        //   }),
-        //   drawRightTopBanner({
-        //     title: scene,
-        //     scorer: s,
-        //     assister: !!a ? `assist.${a}` : "",
-        //     skill: !!k ? k : "",
-        //   }),
-        // ])
-        .on("start", (commandLine) => {
-          console.log(`start mergeVideo`, { commandLine });
-        })
-        .on("end", () => {
-          const executionTime = (performance.now() - start).toFixed(2);
-          console.log(`${scene} 영상 완료 (${t})  [${executionTime}ms]`);
-          resolve();
-        });
-    });
-    return;
-  }
-
   const start = performance.now();
-  const playbackSpeed = 1.5;
-  const beforeSec = 9; //(9초=>6초, 12초=>8초)
-  const { g, q, s, a, k, t } = option;
   const { inputPath, outputPath, gameInfo, idx } = option;
-  const { title, date, place } = gameInfo;
-  const time = calculateTimeBefore(`00:${t}`, beforeSec - 1);
+  const { g, q, s, a, k, t } = option;
   const scene = `#${idx + 1}`;
-  return new Promise((resolve, reject) => {
-    ffmpeg()
-      .input(inputPath)
-      .inputOptions(["-hwaccel cuda"])
-      .seekInput(time)
-      .duration(`00:00:${beforeSec / playbackSpeed}`)
-      .output(outputPath)
-      .outputOptions(["-crf 28", "-c:v nvenc_h264"])
-      .fps(24)
-      .videoFilter([
-        `setpts=${1 / playbackSpeed}*PTS`,
-        drawLeftTopBanner({
-          logo: title,
-          time: date + ` ${g}G ${q}Q`,
-          place,
-        }),
-        drawRightTopBanner({
-          title: scene,
-          scorer: s,
-          assister: !!a ? `assist.${a}` : "",
-          skill: !!k ? k : "",
-        }),
-      ])
-      // .size("1920x1080")
-      .size("1280x720")
-      // .size("960x540")
-      .audioFilter(`atempo=${playbackSpeed}`) // 오디오 속도 조절 필터
-      .on("start", (commandLine) => {
-        // console.log(`start createVideo`, { commandLine });
-      })
-      .on("progress", (progress) => {
-        // console.log("createVideo Processing: " + progress.percent + "% done");
-      })
-      .on("end", () => {
-        const executionTime = (performance.now() - start).toFixed(2);
-        console.log(`${scene} 영상 완료 (${t})  [${executionTime}ms]`);
-        resolve();
-      })
-      .on("error", (err) => {
-        console.error(`createVideo Error`, err);
-        reject(err);
-      })
-      .run();
+  const { title, date, place } = gameInfo;
+  const banners = drawBanners({ scene, title, date, place, g, q, s, a, k });
+
+  await ffmpegPromise({
+    inputPath,
+    outputPath,
+    func: cutFunc({
+      time: calculateTimeBefore(`00:${t}`, 9 - 1),
+      duration: 9,
+      speed: 1.8,
+      func: (ff) => ff.videoFilter(banners),
+    }),
   });
+
+  console.log(
+    `${scene} 영상 완료 (${t})  [${(performance.now() - start).toFixed(2)}ms]`
+  );
 }
 
 function createIntroVideo(option) {
@@ -405,4 +340,21 @@ function getRecord(playerInfo, player) {
     }
   }
   return record;
+}
+
+// 해밍 거리 계산 함수
+function hammingDistance(hashA, hashB) {
+  if (hashA.length !== hashB.length) {
+    throw new Error("해시값 길이가 다릅니다.");
+  }
+
+  let distance = 0;
+
+  for (let i = 0; i < hashA.length; i++) {
+    if (hashA[i] !== hashB[i]) {
+      distance++;
+    }
+  }
+
+  return distance;
 }

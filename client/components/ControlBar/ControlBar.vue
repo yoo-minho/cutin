@@ -16,6 +16,8 @@ props.video.addEventListener("timeupdate", () => {
 const seek = (x: any) => {
   props.video.currentTime = (x / 100) * props.video.duration;
 };
+
+const boxState = calculateBackboardPosition();
 </script>
 <template>
   <div class="control-bar">
@@ -30,7 +32,7 @@ const seek = (x: any) => {
         @update:model-value="seek"
       />
       <div class="row items-center">
-        <div class="col">
+        <div style="width: 64px">
           <q-btn
             flat
             color="white"
@@ -38,11 +40,17 @@ const seek = (x: any) => {
             @click="() => emits('togglePlayPause')"
           />
         </div>
-        <div class="col-3 text-h5 text-white">
+        <div class="text-h5 text-white text-center" style="width: 196px">
           {{ seekTime }}
         </div>
-        <div class="col-8">
+        <div class="col">
           <SpeedSelector :video="video" />
+        </div>
+        <div class="text-white backboard-info">
+          <div>top: {{ boxState.top }}</div>
+          <div>left: {{ boxState.left }}</div>
+          <div>height: {{ boxState.height }}</div>
+          <div>width: {{ boxState.width }}</div>
         </div>
       </div>
     </div>
@@ -55,5 +63,13 @@ const seek = (x: any) => {
   position: absolute;
   bottom: 0;
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5));
+}
+.backboard-info {
+  width: 80px;
+  font-size: 12px;
+  line-height: 12px;
+  border: 1px solid white;
+  border-radius: 8px;
+  padding: 4px 8px;
 }
 </style>

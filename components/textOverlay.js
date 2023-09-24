@@ -6,6 +6,23 @@ const json2str = (json) =>
 const drawtext = (json) => `drawtext=${json2str(json)}`;
 const posY = (v) => v.y + v.fontsize;
 
+export const drawBanners = (props) => {
+  const { title, date, place, scene, g, q, s, a, k } = props;
+  return [
+    drawLeftTopBanner({
+      logo: title,
+      time: date + ` ${g}G ${q}Q`,
+      place,
+    }),
+    drawRightTopBanner({
+      title: scene,
+      scorer: s,
+      assister: !!a ? `assist.${a}` : "",
+      skill: !!k ? k : "",
+    }),
+  ];
+};
+
 export const drawLeftTopBanner = ({ logo, time, place }) => {
   const gap = 24;
   const first = { x: 36, y: 36, fontsize: 64 };
