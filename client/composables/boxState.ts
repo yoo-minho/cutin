@@ -8,6 +8,7 @@ type Position = {
 type Tracking = {
   start: string;
   end: string;
+  duration: number;
   startIdx: number;
   endIdx: number;
 };
@@ -29,7 +30,6 @@ export const useBackboardPositionState = () => {
   }));
 };
 
-const headerHeight = 68.96;
 const calX = (x: number) => Math.round((1920 * x) / 960);
 const calY = (x: number) => Math.round((1080 * x) / 540);
 
@@ -38,7 +38,7 @@ export const calculateBackboardPosition = () => {
   return computed(() => {
     const { top, left, width, height } = state.value;
     return {
-      top: calX(top - headerHeight),
+      top: calX(top),
       left: calY(left),
       width: calX(width),
       height: calY(height),

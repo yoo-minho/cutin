@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import SpeedSelector from "./SpeedSelector.vue";
 const props = defineProps<{ video: HTMLVideoElement; playOn: boolean }>();
-const emits = defineEmits<{ togglePlayPause: () => void }>();
-// const emits = defineEmits<{ (e: "togglePlayPause"): void }>();
+const emits = defineEmits<{ (e: "togglePlayPause"): void }>();
 
 const seekTime = ref("");
 const seekProgress = ref(0);

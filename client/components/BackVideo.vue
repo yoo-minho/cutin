@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { pixelmatch } from "../utils/pixelmatch";
 
+const props = defineProps<{ currTime: string }>();
+const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
+
+const currTime = toRef(props, "currTime");
 const backVideo = useBackVideoState();
 const backboardPosition = calculateBackboardPosition();
 const backboardTracking = useBackboardTrackingState();
@@ -15,6 +19,29 @@ const speed = 16;
 const frame = 0.5; //초당 장수 - 0.5 = 1초당 2장
 const frameInterval = (1000 * frame) / speed;
 
+const seekTime = ref("00:00 / 00:00");
+
+const columns = [
+  {
+    label: "start",
+    name: "start",
+    field: "start",
+    align: "center",
+  },
+  {
+    label: "end",
+    name: "end",
+    field: "end",
+    align: "center",
+  },
+  {
+    label: "duration",
+    name: "duration",
+    field: "duration",
+    align: "center",
+  },
+];
+
 watch(
   () => backVideo.value,
   () => {
@@ -22,6 +49,13 @@ watch(
       backVideo.value.playbackRate = speed;
       backVideo.value.pause();
       backVideo.value.muted = true;
+
+      backVideo.value.addEventListener("timeupdate", () => {
+        const currentTime = backVideo.value.currentTime;
+        const duration = backVideo.value.duration;
+        seekTime.value = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+      });
+
       backVideo.value.addEventListener("play", function () {
         let idx = 0;
 
@@ -83,17 +117,16 @@ watch(
             const { canvas: canvas1, idx: idx1 } = images[0];
             const { canvas: canvas2, idx: idx2 } = images[1];
             const similarity = compareImages(canvas1, canvas2);
-            console.log({ idx1, idx2, similarity });
 
             if (similarity < 99.9 && similarity > 50) {
-              console.log("다운로드");
-              downloadImage(canvas2.toDataURL("image/jpeg"), idx2);
+              // downloadImage(canvas2.toDataURL("image/jpeg"), idx2);
               images.pop();
             } else {
               if (idx1 + 1 < idx2) {
                 const trackData = {
                   start: sec2str(idx1 * frame),
                   end: sec2str(idx2 * frame),
+                  duration: (idx2 - idx1) * frame,
                   startIdx: idx1,
                   endIdx: idx2,
                 };
@@ -102,10 +135,9 @@ watch(
               images.shift();
             }
           }
-          if (idx > 100) {
+          if (backVideo.value.paused || backVideo.value.ended) {
             clearInterval(iv);
             backVideo.value.pause();
-            backVideo.value.currentTime = 0;
           }
         }, frameInterval);
       });
@@ -117,7 +149,10 @@ function sec2str(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   const formattedMinutes = String(minutes).padStart(2, "0");
-  const formattedSeconds = String(remainingSeconds).padStart(2, "0");
+  const formattedSeconds = String(Math.floor(remainingSeconds)).padStart(
+    2,
+    "0"
+  );
   return `${formattedMinutes}:${formattedSeconds}`;
 }
 
@@ -154,7 +189,38 @@ function compareImages(canvas1: HTMLCanvasElement, canvas2: HTMLCanvasElement) {
 }
 </script>
 <template>
-  <video v-show="false" ref="backVideo" width="960" height="540" />
+  <div>
+    <div>{{ seekTime }}</div>
+    <div class="q-pa-md">
+      <q-table
+        dark
+        flat
+        dense
+        :columns="columns"
+        :rows="backboardTracking"
+        :rows-per-page-options="[0]"
+      >
+        <template #body="props">
+          <q-tr
+            :props="props"
+            :class="props.row.time === currTime ? 'text-green' : ''"
+          >
+            <q-td key="start" :props="props">
+              <div
+                class="text-pre-wrap cursor-pointer"
+                @click="emits('moveSeekPoint', String(props.row.start))"
+              >
+                {{ props.row.start }}
+              </div>
+            </q-td>
+            <q-td key="end" :props="props">{{ props.row.end }} </q-td>
+            <q-td key="duration" :props="props">{{ props.row.duration }} </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+    </div>
+    <video v-show="false" ref="backVideo" width="960" height="540" />
+  </div>
 </template>
 
 <style lang="scss" scoped></style>

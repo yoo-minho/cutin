@@ -18,7 +18,6 @@ const upload = (file: any) => {
   videoSrc.value = url;
   const backVideo = useBackVideoState();
   backVideo.value.src = url;
-  console.log("upload", url);
 };
 
 watch(
@@ -26,6 +25,9 @@ watch(
   () => {
     video.value.addEventListener("loadedmetadata", function () {
       video.value.playbackRate = currSpeed.value;
+      playPlayer();
+      setTimeout(() => stopPlayer(), 1);
+
       const pressedKeys = new Set<string>();
       document.addEventListener("keydown", (event) => {
         if (document.activeElement?.tagName === "INPUT") return true;
@@ -155,18 +157,25 @@ function togglePlayPause() {
 }
 </script>
 <template>
-  <div class="q-pa-none">
-    <q-layout
-      view="lHh lpr lFf"
-      container
-      style="max-width: 1920px; min-width: 1280px; height: 100vh"
-      class="shadow-2 rounded-borders"
-    >
-      <header-bar />
-      <div style="margin-top: 68.96px">
+  <q-layout>
+    <div style="max-width: 1920px; min-width: 1280px; margin: 0 auto">
+      <q-header style="position: relative" class="bg-green" elevated>
+        <q-toolbar>
+          <q-toolbar-title>Short-cut</q-toolbar-title>
+        </q-toolbar>
+      </q-header>
+      <q-page-container style="padding: 0">
         <div class="row">
+          <div class="col">
+            <div
+              class="bg-dark text-white"
+              style="height: 100%; border-right: 0.5px solid grey"
+            >
+              <back-video :currTime="currTime" @moveSeekPoint="moveSeekPoint" />
+            </div>
+          </div>
           <div style="width: 960px">
-            <div class="column" style="min-height: calc(960px - 68.96px)">
+            <div class="column" style="height: 100vh">
               <div style="height: 540px; position: relative" class="column">
                 <drag-box :video="video" />
                 <video
@@ -175,8 +184,8 @@ function togglePlayPause() {
                   width="960"
                   height="540"
                   :src="videoSrc"
+                  style="position: fixed"
                 />
-                <back-video />
                 <control-bar
                   v-if="videoOn"
                   :video="video"
@@ -211,7 +220,12 @@ function togglePlayPause() {
             <record-table :currTime="currTime" @moveSeekPoint="moveSeekPoint" />
           </div>
         </div>
-      </div>
-    </q-layout>
-  </div>
+      </q-page-container>
+    </div>
+  </q-layout>
 </template>
+<style>
+body {
+  overflow: hidden;
+}
+</style>

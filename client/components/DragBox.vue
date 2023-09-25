@@ -33,19 +33,17 @@ watch(
   () => {
     props.video.addEventListener("mousedown", (e: any) => {
       isDragging = true;
-      left.value = e.clientX;
-      top.value = e.clientY;
-      transform.value = `translate(${e.clientX}px, ${
-        e.clientY - headerHeight
-      }px)`;
+      left.value = e.clientX - props.video.offsetLeft;
+      top.value = e.clientY - props.video.offsetTop;
+      transform.value = `translate(${left.value}px, ${top.value}px)`;
       initSize();
     });
 
     document.addEventListener("mousemove", (e) => {
       if (!isDragging) return;
 
-      width.value = e.clientX - left.value;
-      height.value = e.clientY - top.value;
+      width.value = e.clientX - left.value - props.video.offsetLeft;
+      height.value = e.clientY - top.value - props.video.offsetTop;
     });
 
     document.addEventListener("mouseup", () => {

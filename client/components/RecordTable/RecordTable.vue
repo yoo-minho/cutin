@@ -1,9 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{ currTime: string }>();
-const emits = defineEmits<{ moveSeekPoint: (time: string) => void }>();
-// const emits = defineEmits<{(e: "moveSeekPoint", title: string): void;}>();
+const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
 
-const backboardTracking = useBackboardTrackingState();
 const currTime = toRef(props, "currTime");
 const currVideoName = useCurrVideoName();
 
@@ -116,13 +114,15 @@ const columns = [
             flat
             dense
             :columns="columns"
-            :rows="cutStore?.filter((cut) => cut.game === currGame)"
+            :rows="
+              cutStore?.filter((cut) => cut.game === currGame && !!cut.time)
+            "
             :rows-per-page-options="[0]"
           >
             <template #body="props">
               <q-tr
                 :props="props"
-                :class="props.row.time === currTime ? 'text-orange' : ''"
+                :class="props.row.time === currTime ? 'text-green' : ''"
               >
                 <q-td key="time" :props="props">
                   <div
@@ -143,6 +143,5 @@ const columns = [
         </div>
       </q-tab-panel>
     </q-tab-panels>
-    <div class="text-white">{{ backboardTracking }}1</div>
   </div>
 </template>
