@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { QTableProps } from "quasar";
 import { pixelmatch } from "../utils/pixelmatch";
 
 const props = defineProps<{ currTime: string }>();
@@ -41,7 +42,7 @@ const columns = [
     field: "duration",
     align: "center",
   },
-];
+] as any;
 
 watch(
   () => backVideo.value,

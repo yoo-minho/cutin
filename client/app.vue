@@ -31,12 +31,12 @@ watch(
       const pressedKeys = new Set<string>();
       document.addEventListener("keydown", (event) => {
         if (document.activeElement?.tagName === "INPUT") return true;
-        pressedKeys.add(event.key);
+        pressedKeys.add(event.code);
         handleKeyPress(event, pressedKeys);
       });
       document.addEventListener("keyup", (event) => {
         if (document.activeElement?.tagName === "INPUT") return true;
-        pressedKeys.delete(event.key);
+        pressedKeys.delete(event.code);
       });
       video.value.addEventListener("timeupdate", () => {
         currTime.value = formatTime(video.value?.currentTime);
@@ -52,15 +52,14 @@ function moveSeekPoint(time: string) {
 
 function handleKeyPress(event: any, pressedKeys: any) {
   event.preventDefault();
-  if (video.value === null) return;
 
   const playerStoreA = usePlayerStore("A");
   const playerStoreB = usePlayerStore("B");
 
-  const isCommandS =
-    [...pressedKeys].filter((key) => key?.toUpperCase() === "S").length > 0;
-  const isCommandA =
-    [...pressedKeys].filter((key) => key?.toUpperCase() === "A").length > 0;
+  const currCode = event.code;
+  const isCommand = (_code: string) => [...pressedKeys].filter((code) => _code === code).length > 0;
+  const isCommandS = isCommand("KeyS");
+  const isCommandA = isCommand("KeyA");
 
   const keyIdx1 = keySet.first.indexOf(event.key);
   const keyIdx2 = keySet.second.indexOf(event.key?.toUpperCase());
@@ -102,7 +101,7 @@ function handleKeyPress(event: any, pressedKeys: any) {
     return;
   }
 
-  if ("C" === event.key.toUpperCase()) {
+  if ("KeyC" === currCode) {
     addCut(currTime.value);
     moveSeekPoint(currTime.value);
     return;

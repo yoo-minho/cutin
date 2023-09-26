@@ -69,7 +69,7 @@ const columns = [
     align: "center",
     style: { width: "30%" },
   },
-];
+] as any;
 </script>
 <template>
   <div class="bg-dark" style="height: 100%; border-left: 0.5px solid grey">
