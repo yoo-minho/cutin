@@ -51,7 +51,7 @@ watch(
 
       isDragging = false;
 
-      if (width.value < 50 || height.value < 50) {
+      if (width.value < 25 || height.value < 25) {
         console.log(width.value, height.value);
         initSize();
         return;

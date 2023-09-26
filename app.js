@@ -13,34 +13,35 @@ const COL_INFO_V2 = {
 };
 
 const conv = (jsonFileName) =>
-  JSON.parse(fs.readFileSync(`_input/${jsonFileName}`, "utf8")).map((v) => {
+  JSON.parse(fs.readFileSync(jsonFileName, "utf8")).map((v) => {
     const [g, q] = v.game.split(/g|q/);
     return { ...v, g, q };
   });
 
+const teamName = "gba";
+const date = "20230923";
+const videoSet = ["1_A", "2_A", "3_A", "4_A", "5_A", "1_B", "2_B"];
+const videoPathPrefix = `_input/${teamName}/${date}`;
+const videoPath = videoSet.map(
+  (v) => `${videoPathPrefix}/${teamName}_${date}_${v}.mp4`
+);
+const seekArr = changeKeyOnArr(
+  videoSet
+    .map((v) => conv(`${videoPathPrefix}/${teamName}_${date}_${v}.json`))
+    .flat(),
+  COL_INFO_V2
+);
+
 await cutVideo(
   {
     gameInfo: {
-      title: "GBA",
-      date: "20230916",
+      title: teamName.toUpperCase(),
+      date,
       place: "영등포 제2스포츠센터",
     },
     bgmPath: "assets/Flying.mp3",
-    videoPath: [
-      "_input/gba_20230916_1_A.mp4",
-      "_input/gba_20230916_1_B.mp4",
-      "_input/gba_20230916_2_A.mp4",
-      "_input/gba_20230916_2_B.mp4",
-    ],
-    seekArr: changeKeyOnArr(
-      [
-        ...conv("gba_20230916_1_A.json"),
-        ...conv("gba_20230916_1_B.json"),
-        ...conv("gba_20230916_2_A.json"),
-        ...conv("gba_20230916_2_B.json"),
-      ],
-      COL_INFO_V2
-    ),
+    videoPath,
+    seekArr,
   },
-  { step: 1 }
+  { step: 0 }
 );

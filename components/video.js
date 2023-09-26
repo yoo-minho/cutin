@@ -1,13 +1,7 @@
 import ffmpeg from "fluent-ffmpeg";
-import sharp from "sharp";
-import { PNG } from "pngjs";
-import pixelmatch from "pixelmatch";
-import { existsFile, makeFolder } from "../util.js";
-import { concatenateAudio } from "./audio.js";
+import { makeFolder } from "../util.js";
 import { ffmpegPromise, cutFunc, chunkArray } from "./videoUtil.js";
 import { drawIntroBanner, drawBanners } from "./textOverlay.js";
-import fs from "node:fs";
-import path from "node:path";
 
 export const cutVideo = async (option, { step = 1 } = {}) => {
   const start = performance.now();
@@ -18,115 +12,15 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
   const highlightPath = makeFolder({ parentDir: _path, childDir: "highlight" });
   const gamePath = makeFolder({ parentDir: _path, childDir: "game" });
   const playerPath = makeFolder({ parentDir: _path, childDir: "player" });
-  const framesPath = makeFolder({ parentDir: _path, childDir: "frames" });
 
-  // 디렉토리가 없으면 생성
-  const inputVideo = videoPath[0]; // 입력 비디오 파일 경로
-  const outputDirectory = _path + "frames"; // 이미지를 저장할 디렉토리
-  const frameRate = 2; // 초당 몇 프레임을 추출할 것인지 (0.5초 간격이므로 2프레임/초)
-  const maxDuration = 5 * 60; // 5분까지만 추출 (초 단위)
-
-  if (!fs.existsSync(outputDirectory)) {
-    fs.mkdirSync(outputDirectory);
-  }
-
-  // ffmpeg()
-  //   .input(inputVideo)
-  //   .outputOptions("-vf", `fps=${frameRate}`)
-  //   .outputOptions(`-t ${maxDuration}`)
-  //   .output(path.join(framesPath, "frame-%03d.png"))
-  //   .on("end", () => {
-  //     const executionTime = (performance.now() - start).toFixed(2);
-  //     console.log(`프레임 추출 완료 [${executionTime}ms]`);
-  //   })
-  //   .on("error", (err) => {
-  //     console.error("오류 발생:", err);
-  //   })
-  //   .run();
-
-  // const cropOptions = {
-  //   left: 768, // 좌상단 x 좌표
-  //   top: 300, // 좌상단 y 좌표
-  //   width: 360, // 크롭할 영역의 너비
-  //   height: 200, // 크롭할 영역의 높이
-  // };
-
-  const cropOptions = {
-    left: 884, // 좌상단 x 좌표
-    top: 344, // 좌상단 y 좌표
-    width: 218, // 크롭할 영역의 너비
-    height: 164, // 크롭할 영역의 높이
-  };
-
-  fs.readdir(framesPath, async (err, files) => {
-    if (err) {
-      console.error("폴더 내 파일 목록을 읽는 중 오류 발생:", err);
-      return;
-    }
-
-    files = files.filter((f) => !f.includes("cropped_"));
-
-    console.log({ files });
-
-    // 각 이미지 파일에 대해 크롭 작업 수행
-    let prevPath;
-    for (const file of files) {
-      const inputFilePath = path.join(framesPath, file);
-      const outputFilePath = path.join(framesPath, `cropped_${file}`);
-      await new Promise((res) => {
-        sharp(inputFilePath)
-          .extract(cropOptions)
-          .toFile(outputFilePath, (cropErr) => {
-            if (cropErr) {
-              console.error(`${file}을(를) 크롭하는 중 오류 발생:`, cropErr);
-            } else {
-              let similarity = 0,
-                distance = 0,
-                hashLength = 0;
-              if (prevPath) {
-                const aBuffer = fs.readFileSync(prevPath);
-                const bBuffer = fs.readFileSync(outputFilePath);
-                const img1 = PNG.sync.read(aBuffer);
-                const img2 = PNG.sync.read(bBuffer);
-                const { width, height } = img1;
-                const diff = new PNG({ width, height });
-                const numDiffPixels = pixelmatch(
-                  img1.data,
-                  img2.data,
-                  diff.data,
-                  width,
-                  height,
-                  { alpha: true, threshold: 0.2 }
-                );
-                const similarity = 1 - numDiffPixels / (width * height);
-                if (similarity < 0.999) {
-                  console.log(
-                    `${prevPath} | ${outputFilePath} | ${similarity}`
-                  );
-                }
-                prevPath = outputFilePath;
-                res();
-              } else {
-                prevPath = outputFilePath;
-                res();
-              }
-            }
-          });
-      });
-    }
-  });
-
-  if (true) {
-    return;
-  }
-
-  if (!existsFile(path + "/bgm.mp3")) {
-    await concatenateAudio(bgmPath, path + "/bgm.mp3", 3);
-  }
+  // if (!existsFile(path + "/bgm.mp3")) {
+  //   await concatenateAudio(bgmPath, path + "/bgm.mp3", 3);
+  // }
 
   //#1. 하이라이트
   const splitCount = 4;
   const avgSecond = 7;
+
   console.log(
     "예상소요시간 : " +
       Math.round((((seekArr.length / splitCount) * avgSecond) / 60) * 100) /
@@ -134,14 +28,16 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
       "분"
   );
 
+  const _seekArr = seekArr.map((v, i) => ({ index: i, ...v }));
+
   const highlightArr = [];
-  for (const [idx, chunk] of chunkArray(seekArr, splitCount).entries()) {
+  for (const [idx, chunk] of chunkArray(_seekArr, splitCount).entries()) {
     await Promise.all(
       chunk.map((seek) => {
         const option = {
-          idx,
+          idx: seek.index,
           inputPath: videoPath.find((v) => v.includes(seek.v)),
-          outputPath: `${highlightPath}/${idx}.mp4`,
+          outputPath: `${highlightPath}/${seek.index}.mp4`,
           gameInfo,
           ...seek,
         };

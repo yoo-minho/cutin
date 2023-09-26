@@ -12,10 +12,11 @@ const backboardTracking = useBackboardTrackingState();
 type canvasImage = {
   idx: number;
   canvas: HTMLCanvasElement;
+  time: string;
 };
 
 const images = [] as canvasImage[];
-const speed = 16;
+const speed = 6;
 const frame = 0.5; //초당 장수 - 0.5 = 1초당 2장
 const frameInterval = (1000 * frame) / speed;
 
@@ -68,6 +69,9 @@ watch(
 
         const iv = setInterval(() => {
           idx++;
+
+          const time = formatTime(backVideo.value.currentTime);
+
           const canvas = document.createElement("canvas");
           canvas.width = backVideo.value.videoWidth;
           canvas.height = backVideo.value.videoHeight;
@@ -93,39 +97,37 @@ watch(
           canvas.height = cropHeight;
           context.putImageData(croppedImageData, 0, 0);
 
-          //grayscale
+          //그레이스케일
           const grayscaleImageData = context.getImageData(
             0,
             0,
             canvas.width,
             canvas.height
           );
-          const grayscaleData = grayscaleImageData.data;
-          for (let i = 0; i < grayscaleData.length; i += 4) {
-            const avg =
-              (grayscaleData[i] + grayscaleData[i + 1] + grayscaleData[i + 2]) /
-              3;
-            grayscaleData[i] = avg;
-            grayscaleData[i + 1] = avg;
-            grayscaleData[i + 2] = avg;
+          const contrast = 1;
+          const data = grayscaleImageData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i] = avg * contrast;
+            data[i + 1] = avg * contrast;
+            data[i + 2] = avg * contrast;
           }
           context.putImageData(grayscaleImageData, 0, 0);
 
-          images.push({ idx, canvas });
+          images.push({ idx, canvas, time });
 
           if (images.length === 2) {
-            const { canvas: canvas1, idx: idx1 } = images[0];
-            const { canvas: canvas2, idx: idx2 } = images[1];
+            const { canvas: canvas1, idx: idx1, time: time1 } = images[0];
+            const { canvas: canvas2, idx: idx2, time: time2 } = images[1];
             const similarity = compareImages(canvas1, canvas2);
 
-            if (similarity < 99.9 && similarity > 50) {
-              // downloadImage(canvas2.toDataURL("image/jpeg"), idx2);
+            if (similarity < 99.9) {
               images.pop();
             } else {
               if (idx1 + 1 < idx2) {
                 const trackData = {
-                  start: sec2str(idx1 * frame),
-                  end: sec2str(idx2 * frame),
+                  start: time1,
+                  end: time2,
                   duration: (idx2 - idx1) * frame,
                   startIdx: idx1,
                   endIdx: idx2,
@@ -144,17 +146,6 @@ watch(
     });
   }
 );
-
-function sec2str(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  const formattedMinutes = String(minutes).padStart(2, "0");
-  const formattedSeconds = String(Math.floor(remainingSeconds)).padStart(
-    2,
-    "0"
-  );
-  return `${formattedMinutes}:${formattedSeconds}`;
-}
 
 function downloadImage(dataUrl: string, idx: number) {
   const a = document.createElement("a");
