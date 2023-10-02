@@ -11,15 +11,13 @@ const backboardPosition = calculateBackboardPosition();
 const backboardTracking = useBackboardTrackingState();
 
 type canvasImage = {
-  idx: number;
   canvas: HTMLCanvasElement;
   time: string;
+  sim: number;
 };
 
-const images = [] as canvasImage[];
+const images = ref<canvasImage[]>([]);
 const speed = 6;
-const frame = 0.5; //초당 장수 - 0.5 = 1초당 2장
-const frameInterval = (1000 * frame) / speed;
 
 const seekTime = ref("00:00 / 00:00");
 
@@ -47,102 +45,70 @@ const columns = [
 watch(
   () => backVideo.value,
   () => {
-    backVideo.value.addEventListener("loadedmetadata", function () {
+    const zoom = 4;
+    backVideo.value.addEventListener("loadedmetadata", () => {
       backVideo.value.playbackRate = speed;
       backVideo.value.pause();
       backVideo.value.muted = true;
 
-      backVideo.value.addEventListener("timeupdate", () => {
+      const catchFrame = () => {
         const currentTime = backVideo.value.currentTime;
+        const currentFormatTime = formatTime(currentTime);
         const duration = backVideo.value.duration;
         seekTime.value = `${formatTime(currentTime)} / ${formatTime(duration)}`;
-      });
-
-      backVideo.value.addEventListener("play", function () {
-        let idx = 0;
-
-        const {
+        let {
           top: cropY,
           left: cropX,
           width: cropWidth,
           height: cropHeight,
         } = backboardPosition.value;
+        cropY = cropY / zoom;
+        cropX = cropX / zoom;
+        cropWidth = cropWidth / zoom;
+        cropHeight = cropHeight / zoom;
 
-        const iv = setInterval(() => {
-          idx++;
+        const canvas = document.createElement("canvas");
+        canvas.width = backVideo.value.videoWidth;
+        canvas.height = backVideo.value.videoHeight;
+        const context = canvas.getContext("2d");
+        context?.drawImage(
+          backVideo.value,
+          0,
+          0,
+          canvas.width / zoom,
+          canvas.height / zoom
+        );
 
-          const time = formatTime(backVideo.value.currentTime);
+        if (!context) return;
 
-          const canvas = document.createElement("canvas");
-          canvas.width = backVideo.value.videoWidth;
-          canvas.height = backVideo.value.videoHeight;
-          const context = canvas.getContext("2d");
-          context?.drawImage(
-            backVideo.value,
-            0,
-            0,
-            canvas.width,
-            canvas.height
+        const croppedImageData = context.getImageData(
+          cropX,
+          cropY,
+          cropWidth,
+          cropHeight
+        );
+        canvas.width = cropWidth;
+        canvas.height = cropHeight;
+        context.putImageData(croppedImageData, 0, 0);
+        if (images.value.length > 0) {
+          const sim = compareImages(
+            canvas,
+            images.value[images.value.length - 1].canvas
           );
+          images.value.push({ canvas, time: currentFormatTime, sim });
+        } else {
+          images.value.push({ canvas, time: currentFormatTime, sim: 0 });
+        }
 
-          if (!context) return;
+        if (backVideo.value.paused || backVideo.value.ended) {
+          backVideo.value.pause();
+        } else {
+          requestAnimationFrame(catchFrame);
+        }
+      };
 
-          //crop
-          const croppedImageData = context.getImageData(
-            cropX,
-            cropY,
-            cropWidth,
-            cropHeight
-          );
-          canvas.width = cropWidth;
-          canvas.height = cropHeight;
-          context.putImageData(croppedImageData, 0, 0);
-
-          //그레이스케일
-          const grayscaleImageData = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
-          const contrast = 1;
-          const data = grayscaleImageData.data;
-          for (let i = 0; i < data.length; i += 4) {
-            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-            data[i] = avg * contrast;
-            data[i + 1] = avg * contrast;
-            data[i + 2] = avg * contrast;
-          }
-          context.putImageData(grayscaleImageData, 0, 0);
-
-          images.push({ idx, canvas, time });
-
-          if (images.length === 2) {
-            const { canvas: canvas1, idx: idx1, time: time1 } = images[0];
-            const { canvas: canvas2, idx: idx2, time: time2 } = images[1];
-            const similarity = compareImages(canvas1, canvas2);
-
-            if (similarity < 99.9) {
-              images.pop();
-            } else {
-              if (idx1 + 1 < idx2) {
-                const trackData = {
-                  start: time1,
-                  end: time2,
-                  duration: (idx2 - idx1) * frame,
-                  startIdx: idx1,
-                  endIdx: idx2,
-                };
-                backboardTracking.value.push(trackData);
-              }
-              images.shift();
-            }
-          }
-          if (backVideo.value.paused || backVideo.value.ended) {
-            clearInterval(iv);
-            backVideo.value.pause();
-          }
-        }, frameInterval);
+      backVideo.value.addEventListener("play", function () {
+        requestAnimationFrame(catchFrame);
       });
     });
   }
@@ -165,7 +131,6 @@ function compareImages(canvas1: HTMLCanvasElement, canvas2: HTMLCanvasElement) {
     .getContext("2d")
     ?.getImageData(0, 0, canvas2.width, canvas2.height);
   const diffImageData = new ImageData(canvas1.width, canvas1.height);
-
   const mismatchedPixels = pixelmatch(
     imageData1?.data,
     imageData2?.data,
@@ -173,16 +138,16 @@ function compareImages(canvas1: HTMLCanvasElement, canvas2: HTMLCanvasElement) {
     canvas1.width,
     canvas1.height,
     {
-      threshold: 0.2, // 임계값을 조정할 수 있습니다.
+      threshold: 0.2,
     }
   );
   const totalPixels = canvas1.width * canvas1.height;
-  return ((totalPixels - mismatchedPixels) / totalPixels) * 100;
+  return +(((totalPixels - mismatchedPixels) / totalPixels) * 100).toFixed(2);
 }
 </script>
 <template>
   <div>
-    <div>{{ seekTime }}</div>
+    <div>{{ seekTime }} {{ backVideo?.playbackRate }}</div>
     <div class="q-pa-md">
       <q-table
         dark
@@ -210,6 +175,12 @@ function compareImages(canvas1: HTMLCanvasElement, canvas2: HTMLCanvasElement) {
           </q-tr>
         </template>
       </q-table>
+      <div class="row" style="overflow-y: scroll; height: calc(100vh - 200px)">
+        <div v-for="img in images.filter((img) => img.sim < 99 && img.sim > 0)">
+          <img width="50" :src="img.canvas.toDataURL('image/jpeg')" />
+          {{ img.time }} - {{ img.sim }}
+        </div>
+      </div>
     </div>
     <video v-show="false" ref="backVideo" width="960" height="540" />
   </div>

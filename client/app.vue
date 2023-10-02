@@ -57,7 +57,8 @@ function handleKeyPress(event: any, pressedKeys: any) {
   const playerStoreB = usePlayerStore("B");
 
   const currCode = event.code;
-  const isCommand = (_code: string) => [...pressedKeys].filter((code) => _code === code).length > 0;
+  const isCommand = (_code: string) =>
+    [...pressedKeys].filter((code) => _code === code).length > 0;
   const isCommandS = isCommand("KeyS");
   const isCommandA = isCommand("KeyA");
 
@@ -107,28 +108,37 @@ function handleKeyPress(event: any, pressedKeys: any) {
     return;
   }
 
+  const controlState = useControlState();
+  const { fastForwardSec, rewindSec } = controlState.value;
+
   switch (event.key) {
     case "ArrowLeft":
-      video.value.currentTime = Math.max(currentTime - 3, 0);
+      video.value.currentTime = Math.max(currentTime - rewindSec, 0);
       break;
+
     case "ArrowRight":
       if (video.value.paused || video.value.ended || event.ctrlKey) {
-        video.value.currentTime = Math.min(currentTime + 10, duration);
+        video.value.currentTime = Math.min(
+          currentTime + fastForwardSec,
+          duration
+        );
         return;
       }
 
-      const highSpeed = 8;
-      if (video.value.playbackRate === highSpeed) {
-        video.value.playbackRate = currSpeed.value;
+      const highSpeed = fastForwardSec * 2;
+      if (video.value.playbackRate !== highSpeed) {
+        currSpeed.value = video.value.playbackRate;
+        video.value.playbackRate = highSpeed;
+        setTimeout(() => {
+          video.value.playbackRate = currSpeed.value;
+        }, 500);
         return;
       }
 
-      currSpeed.value = video.value.playbackRate;
-      video.value.playbackRate = highSpeed;
-      setTimeout(() => {
-        video.value.playbackRate = currSpeed.value;
-      }, 500);
+      video.value.playbackRate = currSpeed.value;
+
       break;
+
     case " ":
       togglePlayPause();
       break;
@@ -154,9 +164,11 @@ function togglePlayPause() {
     stopPlayer();
   }
 }
+
+const route = useRoute();
 </script>
 <template>
-  <q-layout>
+  <q-layout v-if="route.path === '/'">
     <div style="max-width: 1920px; min-width: 1280px; margin: 0 auto">
       <q-header style="position: relative" class="bg-green" elevated>
         <q-toolbar>
@@ -222,6 +234,7 @@ function togglePlayPause() {
       </q-page-container>
     </div>
   </q-layout>
+  <NuxtPage v-else />
 </template>
 <style>
 body {
