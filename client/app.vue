@@ -7,12 +7,15 @@ const file = ref();
 const videoOn = ref(false);
 const videoPlayOn = ref(true);
 const currVideoName = useCurrVideoName();
+const currCode = ref("");
 const currTime = ref("");
 const currSpeed = ref(1.5);
 const videoSrc = ref("");
 
 const upload = (file: any) => {
+  const [name, date] = file.name.split("_");
   currVideoName.value = file.name;
+  currCode.value = name + "_" + date;
   videoOn.value = true;
   const url = URL.createObjectURL(file);
   videoSrc.value = url;
@@ -125,13 +128,14 @@ function handleKeyPress(event: any, pressedKeys: any) {
         return;
       }
 
-      const highSpeed = fastForwardSec * 2;
+      //3초 =>
+      const highSpeed = 8;
       if (video.value.playbackRate !== highSpeed) {
         currSpeed.value = video.value.playbackRate;
         video.value.playbackRate = highSpeed;
         setTimeout(() => {
           video.value.playbackRate = currSpeed.value;
-        }, 500);
+        }, (1000 / 8) * fastForwardSec);
         return;
       }
 
@@ -215,16 +219,7 @@ const route = useRoute();
                   </template>
                 </q-file>
               </div>
-              <div class="col bg-dark q-pa-md">
-                <template v-if="videoOn">
-                  <player-list teamName="A" />
-                  <player-list teamName="B" />
-                </template>
-                <template v-else>
-                  <div class="text-white q-mb-md">비디오를 업로드해주세요!</div>
-                </template>
-                <skill-list />
-              </div>
+              <PlayerArea :videoOn="videoOn" :code="currCode" />
             </div>
           </div>
           <div class="col">

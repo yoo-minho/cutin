@@ -1,86 +1,96 @@
 <script setup lang="ts">
-import { useQuasar } from "quasar";
-import { keySet } from "~/composables/constants";
-
-const props = defineProps<{ teamName: string }>();
-const teamName = toRef(props, "teamName");
-const playerStore = usePlayerStore(teamName.value);
-
-const keyCommand =
-  "A" === teamName.value
-    ? keySet.first
-    : "B" === teamName.value
-    ? keySet.second
-    : [];
-
-const prompt = ref(false);
-const playerName = ref("");
-
-const $q = useQuasar();
-
-const openPop = () => {
-  prompt.value = true;
-  playerName.value = "";
-};
+const props = defineProps<{ code: string; teamName: string }>();
+const teamStore = useTeamStore(props.code);
+const players = ref<any[]>([]);
+watch(teamStore, () => {
+  players.value =
+    teamStore.value.find((v) => v.name === props.teamName)?.players || [];
+});
 
 const _addPlayer = () => {
-  addPlayer(teamName.value, playerName.value);
-  prompt.value = false;
-  playerName.value = "";
+  Dialog.create({
+    title: "선수 추가",
+    prompt: {
+      type: "text",
+    },
+    ok: "추가",
+    cancel: "취소",
+  }).onOk((val: string) => {
+    addPlayerOnTeam(props.code, props.teamName, val);
+  });
 };
 
 const _removePlayer = (name: string) => {
-  $q.dialog({
-    title: "선수제거",
+  Dialog.create({
+    title: "선수 제거",
     ok: "제거",
     cancel: "취소",
   }).onOk(() => {
-    removePlayer(teamName.value, name);
+    removePlayerOnTeam(props.code, props.teamName, name);
   });
+};
+
+const _removeTeam = () => {
+  Dialog.create({
+    title: "팀 제거",
+    ok: "제거",
+    cancel: "취소",
+  }).onOk(() => {
+    removeTeam(props.code, props.teamName);
+  });
+};
+
+const selectPlayer = (playerName: string) => {
+  console.log("xxxx", playerName);
 };
 </script>
 <template>
-  <div class="row items-center">
-    <KeyCap :label="teamName + '팀'" style="width: 80px" />
-    <q-icon name="forward" class="text-white"></q-icon>
-    <KeyCap
-      v-for="(player, idx) in playerStore"
-      color="orange"
-      :command="keyCommand[idx]"
-      :label="player.name"
-      clickable
-      @click="() => _removePlayer(player.name)"
-    />
-    <q-chip
-      clickable
-      outline
-      square
-      color="white"
-      class="q-px-sm"
-      icon="add"
-      @click="openPop()"
+  <div class="row items-center q-mb-md">
+    <q-btn-dropdown
+      :label="`팀 ${teamName}`"
+      color="green-9"
+      padding="6px 0 6px 12px"
     >
-      선수추가
-    </q-chip>
-    <q-dialog v-model="prompt" persistent>
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">선수</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <q-input
-            v-model="playerName"
-            dense
-            autofocus
-            color="orange"
-            @keyup.enter="_addPlayer()"
-          />
-        </q-card-section>
-        <q-card-actions align="right" class="text-orange">
-          <q-btn flat label="취소" v-close-popup />
-          <q-btn flat label="추가" v-close-popup @click="_addPlayer()" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+      <q-list>
+        <q-item clickable v-close-popup @click="_addPlayer()">
+          <q-item-section>선수 추가</q-item-section>
+          <q-item-section side>
+            <q-icon name="add" />
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click="_removeTeam()">
+          <q-item-section>팀 삭제</q-item-section>
+          <q-item-section side>
+            <q-icon name="delete" />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
+
+    <div class="row" style="gap: 8px; margin: 0 8px; font-size: 6px">
+      <q-btn-dropdown
+        v-for="player in players"
+        padding="6px 0 6px 6px"
+        text-color="white"
+        color="grey-9"
+        :label="player.name"
+        @click="selectPlayer(player.name)"
+      >
+        <q-list>
+          <q-item clickable v-close-popup @click="_removePlayer(player.name)">
+            <q-item-section>선수 삭제</q-item-section>
+            <q-item-section side>
+              <q-icon name="delete" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-btn-dropdown>
+    </div>
   </div>
 </template>
+<style>
+.q-btn-dropdown--split .q-btn-dropdown__arrow-container {
+  font-size: 10px;
+  width: 20px;
+}
+</style>

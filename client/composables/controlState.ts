@@ -1,6 +1,6 @@
 type ControlOption = {
-  fastForwardSec: 3 | 5 | 7 | 9;
-  rewindSec: 3 | 5 | 7 | 9;
+  fastForwardSec: 3 | 5;
+  rewindSec: 3 | 5;
 };
 
 export const useControlState = () => {

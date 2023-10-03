@@ -2,7 +2,7 @@
 const props = defineProps<{ video: HTMLVideoElement }>();
 const speed = ref(1.5);
 const speedSet = [1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5];
-const moveSet = [3, 5, 7, 9] as (3 | 5 | 7 | 9)[];
+const moveSet = [3, 5] as (3 | 5)[];
 
 const controlState = useControlState();
 
@@ -12,15 +12,12 @@ function selectSpeed(s: number) {
 }
 </script>
 <template>
-  <div class="row">
+  <div class="row" style="gap: 24px">
     <div>
-      <q-btn-dropdown text-color="white" flat>
-        <template #label>
-          <div>
-            <div>재생속도</div>
-            <div class="label">X {{ speed }}</div>
-          </div>
-        </template>
+      <div class="label">
+        <q-btn label="재생속도" dense flat />
+      </div>
+      <q-btn-dropdown text-color="white" flat :label="`X ${speed}`">
         <q-list>
           <q-item
             v-for="s in speedSet"
@@ -36,14 +33,8 @@ function selectSpeed(s: number) {
       </q-btn-dropdown>
     </div>
     <div>
-      <div class="text-white">
-        <q-btn
-          label="빨리감기"
-          icon-right="info"
-          dense
-          flat
-          style="font-size: 11px"
-        >
+      <div class="label">
+        <q-btn label="빨리감기" icon-right="info" dense flat>
           <q-tooltip
             anchor="top middle"
             self="bottom middle"
@@ -76,13 +67,23 @@ function selectSpeed(s: number) {
       </q-btn-dropdown>
     </div>
     <div>
-      <q-btn-dropdown text-color="white" flat>
-        <template #label>
-          <div>
-            <div>되감기 ←</div>
-            <div class="label">{{ controlState.rewindSec }}초</div>
-          </div>
-        </template>
+      <div class="label">
+        <q-btn label="되감기" icon-right="info" dense flat>
+          <q-tooltip
+            anchor="top middle"
+            self="bottom middle"
+            class="bg-green text-body2"
+            :offset="[10, 10]"
+          >
+            1. 좌방향키로 되감기 (중간화면 생략)
+          </q-tooltip>
+        </q-btn>
+      </div>
+      <q-btn-dropdown
+        text-color="white"
+        flat
+        :label="`${controlState.rewindSec}초`"
+      >
         <q-list>
           <q-item
             v-for="s in moveSet"
@@ -99,14 +100,18 @@ function selectSpeed(s: number) {
     </div>
   </div>
 </template>
-<style>
+<style scoped>
 .q-btn-dropdown {
-  padding: 0 16px;
+  padding: 0 4px 0 16px;
+  min-height: auto;
+  font-size: 20px;
 }
-.label {
-  font-size: 1.25rem;
-  font-weight: 500;
-  letter-spacing: 0.0125em;
-  line-height: 1.25rem;
+.label button {
+  color: #fff !important;
+  padding: 0 0.285em;
+  min-height: auto;
+}
+.label span {
+  font-size: 11px;
 }
 </style>

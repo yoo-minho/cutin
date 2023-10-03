@@ -26,7 +26,7 @@ defineProps<{ command?: string; label: string; color?: string }>();
   border-width: 3px 7px 10px;
   border-style: solid;
   border-radius: 4px;
-  scale: 0.8;
+  /* scale: 0.8; */
 }
 .key.pressed {
   -webkit-transform: scale(0.95, 0.95);

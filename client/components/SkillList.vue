@@ -4,18 +4,25 @@ const skillStore = useSkillStore();
 
 <template>
   <div class="row items-center">
-    <KeyCap command="A" label="어시스트" style="width: 80px" />
-    <q-icon name="add" class="text-white"></q-icon>
-    <KeyCap command="?" label="선수단축키" color="orange" />
-  </div>
-  <div class="row items-center">
-    <KeyCap command="S" label="스킬" style="width: 80px" />
-    <q-icon name="add" class="text-white"></q-icon>
-    <KeyCap
-      v-for="(skill, idx) in skillStore"
-      :command="keySet.first[idx]"
-      :label="skill.name"
+    <q-chip
+      clickable
+      square
       color="green"
-    />
+      class="q-px-sm"
+      style="font-size: 13px"
+    >
+      스킬
+    </q-chip>
+    <q-chip
+      v-for="skill in skillStore"
+      clickable
+      outline
+      square
+      color="white"
+      class="q-px-sm"
+      style="font-size: 13px"
+    >
+      {{ skill.name }}
+    </q-chip>
   </div>
 </template>
