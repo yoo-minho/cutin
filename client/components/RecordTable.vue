@@ -1,15 +1,16 @@
 <script setup lang="ts">
-const props = defineProps<{ currTime: string }>();
 const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
 
-const currTime = toRef(props, "currTime");
-const currVideoName = useCurrVideoName();
+const videoProps = useVideoPropsStore();
+const currTime = toRef(videoProps.value, "currentTime");
+const currVideoName = toRef(videoProps.value, "videoName");
 
 const currGame = useCurrGame();
 const gameTab = ref("1g");
 const quaterTab = ref("1q");
 const tab = ref("");
-let cutStore = useCutStore();
+
+let cutStore = ref<any[]>();
 
 watch(
   [gameTab, quaterTab],
@@ -25,7 +26,7 @@ watch(currVideoName, () => {
 });
 
 const downGameData = () => {
-  const data = cutStore.value.map((cut) => ({
+  const data = cutStore.value?.map((cut) => ({
     ...cut,
     videoName: currVideoName.value,
   }));

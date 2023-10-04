@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { QTableProps } from "quasar";
 import { pixelmatch } from "../utils/pixelmatch";
 
-const props = defineProps<{ currTime: string }>();
 const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
 
-const currTime = toRef(props, "currTime");
+const videoProps = useVideoPropsStore();
+const currTime = videoProps.value.currentTime;
+
 const backVideo = useBackVideoState();
 const backboardPosition = calculateBackboardPosition();
 const backboardTracking = useBackboardTrackingState();

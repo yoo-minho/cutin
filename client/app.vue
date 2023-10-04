@@ -6,21 +6,24 @@ const video = ref();
 const file = ref();
 const videoOn = ref(false);
 const videoPlayOn = ref(true);
-const currVideoName = useCurrVideoName();
-const currCode = ref("");
-const currTime = ref("");
 const currSpeed = ref(1.5);
 const videoSrc = ref("");
 
+const videoProps = useVideoPropsStore();
+
 const upload = (file: any) => {
   const [name, date] = file.name.split("_");
-  currVideoName.value = file.name;
-  currCode.value = name + "_" + date;
-  videoOn.value = true;
+  const code = name + "_" + date;
   const url = URL.createObjectURL(file);
+
+  videoProps.value.videoName = file.name;
+  videoProps.value.videoUrl = url;
+  videoProps.value.videoCode = code;
+
   videoSrc.value = url;
   const backVideo = useBackVideoState();
   backVideo.value.src = url;
+  videoOn.value = true;
 };
 
 watch(
@@ -42,7 +45,7 @@ watch(
         pressedKeys.delete(event.code);
       });
       video.value.addEventListener("timeupdate", () => {
-        currTime.value = formatTime(video.value?.currentTime);
+        videoProps.value.currentTime = formatTime(video.value?.currentTime);
       });
     });
   }
@@ -56,10 +59,13 @@ function moveSeekPoint(time: string) {
 function handleKeyPress(event: any, pressedKeys: any) {
   event.preventDefault();
 
-  const playerStoreA = usePlayerStore("A");
-  const playerStoreB = usePlayerStore("B");
+  const teamStore = useTeamStore();
+
+  const playerRow1 = teamStore.value[0];
+  const playerRow2 = teamStore.value[1];
 
   const currCode = event.code;
+
   const isCommand = (_code: string) =>
     [...pressedKeys].filter((code) => _code === code).length > 0;
   const isCommandS = isCommand("KeyS");
@@ -78,36 +84,40 @@ function handleKeyPress(event: any, pressedKeys: any) {
     : "scorer";
 
   if (["assister", "skill"].includes(currentCommand) && event.key === " ") {
-    updateCut(currentCommand, currTime.value, "");
+    updateCut(currentCommand, "");
     return;
   }
 
   if ("skill" === currentCommand && keyIdx1 > -1) {
-    updateCut("skill", currTime.value, defaultSkill[keyIdx1].name);
+    updateCut("skill", defaultSkill[keyIdx1].name);
     return;
   }
 
   if (keyIdx1 > -1) {
-    if (!playerStoreA.value[keyIdx1]) {
-      Notify.create(`A팀 ${keyIdx1 + 1}번째 선수를 추가해주세요!`);
+    if (!playerRow1.players[keyIdx1]) {
+      Notify.create(
+        `${playerRow1.name}팀 ${keyIdx1 + 1}번째 선수를 추가해주세요!`
+      );
       return;
     }
-    updateCut(currentCommand, currTime.value, playerStoreA.value[keyIdx1].name);
+    updateCut(currentCommand, playerRow1.players[keyIdx1].name);
     return;
   }
 
   if (keyIdx2 > -1) {
-    if (!playerStoreB.value[keyIdx2]) {
-      Notify.create(`B팀 ${keyIdx2 + 1}번째 선수를 추가해주세요!`);
+    if (!playerRow2.players[keyIdx2]) {
+      Notify.create(
+        `${playerRow2.name} 팀 ${keyIdx2 + 1}번째 선수를 추가해주세요!`
+      );
       return;
     }
-    updateCut(currentCommand, currTime.value, playerStoreB.value[keyIdx2].name);
+    updateCut(currentCommand, playerRow2.players[keyIdx2].name);
     return;
   }
 
   if ("KeyC" === currCode) {
-    addCut(currTime.value);
-    moveSeekPoint(currTime.value);
+    const cutTime = addCut();
+    if (cutTime) moveSeekPoint(cutTime);
     return;
   }
 
@@ -128,7 +138,6 @@ function handleKeyPress(event: any, pressedKeys: any) {
         return;
       }
 
-      //3초 =>
       const highSpeed = 8;
       if (video.value.playbackRate !== highSpeed) {
         currSpeed.value = video.value.playbackRate;
@@ -186,7 +195,7 @@ const route = useRoute();
               class="bg-dark text-white"
               style="height: 100%; border-right: 0.5px solid grey"
             >
-              <back-video :currTime="currTime" @moveSeekPoint="moveSeekPoint" />
+              <back-video @moveSeekPoint="moveSeekPoint" />
             </div>
           </div>
           <div style="width: 960px">
@@ -219,11 +228,11 @@ const route = useRoute();
                   </template>
                 </q-file>
               </div>
-              <PlayerArea :videoOn="videoOn" :code="currCode" />
+              <PlayerArea :videoOn="videoOn" />
             </div>
           </div>
           <div class="col">
-            <record-table :currTime="currTime" @moveSeekPoint="moveSeekPoint" />
+            <record-table @moveSeekPoint="moveSeekPoint" />
           </div>
         </div>
       </q-page-container>

@@ -3,7 +3,7 @@ type TeamType = {
   players: PlayerType[];
 };
 
-type PlayerType = {
+export type PlayerType = {
   name: string;
   position?: string;
   weight?: string;
@@ -11,8 +11,10 @@ type PlayerType = {
 };
 
 //code = 동호회이름과 날짜 조합
-export const useTeamStore = (code: string) => {
-  return useState<TeamType[]>(`${code}TeamStore`, () => []);
+export const useTeamStore = () => {
+  const videoProps = useVideoPropsStore();
+  const code = videoProps.value.videoCode;
+  return useState<TeamType[]>(`${code}TeamStore`, () => loadTeamStore(code));
 };
 
 export function loadTeamStore(code: string) {
@@ -23,45 +25,37 @@ export function loadTeamStore(code: string) {
   }
 }
 
-export function addTeam(code: string, teamName: string) {
-  const teamStore = useTeamStore(code);
+export function addTeam(teamName: string) {
+  const teamStore = useTeamStore();
   const isDuplicated =
     teamStore.value.findIndex((v) => v.name === teamName) > -1;
   if (isDuplicated) {
     return { error: true, message: "중복된 팀 이름은 불가능합니다." };
   }
   teamStore.value?.push({ name: teamName, players: [] });
-  saveTeamStore(code, teamStore.value);
+  saveTeamStore(teamStore.value);
   return { error: false };
 }
 
-export function removeTeam(code: string, teamName: string) {
-  const teamStore = useTeamStore(code);
+export function removeTeam(teamName: string) {
+  const teamStore = useTeamStore();
   teamStore.value = teamStore.value.filter((v) => v.name !== teamName);
-  saveTeamStore(code, teamStore.value);
+  saveTeamStore(teamStore.value);
 }
 
-export function addPlayerOnTeam(
-  code: string,
-  teamName: string,
-  playerName: string
-) {
-  const teamStore = useTeamStore(code);
+export function addPlayerOnTeam(teamName: string, playerName: string) {
+  const teamStore = useTeamStore();
   teamStore.value = teamStore.value.map((v, i) => {
     if (v.name == teamName) {
       v.players?.push({ name: playerName });
     }
     return v;
   });
-  saveTeamStore(code, teamStore.value);
+  saveTeamStore(teamStore.value);
 }
 
-export function removePlayerOnTeam(
-  code: string,
-  teamName: string,
-  playerName: string
-) {
-  const teamStore = useTeamStore(code);
+export function removePlayerOnTeam(teamName: string, playerName: string) {
+  const teamStore = useTeamStore();
   teamStore.value = teamStore.value.map((v, i) => {
     if (v.name == teamName) {
       v.players = v.players?.filter((player) => player.name !== playerName);
@@ -69,9 +63,11 @@ export function removePlayerOnTeam(
     return v;
   });
 
-  saveTeamStore(code, teamStore.value);
+  saveTeamStore(teamStore.value);
 }
 
-function saveTeamStore(code: string, teamStoreVal: TeamType[]) {
+function saveTeamStore(teamStoreVal: TeamType[]) {
+  const videoProps = useVideoPropsStore();
+  const code = videoProps.value.videoCode;
   localStorage.setItem(`team_${code}`, JSON.stringify(teamStoreVal));
 }

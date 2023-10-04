@@ -1,11 +1,7 @@
 <script setup lang="ts">
-const props = defineProps<{ code: string; teamName: string }>();
-const teamStore = useTeamStore(props.code);
-const players = ref<any[]>([]);
-watch(teamStore, () => {
-  players.value =
-    teamStore.value.find((v) => v.name === props.teamName)?.players || [];
-});
+import { PlayerType } from "~/composables/playerState";
+
+const props = defineProps<{ teamName: string; players: PlayerType[] }>();
 
 const _addPlayer = () => {
   Dialog.create({
@@ -16,7 +12,7 @@ const _addPlayer = () => {
     ok: "추가",
     cancel: "취소",
   }).onOk((val: string) => {
-    addPlayerOnTeam(props.code, props.teamName, val);
+    addPlayerOnTeam(props.teamName, val);
   });
 };
 
@@ -26,7 +22,7 @@ const _removePlayer = (name: string) => {
     ok: "제거",
     cancel: "취소",
   }).onOk(() => {
-    removePlayerOnTeam(props.code, props.teamName, name);
+    removePlayerOnTeam(props.teamName, name);
   });
 };
 
@@ -36,20 +32,17 @@ const _removeTeam = () => {
     ok: "제거",
     cancel: "취소",
   }).onOk(() => {
-    removeTeam(props.code, props.teamName);
+    removeTeam(props.teamName);
   });
-};
-
-const selectPlayer = (playerName: string) => {
-  console.log("xxxx", playerName);
 };
 </script>
 <template>
   <div class="row items-center q-mb-md">
     <q-btn-dropdown
-      :label="`팀 ${teamName}`"
+      :label="`${teamName} 팀`"
       color="green-9"
       padding="6px 0 6px 12px"
+      style="width: 120px"
     >
       <q-list>
         <q-item clickable v-close-popup @click="_addPlayer()">
@@ -74,9 +67,29 @@ const selectPlayer = (playerName: string) => {
         text-color="white"
         color="grey-9"
         :label="player.name"
-        @click="selectPlayer(player.name)"
       >
         <q-list>
+          <q-item
+            clickable
+            v-close-popup
+            @click="updateCut('scorer', player.name)"
+          >
+            <q-item-section>득점 기록</q-item-section>
+            <q-item-section side>
+              <q-icon name="sports_basketball" />
+            </q-item-section>
+          </q-item>
+          <q-item
+            clickable
+            v-close-popup
+            @click="updateCut('assister', player.name)"
+          >
+            <q-item-section>어시스트 기록</q-item-section>
+            <q-item-section side>
+              <q-icon name="directions_bus_filled" />
+            </q-item-section>
+          </q-item>
+          <hr />
           <q-item clickable v-close-popup @click="_removePlayer(player.name)">
             <q-item-section>선수 삭제</q-item-section>
             <q-item-section side>

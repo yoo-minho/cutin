@@ -1,13 +1,12 @@
 <script setup lang="ts">
-const props = defineProps<{ code: string; videoOn: boolean }>();
-const code = toRef(props, "code");
-let teamStore = ref();
+const props = defineProps<{ videoOn: boolean }>();
+const videoProps = useVideoPropsStore();
+let teamStore = useTeamStore();
 
 watch(
-  code,
-  (_code) => {
-    if (!_code) return;
-    teamStore = useTeamStore(code.value);
+  () => props.videoOn,
+  () => {
+    teamStore = useTeamStore();
   },
   { immediate: true }
 );
@@ -21,7 +20,7 @@ const _addTeam = () => {
     ok: "추가",
     cancel: "취소",
   }).onOk((val: string) => {
-    const { error, message } = addTeam(props.code, val);
+    const { error, message } = addTeam(val);
     if (error) {
       Notify.create({ type: "negative", message });
     }
@@ -43,8 +42,8 @@ const _addTeam = () => {
       </q-btn>
       <player-list
         v-for="team in teamStore"
-        :code="code"
         :teamName="team.name"
+        :players="team.players"
       />
     </template>
     <template v-else>
