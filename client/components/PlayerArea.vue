@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const props = defineProps<{ videoOn: boolean }>();
-const videoProps = useVideoPropsStore();
 let teamStore = useTeamStore();
 
 watch(
@@ -32,10 +31,10 @@ const _addTeam = () => {
     <template v-if="videoOn">
       <q-btn
         clickable
-        color="green"
+        color="pink"
         class="q-mb-md"
         icon="add"
-        style="min-height: 8px"
+        style="min-height: 8px; width: 120px"
         @click="_addTeam()"
       >
         팀 추가

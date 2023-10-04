@@ -21,8 +21,8 @@ const upload = (file: any) => {
   videoProps.value.videoCode = code;
 
   videoSrc.value = url;
-  const backVideo = useBackVideoState();
-  backVideo.value.src = url;
+  // const backVideo = useBackVideoState();
+  // backVideo.value.src = url;
   videoOn.value = true;
 };
 
@@ -195,7 +195,8 @@ const route = useRoute();
               class="bg-dark text-white"
               style="height: 100%; border-right: 0.5px solid grey"
             >
-              <back-video @moveSeekPoint="moveSeekPoint" />
+              <video-list />
+              <!-- <back-video @moveSeekPoint="moveSeekPoint" /> -->
             </div>
           </div>
           <div style="width: 960px">
