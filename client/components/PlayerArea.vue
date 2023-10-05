@@ -1,16 +1,16 @@
 <script setup lang="ts">
-const props = defineProps<{ videoOn: boolean }>();
-let teamStore = useTeamStore();
+let teamStore = ref();
+const videoProps = useVideoPropsStore();
+const videoCode = toRef(videoProps.value, "videoCode");
 
-watch(
-  () => props.videoOn,
-  () => {
-    teamStore = useTeamStore();
-  },
-  { immediate: true }
-);
+watch(videoCode, () => (teamStore = useTeamStore()));
 
 const _addTeam = () => {
+  if (!videoCode.value) {
+    Notify.create("먼저 영상을 업로드해주세요!");
+    return;
+  }
+
   Dialog.create({
     title: "팀 추가",
     prompt: {
@@ -28,25 +28,22 @@ const _addTeam = () => {
 </script>
 <template>
   <div class="col bg-dark q-pa-md" style="gap: 24px">
-    <template v-if="videoOn">
-      <q-btn
-        clickable
-        color="pink"
-        class="q-mb-md"
-        icon="add"
-        style="min-height: 8px; width: 120px"
-        @click="_addTeam()"
-      >
-        팀 추가
-      </q-btn>
+    <q-btn
+      clickable
+      color="pink"
+      class="q-mb-md"
+      icon="add"
+      style="min-height: 8px"
+      @click="_addTeam()"
+    >
+      {{ videoCode ? `'${videoCode}'` : "" }} 이 날의 팀 추가
+    </q-btn>
+    <template v-if="videoCode">
       <player-list
         v-for="team in teamStore"
         :teamName="team.name"
         :players="team.players"
       />
-    </template>
-    <template v-else>
-      <div class="text-white q-mb-md">비디오를 업로드해주세요!</div>
     </template>
   </div>
 </template>

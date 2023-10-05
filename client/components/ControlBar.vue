@@ -3,15 +3,20 @@ import SpeedSelector from "./SpeedSelector.vue";
 const props = defineProps<{ video: HTMLVideoElement; playOn: boolean }>();
 const emits = defineEmits<{ (e: "togglePlayPause"): void }>();
 
-const seekTime = ref("");
+const seekTime = ref("0:00 / 0:00");
 const seekProgress = ref(0);
 
-props.video.addEventListener("timeupdate", () => {
-  const currentTime = props.video.currentTime;
-  const duration = props.video.duration;
-  seekTime.value = `${formatTime(currentTime)} / ${formatTime(duration)}`;
-  seekProgress.value = (currentTime / duration) * 100;
-});
+const load = () => {
+  props.video.addEventListener("timeupdate", () => {
+    const currentTime = props.video.currentTime;
+    const duration = props.video.duration;
+    console.log("timeupdate", duration, formatTime(duration));
+    seekTime.value = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+    seekProgress.value = (currentTime / duration) * 100;
+  });
+};
+
+props.video.addEventListener("loadedmetadata", load);
 
 const seek = (x: any) => {
   props.video.currentTime = (x / 100) * props.video.duration;

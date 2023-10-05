@@ -14,6 +14,7 @@ export type PlayerType = {
 export const useTeamStore = () => {
   const videoProps = useVideoPropsStore();
   const code = videoProps.value.videoCode;
+  console.log("useTeamStore", { code }, loadTeamStore(code));
   return useState<TeamType[]>(`${code}TeamStore`, () => loadTeamStore(code));
 };
 

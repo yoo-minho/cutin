@@ -11,18 +11,25 @@ const quaterTab = ref("1q");
 const tab = ref("");
 
 let cutStore = ref<any[]>();
+const currentCutStore = ref();
 
 watch(
   [gameTab, quaterTab],
   () => {
     tab.value = gameTab.value + quaterTab.value;
     currGame.value = gameTab.value + quaterTab.value;
+    currentCutStore.value = cutStore.value?.filter(
+      (cut) => cut.game === currGame.value && !!cut.time
+    );
   },
   { immediate: true }
 );
 
 watch(currVideoName, () => {
   cutStore = useCutStore(currVideoName.value);
+  currentCutStore.value = cutStore.value?.filter(
+    (cut) => cut.game === currGame.value && !!cut.time
+  );
 });
 
 const downGameData = () => {
@@ -74,6 +81,16 @@ const columns = [
 </script>
 <template>
   <div class="bg-dark" style="height: 100%; border-left: 0.5px solid grey">
+    <q-btn
+      color="green"
+      text-color="white"
+      class="q-ma-md"
+      icon-right="file_download"
+      @click="downGameData"
+    >
+      게임 데이터 JSON 내려받기
+    </q-btn>
+    <q-separator color="grey-7" size="0.5px" />
     <q-tabs
       v-model="gameTab"
       dense
@@ -83,6 +100,8 @@ const columns = [
     >
       <q-tab name="1g" label="1게임" />
       <q-tab name="2g" label="2게임" />
+      <q-tab name="3g" label="3게임" />
+      <q-tab name="4g" label="4게임" />
     </q-tabs>
     <q-tabs
       v-model="quaterTab"
@@ -96,53 +115,48 @@ const columns = [
       <q-tab name="3q" label="3쿼터" />
       <q-tab name="4q" label="4쿼터" />
     </q-tabs>
-    <q-separator />
-    <q-btn
-      color="green"
-      text-color="white"
-      class="q-ma-md"
-      icon="file_download"
-      @click="downGameData"
+    <q-separator color="grey-7" size="1px" />
+    <q-table
+      dark
+      flat
+      dense
+      :columns="columns"
+      :rows="currentCutStore"
+      :hide-pagination="true"
     >
-      게임 데이터 JSON 내려받기
-    </q-btn>
-    <q-tab-panels v-model="tab">
-      <q-tab-panel :name="tab" class="q-pa-md">
-        <div v-if="!currVideoName">비디오를 업로드해주세요!</div>
-        <div v-else>
-          <q-table
-            dark
-            flat
-            dense
-            :columns="columns"
-            :rows="
-              cutStore?.filter((cut) => cut.game === currGame && !!cut.time)
-            "
-            :rows-per-page-options="[0]"
-          >
-            <template #body="props">
-              <q-tr
-                :props="props"
-                :class="props.row.time === currTime ? 'text-green' : ''"
-              >
-                <q-td key="time" :props="props">
-                  <div
-                    class="text-pre-wrap cursor-pointer"
-                    @click="emits('moveSeekPoint', String(props.row.time))"
-                  >
-                    {{ props.row.time }}
-                  </div>
-                </q-td>
-                <q-td key="scorer" :props="props">{{ props.row.scorer }} </q-td>
-                <q-td key="assister" :props="props">
-                  {{ props.row.assister }}
-                </q-td>
-                <q-td key="skill" :props="props">{{ props.row.skill }}</q-td>
-              </q-tr>
-            </template>
-          </q-table>
+      <template #no-data>
+        <div class="full-width row flex-center text-green q-gutter-sm">
+          <q-icon size="2em" name="sports_basketball" />
+          <span> 'C' 단축키를 눌러 득점 순간을 기록하세요! </span>
         </div>
-      </q-tab-panel>
-    </q-tab-panels>
+      </template>
+
+      <template #body="props">
+        <q-tr
+          :props="props"
+          :class="props.row.time === currTime ? 'text-green' : ''"
+        >
+          <q-td key="time" :props="props">
+            <div
+              class="text-pre-wrap cursor-pointer"
+              @click="emits('moveSeekPoint', String(props.row.time))"
+            >
+              {{ props.row.time }}
+            </div>
+          </q-td>
+          <q-td key="scorer" :props="props">{{ props.row.scorer }} </q-td>
+          <q-td key="assister" :props="props">
+            {{ props.row.assister }}
+          </q-td>
+          <q-td key="skill" :props="props">{{ props.row.skill }}</q-td>
+        </q-tr>
+      </template>
+    </q-table>
+    <q-separator color="grey-7" size="0.5px" />
   </div>
 </template>
+<style scoped>
+.q-table__container {
+  border-radius: 0;
+}
+</style>

@@ -1,4 +1,5 @@
 export const formatTime = (time: number) => {
+  if (isNaN(+time)) return "0:00";
   const minutes = Math.floor(time / 60);
   const seconds = Math.ceil(time % 60);
   if (seconds === 60) return `${minutes + 1}:00`;

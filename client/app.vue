@@ -185,55 +185,40 @@ const route = useRoute();
     <div style="max-width: 1920px; min-width: 1280px; margin: 0 auto">
       <q-header style="position: relative" class="bg-green" elevated>
         <q-toolbar>
-          <q-toolbar-title>Short-cut</q-toolbar-title>
+          <q-toolbar-title>MyHighlight 영상편집기</q-toolbar-title>
+          <StopWatch />
         </q-toolbar>
       </q-header>
       <q-page-container style="padding: 0">
         <div class="row">
           <div class="col">
-            <div
-              class="bg-dark text-white"
-              style="height: 100%; border-right: 0.5px solid grey"
-            >
-              <video-list />
-              <!-- <back-video @moveSeekPoint="moveSeekPoint" /> -->
-            </div>
+            <VideoList />
+            <!-- <back-video @moveSeekPoint="moveSeekPoint" /> -->
           </div>
           <div style="width: 960px">
             <div class="column" style="height: 100vh">
               <div style="height: 540px; position: relative" class="column">
                 <drag-box :video="video" />
                 <video
-                  v-show="videoOn"
+                  v-show="videoProps.videoUrl"
                   ref="video"
                   width="960"
                   height="540"
-                  :src="videoSrc"
+                  :src="videoProps.videoUrl"
                   style="position: fixed"
                 />
-                <control-bar
-                  v-if="videoOn"
+                <ControlBar
+                  v-if="videoProps.videoUrl"
                   :video="video"
                   :playOn="videoPlayOn"
                   @togglePlayPause="togglePlayPause()"
                 />
-                <q-file
-                  v-else
-                  v-model="file"
-                  borderless
-                  prefix="Upload"
-                  @update:model-value="upload"
-                >
-                  <template #before>
-                    <q-icon name="upload" size="lg" />
-                  </template>
-                </q-file>
               </div>
-              <PlayerArea :videoOn="videoOn" />
+              <PlayerArea />
             </div>
           </div>
           <div class="col">
-            <record-table @moveSeekPoint="moveSeekPoint" />
+            <RecordTable @moveSeekPoint="moveSeekPoint" />
           </div>
         </div>
       </q-page-container>
