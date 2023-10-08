@@ -1,7 +1,7 @@
 <script setup lang="ts">
 type VideoType = {
   name: string;
-  size: string;
+  size: number;
   duration: string;
   url: string;
 };
@@ -22,7 +22,7 @@ const submit = async (files: File[]) => {
       video.addEventListener("loadedmetadata", () => {
         videoList.value?.push({
           name: f.name,
-          size: formatBytes(f.size),
+          size: f.size,
           duration: formatVideoDuration(video.duration),
           url: URL.createObjectURL(f),
         });
@@ -32,14 +32,16 @@ const submit = async (files: File[]) => {
     });
   }
   const firstFile = videoList.value[0];
-  selectFile(firstFile.name, firstFile.url);
+  selectFile(firstFile.name, firstFile.url, firstFile.size);
 };
-const selectFile = (videoName: string, url: string) => {
+
+const selectFile = (videoName: string, url: string, size: number) => {
   const [name, date] = videoName.split("_");
 
   videoProps.value.videoCode = name + "_" + date;
   videoProps.value.videoName = videoName;
   videoProps.value.videoUrl = url;
+  videoProps.value.videoSize = size;
 };
 
 const columns = [
@@ -112,14 +114,20 @@ const columns = [
           <q-td key="name" :props="props">
             <div
               class="text-pre-wrap cursor-pointer"
-              @click="selectFile(String(props.row.name), String(props.row.url))"
+              @click="
+                selectFile(
+                  String(props.row.name),
+                  String(props.row.url),
+                  +props.row.size
+                )
+              "
             >
               {{ props.row.name }}
             </div>
           </q-td>
           <q-td key="time" :props="props">{{ props.row.duration }} </q-td>
           <q-td key="size" :props="props">
-            {{ props.row.size }}
+            {{ formatBytes(props.row.size) }}
           </q-td>
         </q-tr>
       </template>

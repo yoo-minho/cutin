@@ -3,28 +3,9 @@ import { Notify } from "quasar";
 import { keySet } from "./composables/constants";
 
 const video = ref();
-const file = ref();
-const videoOn = ref(false);
 const videoPlayOn = ref(true);
 const currSpeed = ref(1.5);
-const videoSrc = ref("");
-
 const videoProps = useVideoPropsStore();
-
-const upload = (file: any) => {
-  const [name, date] = file.name.split("_");
-  const code = name + "_" + date;
-  const url = URL.createObjectURL(file);
-
-  videoProps.value.videoName = file.name;
-  videoProps.value.videoUrl = url;
-  videoProps.value.videoCode = code;
-
-  videoSrc.value = url;
-  // const backVideo = useBackVideoState();
-  // backVideo.value.src = url;
-  videoOn.value = true;
-};
 
 watch(
   () => video.value,
@@ -54,6 +35,11 @@ watch(
 function moveSeekPoint(time: string) {
   video.value.currentTime = time2sec(time);
   stopPlayer();
+  getUrl3(
+    videoProps.value.videoUrl,
+    videoProps.value.videoSize,
+    video.value.currentTime
+  );
 }
 
 function handleKeyPress(event: any, pressedKeys: any) {

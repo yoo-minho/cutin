@@ -22,6 +22,8 @@
     "sass-loader": "^13.3.2"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.6",
+    "@ffmpeg/util": "^0.12.1",
     "@quasar/quasar-ui-qmediaplayer": "^2.0.0-beta.6",
     "nuxt-storage": "^1.2.2"
   }
