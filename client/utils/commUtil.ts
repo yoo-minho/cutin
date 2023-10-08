@@ -26,3 +26,7 @@ export const formatVideoDuration = (durationInSeconds: number) => {
   const formattedDuration = `${minutes}:${seconds.toString().padStart(2, "0")}`;
   return formattedDuration;
 };
+
+export const delay = (seconds: number) => {
+  return new Promise((res) => setTimeout(res, seconds * 1000));
+};
