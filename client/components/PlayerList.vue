@@ -72,9 +72,9 @@ const _removeTeam = () => {
           <q-item
             clickable
             v-close-popup
-            @click="updateCut('scorer', player.name)"
+            @click="updateCut('mainPlayer', player.name)"
           >
-            <q-item-section>득점 기록</q-item-section>
+            <q-item-section>메인플레이어로 기록</q-item-section>
             <q-item-section side>
               <q-icon name="sports_basketball" />
             </q-item-section>
@@ -82,9 +82,9 @@ const _removeTeam = () => {
           <q-item
             clickable
             v-close-popup
-            @click="updateCut('assister', player.name)"
+            @click="updateCut('subPlayer', player.name)"
           >
-            <q-item-section>어시스트 기록</q-item-section>
+            <q-item-section>서브플레이어로 기록</q-item-section>
             <q-item-section side>
               <q-icon name="directions_bus_filled" />
             </q-item-section>

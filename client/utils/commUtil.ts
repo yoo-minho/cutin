@@ -1,14 +1,21 @@
 export const formatTime = (time: number) => {
-  if (isNaN(+time)) return "0:00";
-  const minutes = Math.floor(time / 60);
+  if (isNaN(+time)) return "0:00:00";
+  const hours = Math.floor(time / 3600);
+  const minutes = Math.floor((time % 3600) / 60);
   const seconds = Math.ceil(time % 60);
-  if (seconds === 60) return `${minutes + 1}:00`;
-  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  return [
+    String(hours),
+    String(minutes).padStart(2, "0"),
+    String(seconds).padStart(2, "0"),
+  ].join(":");
 };
 
 export const time2sec = (time: string) => {
-  const times = time.split(":", 2);
-  return +times[0] * 60 + +times[1];
+  const times = time.split(":", 3);
+  if (times.length === 2) {
+    return +times[0] * 60 + +times[1];
+  }
+  return +times[0] * 3600 + +times[1] * 60 + +times[2];
 };
 
 export const formatBytes = (bytes: number, decimals = 2) => {

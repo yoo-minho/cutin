@@ -45,7 +45,7 @@ const boxState = calculateBackboardPosition();
             @click="() => emits('togglePlayPause')"
           />
         </div>
-        <div class="text-h5 text-white text-center" style="width: 196px">
+        <div class="text-h5 text-white text-center" style="width: 240px">
           {{ seekTime }}
         </div>
         <div class="col">

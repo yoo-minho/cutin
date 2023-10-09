@@ -35,14 +35,14 @@ watch(
 function moveSeekPoint(time: string) {
   video.value.currentTime = time2sec(time);
   stopPlayer();
-  getUrl3(
-    videoProps.value.videoUrl,
-    videoProps.value.videoSize,
-    video.value.currentTime
-  );
+  // getUrl3(
+  //   videoProps.value.videoUrl,
+  //   videoProps.value.videoSize,
+  //   video.value.currentTime
+  // );
 }
 
-function handleKeyPress(event: any, pressedKeys: any) {
+async function handleKeyPress(event: any, pressedKeys: any) {
   event.preventDefault();
 
   const teamStore = useTeamStore();
@@ -64,18 +64,27 @@ function handleKeyPress(event: any, pressedKeys: any) {
   const duration = video.value.duration;
 
   const currentCommand = isCommandA
-    ? "assister"
+    ? "subPlayer"
     : isCommandS
     ? "skill"
-    : "scorer";
+    : "mainPlayer";
 
-  if (["assister", "skill"].includes(currentCommand) && event.key === " ") {
+  if (["subPlayer", "skill"].includes(currentCommand) && event.key === " ") {
     updateCut(currentCommand, "");
     return;
   }
 
-  if ("skill" === currentCommand && keyIdx1 > -1) {
-    updateCut("skill", defaultSkill[keyIdx1].name);
+  if ("skill" === currentCommand) {
+    if (keyIdx1 > -1) {
+      const name = defaultSkill[keyIdx1].name;
+      if (name) updateCut("skill", name);
+      return;
+    }
+    if (keyIdx2 > -1) {
+      const name = defaultSkill[keyIdx2 + 10].name;
+      if (name) updateCut("skill", name);
+      return;
+    }
     return;
   }
 
@@ -102,7 +111,7 @@ function handleKeyPress(event: any, pressedKeys: any) {
   }
 
   if ("KeyC" === currCode) {
-    const cutTime = addCut();
+    const cutTime = await addCut();
     if (cutTime) moveSeekPoint(cutTime);
     return;
   }
@@ -167,8 +176,19 @@ function togglePlayPause() {
 const route = useRoute();
 </script>
 <template>
-  <q-layout v-if="route.path === '/'">
-    <div style="max-width: 1920px; min-width: 1280px; margin: 0 auto">
+  <q-layout
+    v-if="route.path === '/'"
+    style="display: flex; align-items: center; justify-content: center"
+  >
+    <div
+      style="
+        max-width: 1920px;
+        min-width: 1280px;
+        width: 100vw;
+        max-height: 1080px;
+        min-height: 720px;
+      "
+    >
       <q-header style="position: relative" class="bg-green" elevated>
         <q-toolbar>
           <q-toolbar-title>MyHighlight 영상편집기</q-toolbar-title>
@@ -177,12 +197,25 @@ const route = useRoute();
       </q-header>
       <q-page-container style="padding: 0">
         <div class="row">
-          <div class="col">
-            <VideoList />
+          <div class="column col">
+            <div style="height: 540px">
+              <VideoList />
+            </div>
+            <q-separator color="grey-7" size="1px" />
+            <div class="col">
+              <SkillList />
+            </div>
             <!-- <back-video @moveSeekPoint="moveSeekPoint" /> -->
           </div>
           <div style="width: 960px">
-            <div class="column" style="height: 100vh">
+            <div
+              class="column"
+              style="
+                height: 100vh;
+                max-height: calc(1080px - 50px);
+                min-height: calc(720px - 50px);
+              "
+            >
               <div style="height: 540px; position: relative" class="column">
                 <drag-box :video="video" />
                 <video

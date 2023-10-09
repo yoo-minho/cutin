@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Highlight {
+  clubCode   String  @db.VarChar(50)
+  playDate   String  @db.VarChar(8)
+  gameNo     Int     @db.SmallInt
+  quaterNo   Int     @db.SmallInt
+  seekTime   String  @db.VarChar(7)
+  type       String? @db.VarChar(2)
+  skill      String? @db.VarChar(100)
+  mainPlayer String? @db.VarChar(6)
+  subPlayer  String? @db.VarChar(6)
+  videoUrl   String? @db.VarChar(100)
+  videoName  String  @db.VarChar(100)
+
+  @@id([videoName, seekTime])
+}
+
+model GamePlayer {
+  clubCode String @id @db.VarChar(50)
+  playDate String @db.VarChar(8)
+  teamName String @db.VarChar(8)
+  player   String @db.VarChar(5)
+}

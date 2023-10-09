@@ -9,22 +9,17 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "@element-plus/nuxt": "^1.0.6",
     "@nuxt/devtools": "latest",
     "@quasar/extras": "^1.16.6",
-    "element-plus": "^2.3.14",
-    "install": "^0.13.0",
     "npm": "^10.1.0",
     "nuxt": "^3.7.3",
     "nuxt-quasar-ui": "^2.0.5",
+    "prisma": "^5.4.1",
     "quasar": "^2.12.7",
     "sass": "^1.67.0",
     "sass-loader": "^13.3.2"
   },
   "dependencies": {
-    "@ffmpeg/ffmpeg": "^0.12.6",
-    "@ffmpeg/util": "^0.12.1",
-    "@quasar/quasar-ui-qmediaplayer": "^2.0.0-beta.6",
-    "nuxt-storage": "^1.2.2"
+    "@prisma/client": "^5.4.1"
   }
 }

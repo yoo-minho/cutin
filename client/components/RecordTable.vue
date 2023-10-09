@@ -5,31 +5,16 @@ const videoProps = useVideoPropsStore();
 const currTime = toRef(videoProps.value, "currentTime");
 const currVideoName = toRef(videoProps.value, "videoName");
 
-const currGame = useCurrGame();
-const gameTab = ref("1g");
-const quaterTab = ref("1q");
-const tab = ref("");
+const gameTab = ref("1");
+const quaterTab = ref("1");
 
 let cutStore = ref<any[]>();
-const currentCutStore = ref();
-
-watch(
-  [gameTab, quaterTab],
-  () => {
-    tab.value = gameTab.value + quaterTab.value;
-    currGame.value = gameTab.value + quaterTab.value;
-    currentCutStore.value = cutStore.value?.filter(
-      (cut) => cut.game === currGame.value && !!cut.time
-    );
-  },
-  { immediate: true }
-);
 
 watch(currVideoName, () => {
   cutStore = useCutStore(currVideoName.value);
-  currentCutStore.value = cutStore.value?.filter(
-    (cut) => cut.game === currGame.value && !!cut.time
-  );
+  const temp = gameTab.value;
+  gameTab.value = "";
+  gameTab.value = temp;
 });
 
 const downGameData = () => {
@@ -48,32 +33,41 @@ const downGameData = () => {
   downloadLink.click();
 };
 
+const filterMethod = (rows: readonly any[]) => {
+  return rows?.filter(
+    (row) =>
+      row.gameNo === +gameTab.value &&
+      row.quaterNo === +quaterTab.value &&
+      !!row.seekTime
+  );
+};
+
 const columns = [
   {
-    label: "time",
-    name: "time",
-    field: "time",
+    label: "seekTime",
+    name: "seekTime",
+    field: "seekTime",
     align: "center",
     style: { width: "72px" },
-  },
-  {
-    label: "scorer",
-    name: "scorer",
-    field: "scorer",
-    align: "center",
-    style: { width: "30%" },
-  },
-  {
-    label: "assister",
-    name: "assister",
-    field: "assister",
-    align: "center",
-    style: { width: "30%" },
   },
   {
     label: "skill",
     name: "skill",
     field: "skill",
+    align: "center",
+    style: { width: "40%" },
+  },
+  {
+    label: "mainPlayer",
+    name: "mainPlayer",
+    field: "mainPlayer",
+    align: "center",
+    style: { width: "30%" },
+  },
+  {
+    label: "subPlayer",
+    name: "subPlayer",
+    field: "subPlayer",
     align: "center",
     style: { width: "30%" },
   },
@@ -98,10 +92,10 @@ const columns = [
       active-color="white"
       align="left"
     >
-      <q-tab name="1g" label="1게임" />
-      <q-tab name="2g" label="2게임" />
-      <q-tab name="3g" label="3게임" />
-      <q-tab name="4g" label="4게임" />
+      <q-tab name="1" label="1게임" />
+      <q-tab name="2" label="2게임" />
+      <q-tab name="3" label="3게임" />
+      <q-tab name="4" label="4게임" />
     </q-tabs>
     <q-tabs
       v-model="quaterTab"
@@ -110,10 +104,10 @@ const columns = [
       active-color="white"
       align="left"
     >
-      <q-tab name="1q" label="1쿼터" />
-      <q-tab name="2q" label="2쿼터" />
-      <q-tab name="3q" label="3쿼터" />
-      <q-tab name="4q" label="4쿼터" />
+      <q-tab name="1" label="1쿼터" />
+      <q-tab name="2" label="2쿼터" />
+      <q-tab name="3" label="3쿼터" />
+      <q-tab name="4" label="4쿼터" />
     </q-tabs>
     <q-separator color="grey-7" size="1px" />
     <q-table
@@ -121,7 +115,10 @@ const columns = [
       flat
       dense
       :columns="columns"
-      :rows="currentCutStore"
+      :rows="cutStore"
+      :filter="[gameTab, quaterTab]"
+      :filter-method="filterMethod"
+      :rows-per-page-options="[0]"
       :hide-pagination="true"
     >
       <template #no-data>
@@ -134,21 +131,25 @@ const columns = [
       <template #body="props">
         <q-tr
           :props="props"
-          :class="props.row.time === currTime ? 'text-green' : ''"
+          :class="props.row.seekTime === currTime ? 'text-green' : ''"
         >
-          <q-td key="time" :props="props">
+          <q-td key="seekTime" :props="props">
             <div
               class="text-pre-wrap cursor-pointer"
-              @click="emits('moveSeekPoint', String(props.row.time))"
+              @click="emits('moveSeekPoint', String(props.row.seekTime))"
             >
-              {{ props.row.time }}
+              {{ props.row.seekTime }}
             </div>
           </q-td>
-          <q-td key="scorer" :props="props">{{ props.row.scorer }} </q-td>
-          <q-td key="assister" :props="props">
-            {{ props.row.assister }}
+          <q-td key="skill" :props="props">{{
+            props.row.skill || "득점&어시"
+          }}</q-td>
+          <q-td key="mainPlayer" :props="props">
+            {{ props.row.mainPlayer }}
           </q-td>
-          <q-td key="skill" :props="props">{{ props.row.skill }}</q-td>
+          <q-td key="subPlayer" :props="props">
+            {{ props.row.subPlayer }}
+          </q-td>
         </q-tr>
       </template>
     </q-table>

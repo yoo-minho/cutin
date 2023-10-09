@@ -35,13 +35,19 @@ const submit = async (files: File[]) => {
   selectFile(firstFile.name, firstFile.url, firstFile.size);
 };
 
-const selectFile = (videoName: string, url: string, size: number) => {
+const selectFile = async (videoName: string, url: string, size: number) => {
   const [name, date] = videoName.split("_");
 
   videoProps.value.videoCode = name + "_" + date;
   videoProps.value.videoName = videoName;
   videoProps.value.videoUrl = url;
   videoProps.value.videoSize = size;
+
+  // const cutStore = useCutStore(videoName);
+  // await useFetch("/api/highlights/sync", {
+  //   method: "post",
+  //   body: { videoName, seekArr: cutStore.value },
+  // });
 };
 
 const columns = [
@@ -96,10 +102,11 @@ const columns = [
       dense
       :columns="columns"
       :rows="videoList"
+      :rows-per-page-options="[0]"
       :hide-pagination="true"
     >
       <template #no-data>
-        <div class="full-width row text-pink q-my-sm">
+        <div class="full-width column text-pink q-my-sm">
           <span>'{팀이름(영어)}_{날짜8자리}_순서' 이름으로</span>
           <span> 영상이름을 변경후 업로드해주세요! </span>
           <span> ex) gba_20231006_1, gba_20231006_2</span>
