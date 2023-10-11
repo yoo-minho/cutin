@@ -7,6 +7,19 @@ const videoPlayOn = ref(true);
 const currSpeed = ref(1.5);
 const videoProps = useVideoPropsStore();
 
+onMounted(() => {
+  const pressedKeys = new Set<string>();
+  document.addEventListener("keydown", (event) => {
+    if (document.activeElement?.tagName === "INPUT") return true;
+    pressedKeys.add(event.code);
+    handleKeyPress(event, pressedKeys);
+  });
+  document.addEventListener("keyup", (event) => {
+    if (document.activeElement?.tagName === "INPUT") return true;
+    pressedKeys.delete(event.code);
+  });
+});
+
 watch(
   () => video.value,
   () => {
@@ -14,20 +27,9 @@ watch(
       video.value.playbackRate = currSpeed.value;
       playPlayer();
       setTimeout(() => stopPlayer(), 1);
-
-      const pressedKeys = new Set<string>();
-      document.addEventListener("keydown", (event) => {
-        if (document.activeElement?.tagName === "INPUT") return true;
-        pressedKeys.add(event.code);
-        handleKeyPress(event, pressedKeys);
-      });
-      document.addEventListener("keyup", (event) => {
-        if (document.activeElement?.tagName === "INPUT") return true;
-        pressedKeys.delete(event.code);
-      });
-      video.value.addEventListener("timeupdate", () => {
-        videoProps.value.currentTime = formatTime(video.value?.currentTime);
-      });
+    });
+    video.value.addEventListener("timeupdate", () => {
+      videoProps.value.currentTime = formatTime(video.value?.currentTime);
     });
   }
 );

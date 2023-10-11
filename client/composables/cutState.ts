@@ -66,7 +66,7 @@ export const addCut = async () => {
 };
 
 export const updateCut = async (
-  type: "mainPlayer" | "subPlayer" | "skill",
+  type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl",
   value: string
 ) => {
   const videoPropsStore = useVideoPropsStore();
@@ -103,7 +103,10 @@ export const updateCut = async (
   cutStore.value = cutStore.value.map((c) =>
     c.seekTime === cutTime ? updateData : c
   );
-  saveCutStore();
+
+  console.log("xxxxxxxxxxxxxx", value);
+
+  if ("loading" === value) return;
 
   await useFetch("/api/highlights/sync", {
     method: "post",

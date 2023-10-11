@@ -17,7 +17,7 @@ export const defaultSkill = [
   { key: "W" },
   { key: "E" },
   { key: "R", name: "리바운드", main: { rebound: 1 }, sub: { miss: 1 } },
-  { key: "T", name: "턴오버&스틸", main: { turnover: 1 }, sub: { steal: 1 } },
+  { key: "T", name: "스틸", main: { turnover: 1 }, sub: { steal: 1 } },
   { key: "Y" },
   { key: "U" },
   { key: "I" },

@@ -7,8 +7,13 @@ const currVideoName = toRef(videoProps.value, "videoName");
 
 const gameTab = ref("1");
 const quaterTab = ref("1");
+const currGame = useCurrGame();
 
 let cutStore = ref<any[]>();
+
+watch([gameTab, quaterTab], () => {
+  currGame.value = gameTab.value + "g" + quaterTab.value + "q";
+});
 
 watch(currVideoName, () => {
   cutStore = useCutStore(currVideoName.value);
@@ -42,6 +47,22 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
+const clickDownOrViewer = async (isViewer: boolean, seekTime: string) => {
+  emits("moveSeekPoint", seekTime);
+  await delay(0.3);
+  updateCut("videoUrl", "loading");
+  if (isViewer) {
+    //padd
+  } else {
+    await getUrl3(
+      videoProps.value.videoUrl,
+      videoProps.value.videoSize,
+      time2sec(seekTime)
+    );
+  }
+  updateCut("videoUrl", "fileUrl");
+};
+
 const columns = [
   {
     label: "seekTime",
@@ -70,6 +91,13 @@ const columns = [
     field: "subPlayer",
     align: "center",
     style: { width: "30%" },
+  },
+  {
+    label: "컷",
+    name: "videoUrl",
+    field: "videoUrl",
+    align: "center",
+    style: { width: "16px" },
   },
 ] as any;
 </script>
@@ -149,6 +177,19 @@ const columns = [
           </q-td>
           <q-td key="subPlayer" :props="props">
             {{ props.row.subPlayer }}
+          </q-td>
+          <q-td key="videoUrl" :props="props">
+            <q-btn
+              :icon="!!props.row.videoUrl ? 'smart_display' : 'download'"
+              :loading="props.row.videoUrl === 'loading'"
+              size="xs"
+              @click="
+                clickDownOrViewer(
+                  !!props.row.videoUrl,
+                  String(props.row.seekTime)
+                )
+              "
+            />
           </q-td>
         </q-tr>
       </template>
