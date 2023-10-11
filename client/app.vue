@@ -37,11 +37,6 @@ watch(
 function moveSeekPoint(time: string) {
   video.value.currentTime = time2sec(time);
   stopPlayer();
-  // getUrl3(
-  //   videoProps.value.videoUrl,
-  //   videoProps.value.videoSize,
-  //   video.value.currentTime
-  // );
 }
 
 async function handleKeyPress(event: any, pressedKeys: any) {
