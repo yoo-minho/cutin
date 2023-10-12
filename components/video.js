@@ -87,6 +87,8 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
 
       const introPath = `${playerPath}/${player}_intro.mp4`;
 
+      console.log({ player, playerRecord });
+
       await createIntroVideo({
         outputPath: introPath,
         name: player,
@@ -101,7 +103,9 @@ export const cutVideo = async (option, { step = 1 } = {}) => {
 
       await mergeVideo({
         concatFileArr: [introPath, playPath],
-        outputPath: `${playerPath}/${player}.mp4`,
+        outputPath: `${playerPath}/${player}_${playerRecord
+          .join(" | ")
+          .replace(" 게임 | ", "G-")}.mp4`,
       });
     });
   }
@@ -118,13 +122,19 @@ async function createVideo(option) {
   const { title, date, place } = gameInfo;
   const banners = drawBanners({ scene, title, date, place, g, q, s, a, k });
 
+  let duration;
+  if (["리바운드", "오펜스리바", "스틸"].includes(k)) {
+    duration = 6;
+  } else {
+    duration = 9;
+  }
   await ffmpegPromise({
     inputPath,
     outputPath,
     func: cutFunc({
-      time: calculateTimeBefore(`00:${t}`, 9 - 1),
-      duration: 9,
-      speed: 1.8,
+      time: calculateTimeBefore(t, duration - 2),
+      duration: duration,
+      speed: 1.5,
       func: (ff) => ff.videoFilter(banners),
     }),
   });
@@ -209,16 +219,26 @@ function getRecord(playerInfo, player) {
   const record = [];
   for (let game = 1; game <= 4; game++) {
     let score = 0,
+      three = 0,
       assist = 0,
-      rebound = 0;
+      rebound = 0,
+      still = 0;
     playerInfo.forEach(({ g, s, a, k }) => {
       if (+g === game) {
         if (s === player) {
-          score = score + (k === "3점슛" ? 3 : 2);
-          rebound = rebound + (k === "풋백" ? 1 : 0);
+          score =
+            score +
+            (["스틸", "오펜스리바", "리바운드"].includes(k)
+              ? 0
+              : ["3점슛", "앤드원"].includes(k)
+              ? 3
+              : 2);
+          three = three + (["3점슛"].includes(k) ? 1 : 0);
+          rebound =
+            rebound + (["풋백", "오펜스리바", "리바운드"].includes(k) ? 1 : 0);
+          still = still + (["스틸"].includes(k) ? 1 : 0);
         } else if (a === player) {
           assist++;
-          rebound = rebound + (k === "오펜스리바" ? 1 : 0);
         }
       }
     });
@@ -228,7 +248,8 @@ function getRecord(playerInfo, player) {
           `${game} 게임 | `,
           score > 0 ? `${score}득점` : "",
           assist > 0 ? `${assist}어시` : "",
-          rebound > 0 ? `${rebound}오펜스리바` : "",
+          rebound > 0 ? `${rebound}리바` : "",
+          still > 0 ? `${still}스틸` : "",
         ]
           .filter((v) => !!v)
           .join(" ")

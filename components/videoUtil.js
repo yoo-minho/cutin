@@ -10,7 +10,10 @@ export const ffmpegPromise = ({ inputPath, outputPath, func }) => {
     func(ff)
       .output(outputPath)
       .on("end", () => resolve())
-      .on("error", () => reject())
+      .on("error", (x, y, z) => {
+        // console.log("uuu", x, y, z);
+        reject();
+      })
       .run();
   });
 };
