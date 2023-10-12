@@ -50,17 +50,26 @@ const filterMethod = (rows: readonly any[]) => {
 const clickDownOrViewer = async (isViewer: boolean, seekTime: string) => {
   emits("moveSeekPoint", seekTime);
   await delay(0.3);
-  updateCut("videoUrl", "loading");
   if (isViewer) {
-    //padd
+    //pass
   } else {
-    await getUrl3(
+    updateCut("videoUrl", "loading");
+    const [clubName, date, ...rest] = videoProps.value.videoName.split("_");
+    const path = [
+      clubName,
+      date,
+      currGame.value,
+      seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
+    ].join("/");
+
+    const { fileUrl } = await getUrl3(
       videoProps.value.videoUrl,
       videoProps.value.videoSize,
-      time2sec(seekTime)
+      seekTime,
+      path
     );
+    updateCut("videoUrl", fileUrl);
   }
-  updateCut("videoUrl", "fileUrl");
 };
 
 const columns = [

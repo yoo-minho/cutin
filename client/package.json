@@ -20,6 +20,7 @@
     "sass-loader": "^13.3.2"
   },
   "dependencies": {
-    "@prisma/client": "^5.4.1"
+    "@prisma/client": "^5.4.1",
+    "ffmpeg": "^0.0.4"
   }
 }

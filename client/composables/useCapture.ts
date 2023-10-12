@@ -1,4 +1,10 @@
-export function getUrl3(url: any, size: number, time: number) {
+export function getUrl3(
+  url: string,
+  size: number,
+  seekTime: string,
+  path: string
+) {
+  const time = time2sec(seekTime);
   //   const segmentSet = [{ sec: 9, speed: 1.5 }];
   const segmentSet = [
     { sec: 3.5, speed: 2 }, //1.5
@@ -7,14 +13,15 @@ export function getUrl3(url: any, size: number, time: number) {
     { sec: 1, speed: 2 }, //0.5
   ];
   const totalSec = segmentSet.reduce((acc, seg) => acc + seg.sec, 0);
-  const fps = 24;
-  const [width, height, bitrateRatio] = [960, 540, 6];
-  //   const [width, height, bitrateRatio] = [1280, 720, 4];
+  const fps = 30;
+  // const [width, height, bitrateRatio] = [960, 540, 6];
+  const [width, height, bitrateRatio] = [1280, 720, 4];
+  // const [width, height, bitrateRatio] = [1920, 1080, 1];
 
   let currenrZoom = 1;
   let zoomTime = 0;
 
-  return new Promise<void>(async (res) => {
+  return new Promise<any>(async (res) => {
     const canvasElement = document.createElement("canvas");
     canvasElement.width = width;
     canvasElement.height = height;
@@ -53,6 +60,7 @@ export function getUrl3(url: any, size: number, time: number) {
     const originBitrate = (size / videoElement.duration) * 8;
 
     const mediaRecorderOptions = {
+      mimeType: "video/webm",
       videoBitsPerSecond: originBitrate / bitrateRatio,
     };
     const mediaRecorder = new MediaRecorder(
@@ -64,13 +72,23 @@ export function getUrl3(url: any, size: number, time: number) {
       if (event.data.size > 0) chunks.push(event.data);
     };
     mediaRecorder.onstop = async () => {
-      const blob = new Blob(chunks, { type: "video/mp4" });
-      const blobUrl = URL.createObjectURL(blob);
-      const downloadLink = document.createElement("a");
-      downloadLink.href = blobUrl;
-      downloadLink.download = "temp.mp4";
-      downloadLink.click();
-      res();
+      const blob = new Blob(chunks, { type: "video/webm" });
+
+      const formData = new FormData();
+      formData.append("file", new File([blob], "temp.webm"));
+      formData.append("path", path);
+
+      const { data } = await useFetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      // const blobUrl = URL.createObjectURL(blob);
+      // const downloadLink = document.createElement("a");
+      // downloadLink.href = blobUrl;
+      // downloadLink.download = "temp.webm";
+      // downloadLink.click();
+      res(data.value);
     };
 
     videoElement.currentTime = time - totalSec + 1.5;
