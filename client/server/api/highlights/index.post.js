@@ -12,7 +12,6 @@ export default defineEventHandler(async (event) => {
       gameNo: +gameNo,
       quaterNo: +quaterNo,
       seekTime: seekTime,
-      type: "sa", //sa
       skill: "",
       mainPlayer: "",
       subPlayer: "",

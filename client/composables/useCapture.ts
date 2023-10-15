@@ -1,3 +1,12 @@
+/*
+4K 3840x2160
+1080p 1920x1080
+720p 1280x720 
+480p 854x480
+360p 640x360
+240p 426x240
+*/
+
 export function getUrl3(
   url: string,
   size: number,
@@ -88,6 +97,7 @@ export function getUrl3(
       // downloadLink.href = blobUrl;
       // downloadLink.download = "temp.webm";
       // downloadLink.click();
+
       res(data.value);
     };
 

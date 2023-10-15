@@ -20,12 +20,11 @@ export default defineEventHandler(async (event) => {
       gameNo: +gameNo,
       quaterNo: +quaterNo,
       seekTime: seek.time || seek.seekTime,
-      type: "sa", //sa
       skill: seek.skill,
       mainPlayer: seek.scorer || seek.mainPlayer,
       subPlayer: seek.assister || seek.subPlayer,
       videoName,
-      videoUrl: "",
+      videoUrl: seek.videoUrl || "",
     };
   });
   if (seekArr.length === 1) {

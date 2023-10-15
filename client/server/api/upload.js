@@ -24,7 +24,6 @@ export default defineEventHandler(async (event) => {
   unlinkSync(inputPath);
 
   return {
-    message: "success",
-    fileUrl: outputPath,
+    fileUrl: `/v/${path.replace(/\//g, "-")}`,
   };
 });

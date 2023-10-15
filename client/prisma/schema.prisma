@@ -13,7 +13,6 @@ model Highlight {
   gameNo     Int     @db.SmallInt
   quaterNo   Int     @db.SmallInt
   seekTime   String  @db.VarChar(7)
-  type       String? @db.VarChar(2)
   skill      String? @db.VarChar(100)
   mainPlayer String? @db.VarChar(6)
   subPlayer  String? @db.VarChar(6)

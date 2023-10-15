@@ -6,7 +6,4 @@ export default defineNuxtConfig({
     plugins: ["Dialog", "Notify"],
   },
   watch: ["server/api/upload.js"],
-  build: {
-    publicPath: "/upload/", // 원하는 경로로 설정
-  },
 });

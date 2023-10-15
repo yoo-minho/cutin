@@ -5,6 +5,9 @@ const videoProps = useVideoPropsStore();
 const currTime = toRef(videoProps.value, "currentTime");
 const currVideoName = toRef(videoProps.value, "videoName");
 
+const videoViewerOn = ref(false);
+const videoViewerSrc = ref("");
+
 const gameTab = ref("1");
 const quaterTab = ref("1");
 const currGame = useCurrGame();
@@ -34,7 +37,6 @@ const downGameData = () => {
   const downloadLink = document.createElement("a");
   downloadLink.href = blobUrl;
   downloadLink.download = currVideoName.value.replace(".mp4", ".json");
-
   downloadLink.click();
 };
 
@@ -47,29 +49,35 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const clickDownOrViewer = async (isViewer: boolean, seekTime: string) => {
+const makeVideo = async (seekTime: string) => {
   emits("moveSeekPoint", seekTime);
   await delay(0.3);
-  if (isViewer) {
-    //pass
-  } else {
-    updateCut("videoUrl", "loading");
-    const [clubName, date, ...rest] = videoProps.value.videoName.split("_");
-    const path = [
-      clubName,
-      date,
-      currGame.value,
-      seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
-    ].join("/");
+  updateCut("videoUrl", "loading");
+  const [clubName, date, ...rest] = videoProps.value.videoName.split("_");
+  const path = [
+    clubName,
+    date,
+    currGame.value,
+    seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
+  ].join("/");
+  const { fileUrl } = await getUrl3(
+    videoProps.value.videoUrl,
+    videoProps.value.videoSize,
+    seekTime,
+    path
+  );
+  updateCut("videoUrl", fileUrl);
+};
 
-    const { fileUrl } = await getUrl3(
-      videoProps.value.videoUrl,
-      videoProps.value.videoSize,
-      seekTime,
-      path
-    );
-    updateCut("videoUrl", fileUrl);
+const openViewer = async (videoUrl: string, seekTime: string) => {
+  if (!videoUrl) {
+    await makeVideo(seekTime);
+  } else {
+    emits("moveSeekPoint", seekTime);
+    await delay(0.3);
   }
+  videoViewerOn.value = true;
+  videoViewerSrc.value = videoUrl;
 };
 
 const columns = [
@@ -112,6 +120,9 @@ const columns = [
 </script>
 <template>
   <div class="bg-dark" style="height: 100%; border-left: 0.5px solid grey">
+    <q-dialog v-model="videoViewerOn">
+      <mini-video :src="videoViewerSrc" />
+    </q-dialog>
     <q-btn
       color="green"
       text-color="white"
@@ -164,7 +175,6 @@ const columns = [
           <span> 'C' 단축키를 눌러 득점 순간을 기록하세요! </span>
         </div>
       </template>
-
       <template #body="props">
         <q-tr
           :props="props"
@@ -189,14 +199,19 @@ const columns = [
           </q-td>
           <q-td key="videoUrl" :props="props">
             <q-btn
-              :icon="!!props.row.videoUrl ? 'smart_display' : 'download'"
+              :icon="'movie_edit'"
               :loading="props.row.videoUrl === 'loading'"
               size="xs"
+              :style="{ padding: '4px 8px' }"
+              @click="makeVideo(String(props.row.seekTime))"
+            />
+            <q-btn
+              :icon="'smart_display'"
+              :disable="!props.row.videoUrl"
+              size="xs"
+              :style="{ padding: '4px 8px' }"
               @click="
-                clickDownOrViewer(
-                  !!props.row.videoUrl,
-                  String(props.row.seekTime)
-                )
+                openViewer(props.row.videoUrl, String(props.row.seekTime))
               "
             />
           </q-td>

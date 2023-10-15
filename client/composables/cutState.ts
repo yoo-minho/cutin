@@ -104,7 +104,7 @@ export const updateCut = async (
     c.seekTime === cutTime ? updateData : c
   );
 
-  console.log("xxxxxxxxxxxxxx", value);
+  console.log("xxxxxxxxxxxxxx", value, updateData);
 
   if ("loading" === value) return;
 
@@ -113,13 +113,6 @@ export const updateCut = async (
     body: { videoName, seekArr: [updateData] },
   });
 };
-
-function saveCutStore() {
-  const videoPropsStore = useVideoPropsStore();
-  const currVideoName = videoPropsStore.value.videoName;
-  const cutStore = useCutStore(currVideoName);
-  localStorage.setItem(`cut_${currVideoName}`, JSON.stringify(cutStore.value));
-}
 
 async function loadCutStore() {
   const videoPropsStore = useVideoPropsStore();
