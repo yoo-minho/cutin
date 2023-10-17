@@ -1,5 +1,5 @@
 type VideoPropsType = {
-  videoCode: string;
+  videoCode: string; //gba_20231007
   videoName: string;
   videoUrl: string;
   videoSize: number;

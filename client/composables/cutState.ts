@@ -104,8 +104,6 @@ export const updateCut = async (
     c.seekTime === cutTime ? updateData : c
   );
 
-  console.log("xxxxxxxxxxxxxx", value, updateData);
-
   if ("loading" === value) return;
 
   await useFetch("/api/highlights/sync", {
@@ -121,14 +119,4 @@ async function loadCutStore() {
     params: { videoName },
   });
   return data.value || [];
-}
-
-function loadCutStore2() {
-  const videoPropsStore = useVideoPropsStore();
-  const currVideoName = videoPropsStore.value.videoName;
-  try {
-    return JSON.parse(localStorage.getItem(`cut_${currVideoName}`) || "[]");
-  } catch (e) {
-    return [];
-  }
 }

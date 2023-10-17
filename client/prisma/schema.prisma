@@ -23,8 +23,10 @@ model Highlight {
 }
 
 model GamePlayer {
-  clubCode String @id @db.VarChar(50)
+  clubCode String @db.VarChar(50)
   playDate String @db.VarChar(8)
-  teamName String @db.VarChar(8)
-  player   String @db.VarChar(5)
+  teamName String @db.VarChar(20)
+  player   String @db.VarChar(6)
+
+  @@id([clubCode, playDate, player])
 }

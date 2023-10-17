@@ -3,6 +3,13 @@ type TeamType = {
   players: PlayerType[];
 };
 
+type GamePlayerType = {
+  clubCode: string;
+  playDate: string;
+  teamName: string;
+  player: string;
+};
+
 export type PlayerType = {
   name: string;
   position?: string;
@@ -13,16 +20,21 @@ export type PlayerType = {
 //code = 동호회이름과 날짜 조합
 export const useTeamStore = () => {
   const videoProps = useVideoPropsStore();
-  const code = videoProps.value.videoCode;
-  return useState<TeamType[]>(`${code}TeamStore`, () => loadTeamStore(code));
+  const videoCode = videoProps.value.videoCode;
+  const x = useState<TeamType[]>(`${videoCode}TeamStore`, () => []);
+  if (x.value.length === 0) {
+    loadTeamStore(videoCode).then((data) => {
+      x.value = createTeams(data);
+    });
+  }
+  return x;
 };
 
-export function loadTeamStore(code: string) {
-  try {
-    return JSON.parse(localStorage.getItem(`team_${code}`) || "[]");
-  } catch (e) {
-    return [];
-  }
+async function loadTeamStore(videoCode: string) {
+  const { data } = await useFetch<GamePlayerType[]>("/api/gamePlayer", {
+    params: { videoCode },
+  });
+  return data.value || [];
 }
 
 export function addTeam(teamName: string) {
@@ -33,41 +45,57 @@ export function addTeam(teamName: string) {
     return { error: true, message: "중복된 팀 이름은 불가능합니다." };
   }
   teamStore.value?.push({ name: teamName, players: [] });
-  saveTeamStore(teamStore.value);
   return { error: false };
 }
 
 export function removeTeam(teamName: string) {
   const teamStore = useTeamStore();
   teamStore.value = teamStore.value.filter((v) => v.name !== teamName);
-  saveTeamStore(teamStore.value);
 }
 
 export function addPlayerOnTeam(teamName: string, playerName: string) {
+  const videoProps = useVideoPropsStore();
+  const videoCode = videoProps.value.videoCode;
   const teamStore = useTeamStore();
-  teamStore.value = teamStore.value.map((v, i) => {
+  teamStore.value = teamStore.value.map((v) => {
     if (v.name == teamName) {
       v.players?.push({ name: playerName });
     }
     return v;
   });
-  saveTeamStore(teamStore.value);
+  useFetch("/api/gamePlayer", {
+    method: "post",
+    body: {
+      videoCode,
+      playerArr: [{ teamName: teamName, player: playerName }],
+    },
+  });
 }
 
 export function removePlayerOnTeam(teamName: string, playerName: string) {
+  const videoProps = useVideoPropsStore();
+  const videoCode = videoProps.value.videoCode;
   const teamStore = useTeamStore();
-  teamStore.value = teamStore.value.map((v, i) => {
+  teamStore.value = teamStore.value.map((v) => {
     if (v.name == teamName) {
       v.players = v.players?.filter((player) => player.name !== playerName);
     }
     return v;
   });
-
-  saveTeamStore(teamStore.value);
+  useFetch("/api/gamePlayer", {
+    method: "delete",
+    body: { videoCode, player: playerName },
+  });
 }
 
-function saveTeamStore(teamStoreVal: TeamType[]) {
-  const videoProps = useVideoPropsStore();
-  const code = videoProps.value.videoCode;
-  localStorage.setItem(`team_${code}`, JSON.stringify(teamStoreVal));
+function createTeams(gamePlayers: GamePlayerType[]): TeamType[] {
+  const teamsMap = new Map<string, TeamType>();
+  for (const playerInfo of gamePlayers) {
+    const { teamName, player } = playerInfo;
+    if (!teamsMap.has(teamName)) {
+      teamsMap.set(teamName, { name: teamName, players: [] });
+    }
+    teamsMap.get(teamName)?.players.push({ name: player });
+  }
+  return Array.from(teamsMap.values());
 }
