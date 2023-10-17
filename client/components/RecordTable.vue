@@ -60,13 +60,23 @@ const makeVideo = async (seekTime: string) => {
     currGame.value,
     seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
   ].join("/");
-  const { fileUrl } = await getUrl3(
+
+  const { file } = await getUrl3(
     videoProps.value.videoUrl,
     videoProps.value.videoSize,
-    seekTime,
-    path
+    seekTime
   );
-  updateCut("videoUrl", fileUrl);
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("path", path);
+  const { data } = await useFetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+  if (data.value) {
+    const { fileUrl } = data.value;
+    updateCut("videoUrl", fileUrl);
+  }
 };
 
 const openViewer = async (videoUrl: string, seekTime: string) => {
