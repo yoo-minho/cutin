@@ -28,9 +28,6 @@ watch(
       playPlayer();
       setTimeout(() => stopPlayer(), 1);
     });
-    video.value.addEventListener("timeupdate", () => {
-      videoProps.value.currentTime = formatTime(video.value?.currentTime);
-    });
   }
 );
 
@@ -216,6 +213,7 @@ const route = useRoute();
               <div style="height: 540px; position: relative" class="column">
                 <drag-box :video="video" />
                 <video
+                  id="baseVideo"
                   v-show="videoProps.videoUrl"
                   ref="video"
                   width="960"
@@ -223,6 +221,7 @@ const route = useRoute();
                   :src="videoProps.videoUrl"
                   style="position: fixed"
                 />
+                <canvas id="baseCanvas" style="width: 960px; height: 540px" />
                 <ControlBar
                   v-if="videoProps.videoUrl"
                   :video="video"

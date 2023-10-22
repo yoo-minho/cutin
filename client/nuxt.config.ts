@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ["nuxt-quasar-ui"],
   quasar: {
-    plugins: ["Dialog", "Notify"],
+    plugins: ["Dialog", "Notify", "Loading"],
   },
   watch: ["server/api/upload.js"],
 });

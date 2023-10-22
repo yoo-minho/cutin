@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CutType } from "@/types";
+import { Loading } from "quasar";
 
 const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
 
@@ -51,12 +52,34 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const makeVideo = async (cut: CutType) => {
+const makeAllVideo = async () => {
+  const totalSize = cutStore.value?.length || 1;
+
+  for (const [idx, cut] of cutStore.value?.entries() || []) {
+    const percent = ((idx / totalSize) * 100).toFixed(2);
+    const message = `업로드중입니다 ${percent}%(${idx}/${totalSize})`;
+    Loading.show({
+      message,
+      boxClass: "bg-grey-2 text-grey-9",
+      spinnerColor: "primary",
+    });
+    await makeVideo(cut, false);
+    Loading.hide();
+  }
+};
+
+const makeVideo = async (cut: CutType, loading = true) => {
+  loading &&
+    Loading.show({
+      message: "업로드중입니다",
+      boxClass: "bg-grey-2 text-grey-9",
+      spinnerColor: "primary",
+    });
+
   const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
-
   await delay(0.3);
-  updateCut("videoUrl", "loading");
+
   const [clubName, date, ...rest] = videoProps.value.videoName.split("_");
   const path = [
     clubName,
@@ -65,23 +88,22 @@ const makeVideo = async (cut: CutType) => {
     seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
   ].join("/");
 
-  const { file } = await getUrl3(
-    videoProps.value.videoUrl,
-    videoProps.value.videoSize,
-    cut
-  );
-
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("path", path);
-  const { data } = await useFetch("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
-  if (data.value) {
-    const { fileUrl } = data.value;
-    updateCut("videoUrl", fileUrl);
+  let { file } = await createCaptureVideo(videoProps.value.videoSize, cut);
+  if (file === null) {
+    //error
+  } else {
+    const body = new FormData();
+    body.append("file", file);
+    body.append("path", path);
+    const { data } = await useFetch("/api/upload", { method: "POST", body });
+    file = null;
+    if (data.value) {
+      const { fileUrl } = data.value;
+      updateCut("videoUrl", fileUrl);
+    }
   }
+
+  loading && Loading.hide();
 };
 
 const openViewer = async (videoUrl: string, cut: CutType) => {
@@ -139,15 +161,26 @@ const columns = [
     <q-dialog v-model="videoViewerOn">
       <mini-video :src="videoViewerSrc" />
     </q-dialog>
-    <q-btn
-      color="green"
-      text-color="white"
-      class="q-ma-md"
-      icon-right="file_download"
-      @click="downGameData"
-    >
-      게임 데이터 JSON 내려받기
-    </q-btn>
+    <div class="row">
+      <q-btn
+        color="pink"
+        text-color="white"
+        class="q-ma-md"
+        icon-right="file_download"
+        @click="makeAllVideo"
+      >
+        일괄 업로드
+      </q-btn>
+      <q-btn
+        color="green"
+        text-color="white"
+        class="q-ma-md"
+        icon-right="file_download"
+        @click="downGameData"
+      >
+        게임 데이터 JSON 내려받기
+      </q-btn>
+    </div>
     <q-separator color="grey-7" size="0.5px" />
     <q-tabs
       v-model="gameTab"
@@ -216,7 +249,6 @@ const columns = [
           <q-td key="videoUrl" :props="props">
             <q-btn
               :icon="'movie_edit'"
-              :loading="props.row.videoUrl === 'loading'"
               size="xs"
               :style="{ padding: '4px 8px' }"
               @click="makeVideo(props.row)"

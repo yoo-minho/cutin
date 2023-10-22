@@ -3,7 +3,7 @@ const props = defineProps<{ src: string }>();
 </script>
 <template>
   <q-card style="max-width: fit-content">
-    <video :src="src" width="640" height="360" autoplay loop />
+    <video :src="src" width="960" height="540" autoplay loop />
     <q-card-section>
       <q-btn
         fab
