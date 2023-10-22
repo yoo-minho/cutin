@@ -1,18 +1,9 @@
 import { Notify, Dialog } from "quasar";
-
-type CutType = {
-  gameNo: number;
-  quaterNo: number;
-  seekTime: string;
-  mainPlayer?: string;
-  subPlayer?: string;
-  skill?: string;
-};
+import { CutType } from "@/types";
 
 export const useCutStore = (name: string = "") => {
   const videoPropsStore = useVideoPropsStore();
   name = name || videoPropsStore.value.videoName;
-  // const x = useState<CutType[]>(`${name}CutStore`, () => loadCutStore2());
   const x = useState<CutType[]>(`${name}CutStore`, () => []);
   if (x.value.length === 0) {
     loadCutStore().then((data) => (x.value = data));

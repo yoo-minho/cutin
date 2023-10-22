@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CutType } from "@/types";
+
 const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
 
 const videoProps = useVideoPropsStore();
@@ -49,8 +51,10 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const makeVideo = async (seekTime: string) => {
+const makeVideo = async (cut: CutType) => {
+  const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
+
   await delay(0.3);
   updateCut("videoUrl", "loading");
   const [clubName, date, ...rest] = videoProps.value.videoName.split("_");
@@ -64,8 +68,9 @@ const makeVideo = async (seekTime: string) => {
   const { file } = await getUrl3(
     videoProps.value.videoUrl,
     videoProps.value.videoSize,
-    seekTime
+    cut
   );
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("path", path);
@@ -79,9 +84,10 @@ const makeVideo = async (seekTime: string) => {
   }
 };
 
-const openViewer = async (videoUrl: string, seekTime: string) => {
+const openViewer = async (videoUrl: string, cut: CutType) => {
+  const { seekTime } = cut;
   if (!videoUrl) {
-    await makeVideo(seekTime);
+    await makeVideo(cut);
   } else {
     emits("moveSeekPoint", seekTime);
     await delay(0.3);
@@ -213,16 +219,14 @@ const columns = [
               :loading="props.row.videoUrl === 'loading'"
               size="xs"
               :style="{ padding: '4px 8px' }"
-              @click="makeVideo(String(props.row.seekTime))"
+              @click="makeVideo(props.row)"
             />
             <q-btn
               :icon="'smart_display'"
               :disable="!props.row.videoUrl"
               size="xs"
               :style="{ padding: '4px 8px' }"
-              @click="
-                openViewer(props.row.videoUrl, String(props.row.seekTime))
-              "
+              @click="openViewer(props.row.videoUrl, props.row)"
             />
           </q-td>
         </q-tr>
