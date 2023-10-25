@@ -18,6 +18,17 @@ export const time2sec = (time: string) => {
   return +times[0] * 3600 + +times[1] * 60 + +times[2];
 };
 
+export const prettyElapsedTime = (startDate: any, endDate: any) => {
+  const elapsedMilliseconds = endDate - startDate;
+  const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
+  const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+  const elapsedHours = Math.floor(elapsedMinutes / 60);
+  const hours = String(elapsedHours).padStart(2, "0");
+  const minutes = String(elapsedMinutes % 60).padStart(2, "0");
+  const seconds = String(elapsedSeconds % 60).padStart(2, "0");
+  return hours + ":" + minutes + ":" + seconds;
+};
+
 export const formatBytes = (bytes: number, decimals = 2) => {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;

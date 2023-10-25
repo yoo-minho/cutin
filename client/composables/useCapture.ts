@@ -1,13 +1,5 @@
 import { CutType } from "@/types";
 
-/*
-4K 3840x2160
-1080p 1920x1080
-720p 1280x720 
-480p 854x480
-360p 640x360
-240p 426x240
-*/
 const ratioSet = {
   "360p": [640, 360, 6],
   "540p": [960, 540, 6],
@@ -25,7 +17,7 @@ const segmentSet = {
     { sec: 2, speed: 2 }, //1
   ],
   wide: [
-    { sec: 6, speed: 1.5 },
+    { sec: 5.5, speed: 1.5 },
     { sec: 3, speed: 2, zoom: 1.3 },
   ],
   short: [{ sec: 4, speed: 1.5, zoom: 1.5 }],
@@ -42,7 +34,6 @@ const getSegment = (_skill: string) => {
 let chunks = [] as any;
 let _zoom = 1;
 let zoomTick = 0;
-let mediaRecorder: MediaRecorder;
 let hasBeenRegistered = false;
 
 export async function createCaptureVideo(size: number, cut: CutType) {
@@ -64,10 +55,15 @@ export async function createCaptureVideo(size: number, cut: CutType) {
   const canvasContext = canvasElem.getContext("2d");
   if (!canvasContext) return { file: null };
 
+  const start = time - totalSec + 2;
+  const originSpeed = videoElem.playbackRate;
+  const mimeType = "video/webm; codecs=vp9";
+  const opt = { mimeType, videoBitsPerSecond };
+
   if (!hasBeenRegistered) {
     videoElem.addEventListener("play", () => {
       hasBeenRegistered = true;
-      if (mediaRecorder.state !== "recording") return;
+      // if (mediaRecorder.state !== "recording") return;
       const renderFrame = () => {
         if (!videoElem.paused && !videoElem.ended) {
           _zoom += zoomTick;
@@ -87,43 +83,36 @@ export async function createCaptureVideo(size: number, cut: CutType) {
     });
   }
 
-  const start = time - totalSec + 2;
-  const originSpeed = videoElem.playbackRate;
-  const mimeType = "video/webm; codecs=vp9";
-  const opt = { mimeType, videoBitsPerSecond };
-
-  if (!mediaRecorder) {
-    mediaRecorder = new MediaRecorder(canvasElem.captureStream(fps), opt);
+  return new Promise<{ file: File }>(async (res) => {
+    const mediaRecorder = new MediaRecorder(canvasElem.captureStream(fps), opt);
     mediaRecorder.ondataavailable = ({ data }) => {
       if (data.size > 0) chunks.push(data);
     };
-  }
+    mediaRecorder.onstop = () => {
+      videoElem.pause();
+      videoElem.muted = false;
+      videoElem.currentTime = time;
+      videoElem.playbackRate = originSpeed;
 
-  videoElem.currentTime = start;
-  videoElem.muted = true;
-  videoElem.play();
-  mediaRecorder.start();
-  for (const seg of segment) {
-    const { sec, speed, zoom = 1 } = seg;
-    const segSpeed = speed * 2;
-    videoElem.playbackRate = segSpeed;
-    zoomTick = zoom === 1 ? 0 : (zoom - 1) / (fps * (sec / segSpeed));
-    await delay(sec / segSpeed);
-  }
+      const file = new File(
+        [new Blob(chunks, { type: "video/webm" })],
+        "temp.webm"
+      );
+      chunks = [];
+      return res({ file });
+    };
+    videoElem.currentTime = start;
+    videoElem.muted = true;
+    videoElem.play();
+    mediaRecorder.start();
+    for (const seg of segment) {
+      const { sec, speed, zoom = 1 } = seg;
+      const segSpeed = speed * 2.5;
+      videoElem.playbackRate = segSpeed;
+      zoomTick = zoom === 1 ? 0 : (zoom - 1) / (fps * (sec / segSpeed));
+      await delay(sec / segSpeed);
+    }
 
-  mediaRecorder.stop();
-  videoElem.pause();
-
-  videoElem.muted = false;
-  videoElem.currentTime = time;
-  videoElem.playbackRate = originSpeed;
-
-  await delay(0.3);
-
-  const file = new File(
-    [new Blob(chunks, { type: "video/webm" })],
-    "temp.webm"
-  );
-  chunks = [];
-  return { file };
+    mediaRecorder.stop();
+  });
 }

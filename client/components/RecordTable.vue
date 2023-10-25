@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CutType } from "@/types";
-import { Loading } from "quasar";
+import { Loading, QSpinner } from "quasar";
 
 const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
 
@@ -52,34 +52,10 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const makeAllVideo = async () => {
-  const totalSize = cutStore.value?.length || 1;
-
-  for (const [idx, cut] of cutStore.value?.entries() || []) {
-    const percent = ((idx / totalSize) * 100).toFixed(2);
-    const message = `업로드중입니다 ${percent}%(${idx}/${totalSize})`;
-    Loading.show({
-      message,
-      boxClass: "bg-grey-2 text-grey-9",
-      spinnerColor: "primary",
-    });
-    await makeVideo(cut, false);
-    Loading.hide();
-  }
-};
-
-const makeVideo = async (cut: CutType, loading = true) => {
-  loading &&
-    Loading.show({
-      message: "업로드중입니다",
-      boxClass: "bg-grey-2 text-grey-9",
-      spinnerColor: "primary",
-    });
-
+const makeVideo = async (cut: CutType) => {
   const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
   await delay(0.3);
-
   const [clubName, date, ...rest] = videoProps.value.videoName.split("_");
   const path = [
     clubName,
@@ -87,29 +63,85 @@ const makeVideo = async (cut: CutType, loading = true) => {
     currGame.value,
     seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
   ].join("/");
-
   let { file } = await createCaptureVideo(videoProps.value.videoSize, cut);
-  if (file === null) {
-    //error
-  } else {
-    const body = new FormData();
-    body.append("file", file);
-    body.append("path", path);
-    const { data } = await useFetch("/api/upload", { method: "POST", body });
-    file = null;
-    if (data.value) {
-      const { fileUrl } = data.value;
-      updateCut("videoUrl", fileUrl);
-    }
+  if (file === null) return;
+
+  const body = new FormData();
+  body.append("file", file);
+  body.append("path", path);
+  const { data } = await useFetch("/api/upload", { method: "POST", body });
+  file = null;
+  if (data.value) {
+    const { fileUrl } = data.value;
+    updateCut("videoUrl", fileUrl);
+  }
+};
+
+const makeAllVideo = async () => {
+  const totalSize = cutStore.value?.length || 1;
+  const startTime = new Date();
+  let isCancel = false;
+
+  const dialog = Dialog.create({
+    title: "영상 만드는 중",
+    progress: { spinner: QSpinner, color: "green" },
+    html: true,
+    cancel: "취소",
+    persistent: true,
+    ok: false,
+  }).onCancel(() => {
+    isCancel = true;
+    Notify.create("작업이 취소되었습니다.");
+  });
+
+  let message;
+  for (const [idx, cut] of [...(cutStore.value || [])]
+    ?.splice(0, 4)
+    .entries() || []) {
+    if (isCancel) break;
+    const { gameNo, quaterNo } = cut;
+    const _gameTab = gameNo + "";
+    const _quaterTab = quaterNo + "";
+    if (gameTab.value !== _gameTab) gameTab.value = _gameTab;
+    if (quaterTab.value !== _quaterTab) quaterTab.value = _quaterTab;
+    const elapsedTime = prettyElapsedTime(startTime, new Date());
+    const percent = (((idx + 1) / totalSize) * 100).toFixed(2);
+    message =
+      `<span style="font-weight:bold;font-size:36px">${percent}%</span><br/>` +
+      `(${totalSize}건 중 ${idx + 1}건)<br/>` +
+      `소요시간 : ${elapsedTime}`;
+    dialog.update({ message });
+    await makeVideo(cut);
   }
 
-  loading && Loading.hide();
+  const elapsedTime = prettyElapsedTime(startTime, new Date());
+  const completeMsg =
+    `<span style="font-weight:bold;font-size:36px">${totalSize}건</span><br/>` +
+    `작업 완료<br/>` +
+    `소요시간 : ${elapsedTime}`;
+  dialog.update({
+    title: "영상 작업 완료",
+    message: completeMsg,
+    progress: false,
+    ok: "확인",
+    cancel: false,
+  });
+};
+
+const makeVideoWithLoading = async (cut: CutType) => {
+  Loading.show({
+    message: "업로드중입니다",
+    boxClass: "bg-grey-2 text-grey-9",
+    spinnerColor: "primary",
+  });
+  await makeVideo(cut);
+  Loading.hide();
 };
 
 const openViewer = async (videoUrl: string, cut: CutType) => {
   const { seekTime } = cut;
   if (!videoUrl) {
-    await makeVideo(cut);
+    await makeVideoWithLoading(cut);
   } else {
     emits("moveSeekPoint", seekTime);
     await delay(0.3);
@@ -237,9 +269,9 @@ const columns = [
               {{ props.row.seekTime }}
             </div>
           </q-td>
-          <q-td key="skill" :props="props">{{
-            props.row.skill || "득점&어시"
-          }}</q-td>
+          <q-td key="skill" :props="props">
+            {{ props.row.skill || "득점&어시" }}
+          </q-td>
           <q-td key="mainPlayer" :props="props">
             {{ props.row.mainPlayer }}
           </q-td>
@@ -251,7 +283,7 @@ const columns = [
               :icon="'movie_edit'"
               size="xs"
               :style="{ padding: '4px 8px' }"
-              @click="makeVideo(props.row)"
+              @click="makeVideoWithLoading(props.row)"
             />
             <q-btn
               :icon="'smart_display'"
