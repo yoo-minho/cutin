@@ -4,7 +4,7 @@ const props = defineProps<{ src: string }>();
 <template>
   <q-card style="max-width: fit-content">
     <video :src="src" width="960" height="540" autoplay loop />
-    <q-card-section>
+    <!-- <q-card-section>
       <q-btn
         fab
         color="primary"
@@ -34,7 +34,7 @@ const props = defineProps<{ src: string }>();
 
     <q-card-actions align="right">
       <q-btn v-close-popup flat color="primary" label="Reserve" />
-    </q-card-actions>
+    </q-card-actions> -->
   </q-card>
 </template>
 

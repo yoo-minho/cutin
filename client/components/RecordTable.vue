@@ -56,25 +56,26 @@ const makeVideo = async (cut: CutType) => {
   const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
   await delay(0.3);
-  const [clubName, date, ...rest] = videoProps.value.videoName.split("_");
+  const { videoName, videoSize } = videoProps.value;
+  const [clubName, date, ...rest] = videoName.split("_");
   const path = [
     clubName,
     date,
     currGame.value,
     seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
   ].join("/");
-  let { file } = await createCaptureVideo(videoProps.value.videoSize, cut);
-  if (file === null) return;
-
-  const body = new FormData();
-  body.append("file", file);
-  body.append("path", path);
-  const { data } = await useFetch("/api/upload", { method: "POST", body });
-  file = null;
-  if (data.value) {
-    const { fileUrl } = data.value;
-    updateCut("videoUrl", fileUrl);
-  }
+  await createCaptureVideo(videoSize, cut).then(({ file }) => {
+    if (file === null) return;
+    const body = new FormData();
+    body.append("file", file);
+    body.append("path", path);
+    useFetch("/api/upload", { method: "POST", body }).then(({ data }) => {
+      file = null;
+      if (!data.value) return;
+      const { fileUrl } = data.value;
+      updateCut("videoUrl", fileUrl, seekTime);
+    });
+  });
 };
 
 const makeAllVideo = async () => {
@@ -95,9 +96,7 @@ const makeAllVideo = async () => {
   });
 
   let message;
-  for (const [idx, cut] of [...(cutStore.value || [])]
-    ?.splice(0, 4)
-    .entries() || []) {
+  for (const [idx, cut] of cutStore.value?.entries() || []) {
     if (isCancel) break;
     const { gameNo, quaterNo } = cut;
     const _gameTab = gameNo + "";
@@ -112,6 +111,7 @@ const makeAllVideo = async () => {
       `소요시간 : ${elapsedTime}`;
     dialog.update({ message });
     await makeVideo(cut);
+    await delay(1);
   }
 
   const elapsedTime = prettyElapsedTime(startTime, new Date());

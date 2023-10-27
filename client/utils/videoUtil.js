@@ -2,12 +2,11 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "node:fs";
 
 export const ffmpegPromise = ({ inputPath, outputPath }) => {
-  console.log("ffmpegPromise");
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
-      .videoFilters("setpts=2.5*PTS")
-      .fps(24)
+      .videoFilters("setpts=2*PTS")
+      .fps(30)
       .videoCodec("libx265")
       .output(outputPath)
       .on("start", function (commandLine) {

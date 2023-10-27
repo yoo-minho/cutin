@@ -58,11 +58,12 @@ export const addCut = async () => {
 
 export const updateCut = async (
   type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl",
-  value: string
+  value: string,
+  targetTime?: string
 ) => {
   const videoPropsStore = useVideoPropsStore();
   const videoName = videoPropsStore.value.videoName;
-  const cutTime = videoPropsStore.value.currentTime;
+  const cutTime = targetTime || videoPropsStore.value.currentTime;
 
   const cutStore = useCutStore(videoName);
   const cut = cutStore.value.find((c) => c.seekTime === cutTime);

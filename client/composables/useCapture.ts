@@ -10,23 +10,32 @@ const ratioSet = {
 const fps = 60;
 
 const segmentSet = {
+  //8초 => 6초
   deep: [
-    { sec: 3, speed: 2 }, //1.5
-    { sec: 0.5, speed: 2, zoom: 1.3 }, //0.25
-    { sec: 3, speed: 0.8, zoom: 1.3 }, //3.75
+    { sec: 2.5, speed: 1.5 },
+    { sec: 0.5, speed: 1.5, zoom: 1.3 }, //2
+    { sec: 3, speed: 1, zoom: 1.3 }, //3
     { sec: 2, speed: 2 }, //1
   ],
+  //8초 => 5초
   wide: [
-    { sec: 5.5, speed: 1.5 },
-    { sec: 3, speed: 2, zoom: 1.3 },
+    { sec: 4, speed: 1.6 }, //2.5
+    { sec: 1, speed: 1 }, //1
+    { sec: 3, speed: 2, zoom: 1.3 }, //1.5
   ],
-  short: [{ sec: 4, speed: 1.5, zoom: 1.5 }],
+  //5초 => 3초
+  short: [
+    { sec: 2, speed: 2 }, //1
+    { sec: 1.5, speed: 1.2, zoom: 1.3 }, //1.25
+    { sec: 1.5, speed: 2, zoom: 1.3 }, //0.75
+  ],
 };
 
 const getSegment = (_skill: string) => {
-  if (["오펜스리바", "리바운드", "자유투", "스틸", "스핀무브"].includes(_skill))
+  if (["오펜스리바", "리바운드", "스틸", "자유투", "속공"].includes(_skill))
     return segmentSet.short;
-  if (["득점&어시"].includes(_skill)) return segmentSet.deep;
+  if (["득점&어시", "풋백", "스핀무브", "앤드원"].includes(_skill))
+    return segmentSet.deep;
   if (["3점슛"].includes(_skill)) return segmentSet.wide;
   return segmentSet.wide;
 };
@@ -103,16 +112,15 @@ export async function createCaptureVideo(size: number, cut: CutType) {
     };
     videoElem.currentTime = start;
     videoElem.muted = true;
-    videoElem.play();
+    await videoElem.play();
     mediaRecorder.start();
     for (const seg of segment) {
       const { sec, speed, zoom = 1 } = seg;
-      const segSpeed = speed * 2.5;
+      const segSpeed = speed * 1.5;
       videoElem.playbackRate = segSpeed;
       zoomTick = zoom === 1 ? 0 : (zoom - 1) / (fps * (sec / segSpeed));
       await delay(sec / segSpeed);
     }
-
     mediaRecorder.stop();
   });
 }
