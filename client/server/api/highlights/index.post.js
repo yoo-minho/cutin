@@ -5,16 +5,16 @@ export default defineEventHandler(async (event) => {
   const { videoName, seekArr } = body;
   const [clubCode, playDate] = videoName.split("_");
   const seekArrForCreate = seekArr.map((seek) => {
-    const { gameNo, quaterNo, seekTime } = seek;
+    const { gameNo, quaterNo, seekTime, skill, mainPlayer, subPlayer } = seek;
     return {
       clubCode,
       playDate,
       gameNo: +gameNo,
       quaterNo: +quaterNo,
       seekTime: seekTime,
-      skill: "",
-      mainPlayer: "",
-      subPlayer: "",
+      skill,
+      mainPlayer,
+      subPlayer,
       videoName,
       videoUrl: "",
     };

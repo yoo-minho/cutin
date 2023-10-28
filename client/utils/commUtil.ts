@@ -48,3 +48,20 @@ export const formatVideoDuration = (durationInSeconds: number) => {
 export const delay = (seconds: number) => {
   return new Promise((res) => setTimeout(res, seconds * 1000));
 };
+
+export const readFileAsJSON = (file: File) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const fileContent = event.target?.result as any;
+        const jsonObject = JSON.parse(fileContent);
+        resolve(jsonObject);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = () => reject(new Error("파일을 읽을 수 없습니다."));
+    reader.readAsText(file);
+  });
+};

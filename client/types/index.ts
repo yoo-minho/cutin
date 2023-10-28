@@ -5,4 +5,6 @@ export type CutType = {
   mainPlayer?: string;
   subPlayer?: string;
   skill?: string;
+  videoName?: string;
+  team?: string;
 };

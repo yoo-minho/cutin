@@ -2,6 +2,12 @@ export const keySet = {
   first: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
   second: ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
 };
+export const pts = {
+  name: "득점&어시",
+  main: { score: 2 },
+  sub: { assist: 1 },
+};
+
 export const defaultSkill = [
   { key: "1", name: "풋백", main: { score: 2, rebound: 1 } },
   { key: "2", name: "자유투", main: { score: 2 } },

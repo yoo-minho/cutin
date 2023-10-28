@@ -28,11 +28,31 @@ watch(currVideoName, () => {
   gameTab.value = temp;
 });
 
+const file = ref();
+const uploader = ref();
+
+const upGameData = (e: any) => {
+  uploader.value.pickFiles(e);
+};
+const submit = async (files: File[]) => {
+  for (const f of files) {
+    const cuts = (await readFileAsJSON(f)) as CutType[];
+    const videoName = cuts[0].videoName || "";
+    addCuts({ videoName, cuts });
+  }
+};
+
 const downGameData = () => {
-  const data = cutStore.value?.map((cut) => ({
-    ...cut,
-    videoName: currVideoName.value,
-  }));
+  const data =
+    cutStore.value?.map((cut) => ({
+      ...cut,
+      videoName: currVideoName.value,
+    })) || [];
+  console.log({ data });
+  if (data.length === 0) {
+    Notify.create("데이터가 없습니다.");
+    return;
+  }
   const jsonString = JSON.stringify(data);
   const blob = new Blob([jsonString], { type: "application/json" });
   const blobUrl = URL.createObjectURL(blob);
@@ -52,12 +72,67 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
+const skillInfo = (skill: string): any =>
+  [...defaultSkill, pts].find((k) => k.name === skill);
+
 const makeVideo = async (cut: CutType) => {
   const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
-  const allCut = await fetchAllGameCut();
+  const cuts = await fetchAllGameCut();
+  const vsScore = {} as { [key: string]: number };
+  const playerStat = {} as { [key: string]: any };
 
-  console.log({ allCut });
+  cuts.forEach((cut) => {
+    const { team = "team", skill = "", mainPlayer = "", subPlayer = "" } = cut;
+
+    const { main, sub } = skillInfo(skill);
+    vsScore[team] = (vsScore[team] || 0) + (main?.score || 0);
+
+    if (!playerStat[mainPlayer]) playerStat[mainPlayer] = {};
+    const {
+      score = 0,
+      rebound = 0,
+      block = 0,
+      steal = 0,
+      assist = 0,
+    } = playerStat[mainPlayer];
+    const {
+      score: pts = 0,
+      rebound: reb = 0,
+      block: blk = 0,
+      steal: stl = 0,
+    } = main;
+    playerStat[mainPlayer] = {
+      score: score + pts,
+      rebound: rebound + reb,
+      block: block + blk,
+      steal: steal + stl,
+      assist,
+    };
+
+    if (subPlayer) {
+      if (!playerStat[subPlayer]) playerStat[subPlayer] = {};
+      const {
+        score = 0,
+        rebound = 0,
+        block = 0,
+        steal = 0,
+        assist = 0,
+      } = playerStat[subPlayer];
+      const { assist: ast = 0 } = sub;
+      playerStat[subPlayer] = {
+        score,
+        rebound,
+        block,
+        steal,
+        assist: assist + ast,
+      };
+    }
+  });
+
+  console.log(vsScore);
+  console.log(playerStat);
+  console.log({ cuts });
 
   await delay(0.3);
   const { videoName, videoSize } = videoProps.value;
@@ -197,11 +272,10 @@ const columns = [
     <q-dialog v-model="videoViewerOn">
       <mini-video :src="videoViewerSrc" />
     </q-dialog>
-    <div class="row">
+    <div class="row" style="gap: 12px; padding: 12px">
       <q-btn
         color="pink"
         text-color="white"
-        class="q-ma-md"
         icon-right="file_download"
         @click="makeAllVideo"
       >
@@ -210,11 +284,27 @@ const columns = [
       <q-btn
         color="green"
         text-color="white"
-        class="q-ma-md"
         icon-right="file_download"
         @click="downGameData"
       >
-        게임 데이터 JSON 내려받기
+        JSON 내려받기
+        <q-file
+          ref="uploader"
+          v-model="file"
+          multiple
+          borderless
+          dense
+          @update:model-value="submit"
+          style="display: none"
+        />
+      </q-btn>
+      <q-btn
+        color="green"
+        text-color="white"
+        icon-right="file_upload"
+        @click="upGameData"
+      >
+        JSON 업로드
       </q-btn>
     </div>
     <q-separator color="grey-7" size="0.5px" />

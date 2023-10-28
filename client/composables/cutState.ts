@@ -8,7 +8,7 @@ export const useCutStore = (name: string = "") => {
   const x = useState<CutType[]>(`${name}CutStore`, () => []);
   if (first) {
     loadCutStore().then((data) => {
-      first = false;
+      first = true;
       x.value = data;
     });
   }
@@ -58,6 +58,17 @@ export const addCut = async () => {
   });
 
   return currentTime;
+};
+
+export const addCuts = async (props: {
+  videoName: string;
+  cuts: CutType[];
+}) => {
+  const { videoName, cuts } = props;
+  await useFetch("/api/highlights", {
+    method: "post",
+    body: { videoName, seekArr: cuts },
+  });
 };
 
 export const updateCut = async (
