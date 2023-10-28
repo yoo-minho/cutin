@@ -18,8 +18,8 @@ const _addTeam = () => {
     },
     ok: "추가",
     cancel: "취소",
-  }).onOk((val: string) => {
-    const { error, message } = addTeam(val);
+  }).onOk(async (val: string) => {
+    const { error, message } = await addTeam(val);
     if (error) {
       Notify.create({ type: "negative", message });
     }
@@ -42,7 +42,7 @@ const _addTeam = () => {
       <player-list
         v-for="team in teamStore"
         :teamName="team.name"
-        :players="team.players"
+        :players="team.players.filter((v:any) => !!v.name)"
       />
     </template>
   </div>

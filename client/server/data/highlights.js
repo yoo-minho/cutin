@@ -8,6 +8,15 @@ export async function getHighlightByVideo(videoName) {
   return highlights;
 }
 
+export async function getHighlightByVideoByGameNo(clubCode, playDate, gameNo) {
+  const highlights = await prisma.highlight.findMany({
+    select: { mainTeam: { select: { teamName: true } } },
+    where: { clubCode, playDate, gameNo: +gameNo },
+    orderBy: [{ gameNo: "asc" }, { quaterNo: "asc" }, { seekTime: "asc" }],
+  });
+  return highlights;
+}
+
 export async function createManyHighlight(data) {
   const highlights = await prisma.highlight.createMany({
     data,

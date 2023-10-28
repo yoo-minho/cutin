@@ -1,12 +1,16 @@
 import { Notify, Dialog } from "quasar";
 import { CutType } from "@/types";
 
+let first = true;
 export const useCutStore = (name: string = "") => {
   const videoPropsStore = useVideoPropsStore();
   name = name || videoPropsStore.value.videoName;
   const x = useState<CutType[]>(`${name}CutStore`, () => []);
-  if (x.value.length === 0) {
-    loadCutStore().then((data) => (x.value = data));
+  if (first) {
+    loadCutStore().then((data) => {
+      first = false;
+      x.value = data;
+    });
   }
   return x;
 };
@@ -109,6 +113,15 @@ async function loadCutStore() {
   const videoName = videoPropsStore.value.videoName;
   const { data } = await useFetch<CutType[]>("/api/highlights", {
     params: { videoName },
+  });
+  return data.value || [];
+}
+
+export async function fetchAllGameCut() {
+  const videoPropsStore = useVideoPropsStore();
+  const videoName = videoPropsStore.value.videoName;
+  const { data } = await useFetch<CutType[]>("/api/highlights", {
+    params: { videoName, multiVideo: true },
   });
   return data.value || [];
 }

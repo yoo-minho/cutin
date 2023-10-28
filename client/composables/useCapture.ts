@@ -43,13 +43,12 @@ const getSegment = (_skill: string) => {
 let chunks = [] as any;
 let _zoom = 1;
 let zoomTick = 0;
-let hasBeenRegistered = false;
 
 export async function createCaptureVideo(size: number, cut: CutType) {
   chunks = [];
   _zoom = 1;
 
-  const { seekTime, skill } = cut;
+  const { seekTime, skill, mainPlayer, subPlayer } = cut;
   const _skill = skill || "득점&어시";
   const time = time2sec(seekTime);
   const segment = getSegment(_skill);
@@ -68,29 +67,62 @@ export async function createCaptureVideo(size: number, cut: CutType) {
   const originSpeed = videoElem.playbackRate;
   const mimeType = "video/webm; codecs=vp9";
   const opt = { mimeType, videoBitsPerSecond };
+  let x = 0;
+  const fontSize = 48;
+  canvasContext.font = `${fontSize}px Giants-Bold`; // 원하는 폰트 및 크기로 설정
 
-  if (!hasBeenRegistered) {
-    videoElem.addEventListener("play", () => {
-      hasBeenRegistered = true;
-      // if (mediaRecorder.state !== "recording") return;
-      const renderFrame = () => {
-        if (!videoElem.paused && !videoElem.ended) {
-          _zoom += zoomTick;
-          if (_zoom > 1) {
-            const ratio = (_zoom - 1) / (_zoom * 2);
-            canvasContext.setTransform(1, 0, 0, 1, 0, 0);
-            canvasContext.scale(_zoom, _zoom);
-            canvasContext.translate(-(width * ratio), -(height * ratio * 0.5));
-          } else {
-            _zoom = 1;
-          }
-          canvasContext.drawImage(videoElem, 0, 0, width, height);
-          requestAnimationFrame(renderFrame);
-        }
-      };
-      renderFrame();
-    });
-  }
+  const prefix = ["리바운드", "스틸", "오펜스리바"].includes(_skill)
+    ? ""
+    : "🏀";
+
+  const playListener = () => {
+    const renderFrame = () => {
+      if (videoElem.paused || videoElem.ended) return;
+
+      _zoom += zoomTick;
+      const ratio = (_zoom - 1) / (_zoom * 2);
+      if (ratio > 0) {
+        canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+        canvasContext.scale(_zoom, _zoom);
+        canvasContext.translate(-(width * ratio), -(height * ratio * 0.5));
+      } else {
+        _zoom = 1;
+      }
+      canvasContext.drawImage(videoElem, 0, 0, width, height);
+
+      const zoomX = 48 / _zoom + width * ratio;
+      const zoomY = (height - 48) / _zoom + height * ratio * 0.5;
+      const zoomFontSize = fontSize / _zoom;
+      const borderSize = zoomFontSize * 0.3;
+
+      const text = [
+        " " + mainPlayer,
+        prefix + _skill,
+        subPlayer ? `ast.${subPlayer}` : "",
+      ]
+        .filter((v) => !!v)
+        .join(" - ");
+      canvasContext.font = `${zoomFontSize}px Giants-Bold`;
+      const textWidth = canvasContext.measureText(text).width;
+
+      canvasContext.fillStyle = "white";
+      roundRect(
+        canvasContext,
+        zoomX,
+        zoomY - zoomFontSize,
+        textWidth + borderSize,
+        zoomFontSize + borderSize,
+        borderSize
+      );
+
+      canvasContext.fillStyle = "black";
+      canvasContext.fillText(text, zoomX, zoomY);
+      requestAnimationFrame(renderFrame);
+    };
+    x = 0;
+    renderFrame();
+  };
+  videoElem.addEventListener("play", playListener);
 
   return new Promise<{ file: File }>(async (res) => {
     const mediaRecorder = new MediaRecorder(canvasElem.captureStream(fps), opt);
@@ -98,6 +130,7 @@ export async function createCaptureVideo(size: number, cut: CutType) {
       if (data.size > 0) chunks.push(data);
     };
     mediaRecorder.onstop = () => {
+      videoElem.removeEventListener("play", playListener);
       videoElem.pause();
       videoElem.muted = false;
       videoElem.currentTime = time;
@@ -123,4 +156,26 @@ export async function createCaptureVideo(size: number, cut: CutType) {
     }
     mediaRecorder.stop();
   });
+}
+
+function roundRect(
+  ctx: any,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  ctx.fill();
 }

@@ -55,6 +55,10 @@ const filterMethod = (rows: readonly any[]) => {
 const makeVideo = async (cut: CutType) => {
   const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
+  const allCut = await fetchAllGameCut();
+
+  console.log({ allCut });
+
   await delay(0.3);
   const { videoName, videoSize } = videoProps.value;
   const [clubName, date, ...rest] = videoName.split("_");

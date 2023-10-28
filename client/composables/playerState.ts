@@ -18,13 +18,15 @@ export type PlayerType = {
 };
 
 //code = 동호회이름과 날짜 조합
+let first = true;
 export const useTeamStore = () => {
   const videoProps = useVideoPropsStore();
   const videoCode = videoProps.value.videoCode;
   const x = useState<TeamType[]>(`${videoCode}TeamStore`, () => []);
-  if (x.value.length === 0) {
+  if (first) {
     loadTeamStore(videoCode).then((data) => {
       x.value = createTeams(data);
+      first = false;
     });
   }
   return x;
@@ -37,14 +39,17 @@ async function loadTeamStore(videoCode: string) {
   return data.value || [];
 }
 
-export function addTeam(teamName: string) {
+export async function addTeam(teamName: string) {
   const teamStore = useTeamStore();
   const isDuplicated =
     teamStore.value.findIndex((v) => v.name === teamName) > -1;
   if (isDuplicated) {
     return { error: true, message: "중복된 팀 이름은 불가능합니다." };
   }
-  teamStore.value?.push({ name: teamName, players: [] });
+  if (teamStore.value.length === 0) {
+    await addPlayerOnTeam(teamName, "");
+  }
+  teamStore.value.push({ name: teamName, players: [] });
   return { error: false };
 }
 
@@ -53,7 +58,7 @@ export function removeTeam(teamName: string) {
   teamStore.value = teamStore.value.filter((v) => v.name !== teamName);
 }
 
-export function addPlayerOnTeam(teamName: string, playerName: string) {
+export async function addPlayerOnTeam(teamName: string, playerName: string) {
   const videoProps = useVideoPropsStore();
   const videoCode = videoProps.value.videoCode;
   const teamStore = useTeamStore();
@@ -63,7 +68,7 @@ export function addPlayerOnTeam(teamName: string, playerName: string) {
     }
     return v;
   });
-  useFetch("/api/gamePlayer", {
+  await useFetch("/api/gamePlayer", {
     method: "post",
     body: {
       videoCode,

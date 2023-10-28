@@ -8,25 +8,27 @@ datasource db {
 }
 
 model Highlight {
-  clubCode   String  @db.VarChar(50)
-  playDate   String  @db.VarChar(8)
-  gameNo     Int     @db.SmallInt
-  quaterNo   Int     @db.SmallInt
-  seekTime   String  @db.VarChar(7)
-  skill      String? @db.VarChar(100)
-  mainPlayer String? @db.VarChar(6)
-  subPlayer  String? @db.VarChar(6)
-  videoUrl   String? @db.VarChar(100)
-  videoName  String  @db.VarChar(100)
+  clubCode   String      @db.VarChar(50)
+  playDate   String      @db.VarChar(8)
+  gameNo     Int         @db.SmallInt
+  quaterNo   Int         @db.SmallInt
+  seekTime   String      @db.VarChar(7)
+  skill      String?     @db.VarChar(100)
+  mainPlayer String?     @db.VarChar(6)
+  subPlayer  String?     @db.VarChar(6)
+  videoUrl   String?     @db.VarChar(100)
+  videoName  String      @db.VarChar(100)
+  mainTeam   GamePlayer? @relation(fields: [clubCode, playDate, mainPlayer], references: [clubCode, playDate, player])
 
   @@id([videoName, seekTime])
 }
 
 model GamePlayer {
-  clubCode String @db.VarChar(50)
-  playDate String @db.VarChar(8)
-  teamName String @db.VarChar(20)
-  player   String @db.VarChar(6)
+  clubCode   String      @db.VarChar(50)
+  playDate   String      @db.VarChar(8)
+  teamName   String      @db.VarChar(20)
+  player     String      @db.VarChar(6)
+  highlights Highlight[]
 
   @@id([clubCode, playDate, player])
 }
