@@ -239,7 +239,7 @@ const route = useRoute();
       </q-page-container>
     </div>
   </q-layout>
-  <NuxtPage v-else />
+  <NuxtPage v-else>123</NuxtPage>
 </template>
 <style>
 body {

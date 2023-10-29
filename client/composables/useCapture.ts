@@ -48,7 +48,8 @@ export async function createCaptureVideo(size: number, cut: CutType) {
   chunks = [];
   _zoom = 1;
 
-  const { seekTime, skill, mainPlayer, subPlayer } = cut;
+  const { seekTime, skill, mainPlayer, subPlayer, vsScore } = cut;
+  console.log({ cut });
   const _skill = skill || "득점&어시";
   const time = time2sec(seekTime);
   const segment = getSegment(_skill);
@@ -99,6 +100,7 @@ export async function createCaptureVideo(size: number, cut: CutType) {
         " " + mainPlayer,
         prefix + _skill,
         subPlayer ? `ast.${subPlayer}` : "",
+        `[${JSON.stringify(vsScore)}]`,
       ]
         .filter((v) => !!v)
         .join(" - ");
@@ -156,26 +158,4 @@ export async function createCaptureVideo(size: number, cut: CutType) {
     }
     mediaRecorder.stop();
   });
-}
-
-function roundRect(
-  ctx: any,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number
-) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-  ctx.fill();
 }

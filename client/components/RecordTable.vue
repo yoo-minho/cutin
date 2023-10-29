@@ -75,14 +75,11 @@ const filterMethod = (rows: readonly any[]) => {
 const skillInfo = (skill: string): any =>
   [...defaultSkill, pts].find((k) => k.name === skill);
 
-const makeVideo = async (cut: CutType) => {
-  const { seekTime } = cut;
-  emits("moveSeekPoint", seekTime);
+const getStatByCut = async (seekTime: string) => {
   const cuts = await fetchAllGameCut();
   const vsScore = {} as { [key: string]: number };
   const playerStat = {} as { [key: string]: any };
-
-  cuts.forEach((cut) => {
+  const cutsWithStat = cuts.map((cut) => {
     const { team = "team", skill = "", mainPlayer = "", subPlayer = "" } = cut;
 
     const { main, sub } = skillInfo(skill);
@@ -128,11 +125,23 @@ const makeVideo = async (cut: CutType) => {
         assist: assist + ast,
       };
     }
-  });
 
-  console.log(vsScore);
-  console.log(playerStat);
-  console.log({ cuts });
+    return {
+      ...cut,
+      vsScore: { ...vsScore },
+      playerStat: { ...playerStat },
+    };
+  });
+  return cutsWithStat.find((cut) => cut.seekTime === seekTime);
+};
+
+const makeVideo = async (cut: CutType) => {
+  const { seekTime } = cut;
+  emits("moveSeekPoint", seekTime);
+
+  const statByCut = await getStatByCut(seekTime);
+  console.log({ statByCut });
+  if (!statByCut) return;
 
   await delay(0.3);
   const { videoName, videoSize } = videoProps.value;
@@ -143,18 +152,18 @@ const makeVideo = async (cut: CutType) => {
     currGame.value,
     seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
   ].join("/");
-  await createCaptureVideo(videoSize, cut).then(({ file }) => {
-    if (file === null) return;
-    const body = new FormData();
-    body.append("file", file);
-    body.append("path", path);
-    useFetch("/api/upload", { method: "POST", body }).then(({ data }) => {
-      file = null;
-      if (!data.value) return;
-      const { fileUrl } = data.value;
-      updateCut("videoUrl", fileUrl, seekTime);
-    });
-  });
+
+  const { file } = await createCaptureVideo(videoSize, statByCut);
+  if (file === null) return;
+
+  const body = new FormData();
+  body.append("file", file);
+  body.append("path", path);
+  const { data } = await useFetch("/api/upload", { method: "POST", body });
+  if (!data.value) return;
+
+  const { fileUrl } = data.value;
+  updateCut("videoUrl", fileUrl, seekTime);
 };
 
 const makeAllVideo = async () => {

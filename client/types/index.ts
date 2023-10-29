@@ -7,4 +7,6 @@ export type CutType = {
   skill?: string;
   videoName?: string;
   team?: string;
+  vsScore?: any;
+  playerStat?: any;
 };
