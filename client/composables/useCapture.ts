@@ -96,29 +96,32 @@ export async function createCaptureVideo(size: number, cut: CutType) {
       const zoomFontSize = fontSize / _zoom;
       const borderSize = zoomFontSize * 0.3;
 
-      const text = [
-        " " + mainPlayer,
-        prefix + _skill,
-        subPlayer ? `ast.${subPlayer}` : "",
-        `[${JSON.stringify(vsScore)}]`,
-      ]
-        .filter((v) => !!v)
-        .join(" - ");
-      canvasContext.font = `${zoomFontSize}px Giants-Bold`;
-      const textWidth = canvasContext.measureText(text).width;
+      // const text = [
+      //   " " + mainPlayer,
+      //   prefix + _skill,
+      //   subPlayer ? `ast.${subPlayer}` : "",
+      //   `[${JSON.stringify(vsScore)}]`,
+      // ]
+      //   .filter((v) => !!v)
+      //   .join(" - ");
+      // canvasContext.font = `${zoomFontSize}px Giants-Bold`;
+      // const textWidth = canvasContext.measureText(text).width;
 
-      canvasContext.fillStyle = "white";
-      roundRect(
-        canvasContext,
-        zoomX,
-        zoomY - zoomFontSize,
-        textWidth + borderSize,
-        zoomFontSize + borderSize,
-        borderSize
-      );
+      // canvasContext.fillStyle = "white";
+      // roundRect(
+      //   canvasContext,
+      //   zoomX,
+      //   zoomY - zoomFontSize,
+      //   textWidth + borderSize,
+      //   zoomFontSize + borderSize,
+      //   borderSize
+      // );
 
-      canvasContext.fillStyle = "black";
-      canvasContext.fillText(text, zoomX, zoomY);
+      // canvasContext.fillStyle = "black";
+      // canvasContext.fillText(text, zoomX, zoomY);
+
+      drawVideoBanners(canvasElem, cut);
+
       requestAnimationFrame(renderFrame);
     };
     x = 0;
