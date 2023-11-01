@@ -65,11 +65,12 @@ onMounted(() => {
     xAlign: "right",
     x: (canvas.value?.width || 0) - margin,
     y: (canvas.value?.height || 0) - margin,
-    text: "유민호의 득점! 소문혁의 어시!",
+    text: "유민호의 Three Pointer!",
     font: "Giants-Bold",
     fontSize: 48,
     textColor: "white",
     textStrokeColor: "black",
+    letterWidthRatio: 0.95,
     padding: 8,
   });
 
@@ -90,11 +91,13 @@ onMounted(() => {
 });
 </script>
 <template>
-  <canvas
-    id="baseCanvas"
-    style="width: 960px; height: 540px; background-color: chartreuse"
-    width="1280"
-    height="720"
-    ref="canvas"
-  ></canvas>
+  <canvas id="baseCanvas" width="1280" height="720" ref="canvas"></canvas>
 </template>
+
+<style lang="scss" scoped>
+#baseCanvas {
+  width: 960px;
+  height: 540px;
+  background-color: chartreuse;
+}
+</style>

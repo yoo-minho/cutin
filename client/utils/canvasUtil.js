@@ -12,6 +12,7 @@ export function drawBanner(canvas, props) {
     fontSize,
     textColor,
     textStrokeColor,
+    letterWidthRatio = 1,
     bgColor = "rgba(0,0,0,0)",
     padding,
     borderRadius = 0,
@@ -24,7 +25,8 @@ export function drawBanner(canvas, props) {
   const fontAlpha = fontSize * 0.1; //폰트보정
 
   ctx.font = `${fontSize}px ${font}`; // 원하는 폰트 및 크기로 설정
-  const textWidth = ctx.measureText(text).width;
+  console.log({ letterWidthRatio });
+  const textWidth = ctx.measureText(text).width * letterWidthRatio;
 
   ctx.fillStyle = bgColor;
   roundRect(
@@ -47,7 +49,8 @@ export function drawBanner(canvas, props) {
     ctx.shadowOffsetY = 5;
   }
 
-  ctx.fillText(text, textX, textY);
+  // ctx.letterSpacing = letterSpace;
+  ctx.fillText(text, textX, textY, textWidth);
 
   if (shadow) {
     ctx.shadowColor = "transparent";
@@ -59,7 +62,7 @@ export function drawBanner(canvas, props) {
   if (textStrokeColor) {
     ctx.strokeStyle = textStrokeColor;
     ctx.lineWidth = fontSize * 0.03;
-    ctx.strokeText(text, textX, textY);
+    ctx.strokeText(text, textX, textY, textWidth);
   }
 
   return {
@@ -102,21 +105,26 @@ export function drawGrid(canvas, gridSize = 16) {
   }
 }
 
-export function drawVideoBanners(canvas, cut) {
-  console.log("111", { cut });
+export function drawVideoBanners(canvas, cut, tick = 0) {
+  canvas?.getContext("2d").setTransform(1, 0, 0, 1, 0, 0);
 
-  const { gameNo, vsScore, quaterNo, seekTime, skill, mainPlayer } = cut;
-
+  const {
+    gameNo,
+    vsScore,
+    quaterNo,
+    seekTime,
+    skill,
+    mainPlayer,
+    subPlayer,
+    videoName,
+  } = cut;
+  const [name, date] = videoName.split("_");
   const vsScoreArr = Object.entries(vsScore);
-
-  console.log({ vsScoreArr });
-
+  if (vsScoreArr.length !== 2) throw "vsScore가 2개가 아니네";
   const [aName, aScore] = vsScoreArr[0];
-  const [bName, bScore] = vsScoreArr.length > 1 ? vsScoreArr[1] : ["블랙", 0];
-
+  const [bName, bScore] = vsScoreArr[1];
   const [hour, min, sec] = seekTime.split(":");
-
-  const gogo = `${mainPlayer}의 ${skill}`;
+  const expression = skillExpression(skill, mainPlayer, subPlayer);
 
   const margin = 32;
   const { top, right } = drawBanner(canvas, {
@@ -167,7 +175,7 @@ export function drawVideoBanners(canvas, cut) {
     x: margin,
     y: top,
     text:
-      "🏀 2023-10-24(토) GBA 동아리 농구경기" +
+      `🏀 ${formatDate(date)} ${name} 동아리 농구경기` +
       (gameNo ? ` - ${gameNo}게임` : ""),
     font: "NanumSquareNeo-Variable",
     fontSize: 16,
@@ -176,30 +184,37 @@ export function drawVideoBanners(canvas, cut) {
     padding: 8,
   });
 
-  drawBanner(canvas, {
-    xAlign: "right",
-    x: (canvas.value?.width || 0) - margin,
-    y: (canvas.value?.height || 0) - margin,
-    text: gogo,
-    font: "Giants-Bold",
-    fontSize: 48,
-    textColor: "white",
-    textStrokeColor: "black",
-    padding: 8,
-  });
+  const fps = 60;
+  const waitSec = 0.5;
+  const floatingSec = 0.2;
+  if (tick > fps * waitSec) {
+    const tickY =
+      (margin + 48) *
+      Math.max(1 - (tick - fps * waitSec) / (fps * floatingSec), 0);
+    drawBanner(canvas, {
+      xAlign: "right",
+      x: (canvas?.width || 0) - margin,
+      y: (canvas?.height || 0) - margin + tickY,
+      text: expression,
+      font: "Giants-Bold",
+      fontSize: 48,
+      textColor: "white",
+      textStrokeColor: "black",
+      letterWidthRatio: 0.95,
+      padding: 8,
+    });
+  }
 
   drawBanner(canvas, {
-    xAlign: "right",
     yAlign: "top",
-    x: (canvas?.width || 0) - margin,
+    x: margin,
     y: margin,
-    text: "SPOTV NOW",
+    text: "@myhl",
     font: "Giants-Bold",
     fontSize: 36,
-    textColor: "black",
+    textColor: "orange",
+    textStrokeColor: "black",
     padding: 8,
     shadow: true,
   });
-
-  console.log("222", { cut });
 }

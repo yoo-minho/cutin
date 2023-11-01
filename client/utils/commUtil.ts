@@ -2,7 +2,7 @@ export const formatTime = (time: number) => {
   if (isNaN(+time)) return "0:00:00";
   const hours = Math.floor(time / 3600);
   const minutes = Math.floor((time % 3600) / 60);
-  const seconds = Math.ceil(time % 60);
+  const seconds = Math.floor(time % 60);
   return [
     String(hours),
     String(minutes).padStart(2, "0"),
@@ -65,3 +65,14 @@ export const readFileAsJSON = (file: File) => {
     reader.readAsText(file);
   });
 };
+
+export function formatDate(inputDate: string) {
+  const year = inputDate.slice(0, 4);
+  const month = inputDate.slice(4, 6);
+  const day = inputDate.slice(6, 8);
+  const date = new Date(`${year}-${month}-${day}`);
+  const dayOfWeek = new Intl.DateTimeFormat("ko-KR", {
+    weekday: "short",
+  }).format(date);
+  return `${year}-${month}-${day}(${dayOfWeek})`;
+}

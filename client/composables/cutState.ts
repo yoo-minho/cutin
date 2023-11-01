@@ -8,7 +8,7 @@ export const useCutStore = (name: string = "") => {
   const x = useState<CutType[]>(`${name}CutStore`, () => []);
   if (first) {
     loadCutStore().then((data) => {
-      first = true;
+      first = false;
       x.value = data;
     });
   }

@@ -48,10 +48,10 @@ export async function createCaptureVideo(size: number, cut: CutType) {
   chunks = [];
   _zoom = 1;
 
-  const { seekTime, skill, mainPlayer, subPlayer, vsScore } = cut;
-  console.log({ cut });
+  const { team = "team", seekTime, skill, vsScore } = cut;
   const _skill = skill || "득점&어시";
-  const time = time2sec(seekTime);
+  const { main } = skillInfo(_skill);
+  const seekSec = time2sec(seekTime);
   const segment = getSegment(_skill);
   const totalSec = segment.reduce((acc, seg) => acc + seg.sec, 0);
   const videoElem = document.getElementById("baseVideo") as HTMLVideoElement;
@@ -64,17 +64,13 @@ export async function createCaptureVideo(size: number, cut: CutType) {
   const canvasContext = canvasElem.getContext("2d");
   if (!canvasContext) return { file: null };
 
-  const start = time - totalSec + 2;
+  const start = seekSec - totalSec + 2;
   const originSpeed = videoElem.playbackRate;
   const mimeType = "video/webm; codecs=vp9";
   const opt = { mimeType, videoBitsPerSecond };
-  let x = 0;
-  const fontSize = 48;
-  canvasContext.font = `${fontSize}px Giants-Bold`; // 원하는 폰트 및 크기로 설정
-
-  const prefix = ["리바운드", "스틸", "오펜스리바"].includes(_skill)
-    ? ""
-    : "🏀";
+  let tick = 0,
+    goal = false;
+  canvasContext.font = `1px Giants-Bold`; // 원하는 폰트 및 크기로 설정
 
   const playListener = () => {
     const renderFrame = () => {
@@ -91,40 +87,20 @@ export async function createCaptureVideo(size: number, cut: CutType) {
       }
       canvasContext.drawImage(videoElem, 0, 0, width, height);
 
-      const zoomX = 48 / _zoom + width * ratio;
-      const zoomY = (height - 48) / _zoom + height * ratio * 0.5;
-      const zoomFontSize = fontSize / _zoom;
-      const borderSize = zoomFontSize * 0.3;
+      const currentSec = videoElem.currentTime;
+      if (currentSec > seekSec && !goal) {
+        vsScore[team] += main.pts || 0;
+        goal = true;
+      }
+      drawVideoBanners(
+        canvasElem,
+        { ...cut, seekTime: formatTime(currentSec), vsScore },
+        tick
+      );
 
-      // const text = [
-      //   " " + mainPlayer,
-      //   prefix + _skill,
-      //   subPlayer ? `ast.${subPlayer}` : "",
-      //   `[${JSON.stringify(vsScore)}]`,
-      // ]
-      //   .filter((v) => !!v)
-      //   .join(" - ");
-      // canvasContext.font = `${zoomFontSize}px Giants-Bold`;
-      // const textWidth = canvasContext.measureText(text).width;
-
-      // canvasContext.fillStyle = "white";
-      // roundRect(
-      //   canvasContext,
-      //   zoomX,
-      //   zoomY - zoomFontSize,
-      //   textWidth + borderSize,
-      //   zoomFontSize + borderSize,
-      //   borderSize
-      // );
-
-      // canvasContext.fillStyle = "black";
-      // canvasContext.fillText(text, zoomX, zoomY);
-
-      drawVideoBanners(canvasElem, cut);
-
+      tick++;
       requestAnimationFrame(renderFrame);
     };
-    x = 0;
     renderFrame();
   };
   videoElem.addEventListener("play", playListener);
@@ -138,7 +114,7 @@ export async function createCaptureVideo(size: number, cut: CutType) {
       videoElem.removeEventListener("play", playListener);
       videoElem.pause();
       videoElem.muted = false;
-      videoElem.currentTime = time;
+      videoElem.currentTime = seekSec;
       videoElem.playbackRate = originSpeed;
 
       const file = new File(

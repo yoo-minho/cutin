@@ -72,65 +72,60 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const skillInfo = (skill: string): any =>
-  [...defaultSkill, pts].find((k) => k.name === skill);
-
 const getStatByCut = async (seekTime: string) => {
   const cuts = await fetchAllGameCut();
+  const uniqueTeam = Array.from(new Set(cuts.map((v) => v.team)));
+  const uniquePlayer = Array.from(
+    new Set([...cuts.map((v) => v.mainPlayer), ...cuts.map((v) => v.subPlayer)])
+  );
+
   const vsScore = {} as { [key: string]: number };
+  uniqueTeam.forEach((name) => {
+    if (!name || vsScore[name]) return;
+    vsScore[name] = 0;
+  });
+
   const playerStat = {} as { [key: string]: any };
-  const cutsWithStat = cuts.map((cut) => {
-    const { team = "team", skill = "", mainPlayer = "", subPlayer = "" } = cut;
-
-    const { main, sub } = skillInfo(skill);
-    vsScore[team] = (vsScore[team] || 0) + (main?.score || 0);
-
-    if (!playerStat[mainPlayer]) playerStat[mainPlayer] = {};
-    const {
-      score = 0,
-      rebound = 0,
-      block = 0,
-      steal = 0,
-      assist = 0,
-    } = playerStat[mainPlayer];
-    const {
-      score: pts = 0,
-      rebound: reb = 0,
-      block: blk = 0,
-      steal: stl = 0,
-    } = main;
-    playerStat[mainPlayer] = {
-      score: score + pts,
-      rebound: rebound + reb,
-      block: block + blk,
-      steal: steal + stl,
-      assist,
+  uniquePlayer.forEach((name) => {
+    if (!name || playerStat[name]) return;
+    playerStat[name] = {
+      pts: 0,
+      tpm: 0,
+      reb: 0,
+      orb: 0,
+      ast: 0,
+      blk: 0,
+      stl: 0,
     };
+  });
 
-    if (subPlayer) {
-      if (!playerStat[subPlayer]) playerStat[subPlayer] = {};
-      const {
-        score = 0,
-        rebound = 0,
-        block = 0,
-        steal = 0,
-        assist = 0,
-      } = playerStat[subPlayer];
-      const { assist: ast = 0 } = sub;
-      playerStat[subPlayer] = {
-        score,
-        rebound,
-        block,
-        steal,
-        assist: assist + ast,
-      };
-    }
+  const setPlayerStat = (playerName: string, playerSkill: any) => {
+    if (!playerName) return;
+    const { pts, tpm, reb, orb, blk, stl, ast } = playerStat[playerName];
+    playerStat[playerName] = {
+      pts: pts + playerSkill.pts || 0,
+      tpm: tpm + playerSkill.tpm || 0,
+      reb: reb + playerSkill.reb || 0,
+      orb: orb + playerSkill.orb || 0,
+      blk: blk + playerSkill.blk || 0,
+      stl: stl + playerSkill.stl || 0,
+      ast: ast + playerSkill.ast || 0,
+    };
+  };
 
-    return {
+  const cutsWithStat = cuts.map((cut) => {
+    const preCut = {
       ...cut,
       vsScore: { ...vsScore },
       playerStat: { ...playerStat },
     };
+    const { team = "team", skill = "", mainPlayer = "", subPlayer = "" } = cut;
+    const { main, sub } = skillInfo(skill);
+
+    vsScore[team] += main.pts || 0;
+    setPlayerStat(mainPlayer, main);
+    setPlayerStat(subPlayer, sub);
+    return preCut;
   });
   return cutsWithStat.find((cut) => cut.seekTime === seekTime);
 };
