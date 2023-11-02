@@ -2,33 +2,19 @@ import { createManyHighlight, deleteByVideo } from "../../data/highlights";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { videoName, seekArr } = body;
+  const { videoName, seekTime, seekArr } = body;
   const [clubCode, playDate] = videoName.split("_");
   const seekArrForCreate = seekArr.map((seek) => {
-    let gameNo, quaterNo;
-    if (seek.game) {
-      const arr = seek.game.split(/g|q/g, 2);
-      gameNo = arr[0];
-      quaterNo = arr[1];
-    } else {
-      gameNo = seek.gameNo;
-      quaterNo = seek.quaterNo;
-    }
+    const { gameNo, quaterNo, seekTime, skill } = seek;
+    const { mainPlayer, subPlayer, videoUrl } = seek;
     return {
-      clubCode,
-      playDate,
-      gameNo: +gameNo,
-      quaterNo: +quaterNo,
-      seekTime: seek.time || seek.seekTime,
-      skill: seek.skill,
-      mainPlayer: seek.scorer || seek.mainPlayer,
-      subPlayer: seek.assister || seek.subPlayer,
-      videoName,
-      videoUrl: seek.videoUrl || "",
+      ...{ videoName, seekTime, clubCode, playDate },
+      ...{ gameNo: +gameNo, quaterNo: +quaterNo },
+      ...{ mainPlayer, subPlayer, skill, videoUrl },
     };
   });
   if (seekArr.length === 1) {
-    await deleteByVideo(videoName, seekArr[0].seekTime);
+    await deleteByVideo(videoName, seekTime);
   } else {
     await deleteByVideo(videoName);
   }

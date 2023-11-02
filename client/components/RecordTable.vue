@@ -135,7 +135,6 @@ const makeVideo = async (cut: CutType) => {
   emits("moveSeekPoint", seekTime);
 
   const statByCut = await getStatByCut(seekTime);
-  console.log({ statByCut });
   if (!statByCut) return;
 
   await delay(0.3);

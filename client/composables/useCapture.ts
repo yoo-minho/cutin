@@ -12,22 +12,22 @@ const fps = 60;
 const segmentSet = {
   //8초 => 6초
   deep: [
-    { sec: 2.5, speed: 1.5 },
-    { sec: 0.5, speed: 1.5, zoom: 1.3 }, //2
-    { sec: 3, speed: 1, zoom: 1.3 }, //3
-    { sec: 2, speed: 2 }, //1
+    { sec: 2.5, speed: 1.75 },
+    { sec: 0.5, speed: 1.75, zoom: 1.3 },
+    { sec: 3, speed: 1, zoom: 3 },
+    { sec: 2, speed: 2 },
   ],
   //8초 => 5초
   wide: [
-    { sec: 4, speed: 1.6 }, //2.5
-    { sec: 1, speed: 1 }, //1
-    { sec: 3, speed: 2, zoom: 1.3 }, //1.5
+    { sec: 4, speed: 1.75 },
+    { sec: 1, speed: 1 },
+    { sec: 3, speed: 2, zoom: 3 },
   ],
   //5초 => 3초
   short: [
     { sec: 2, speed: 2 }, //1
-    { sec: 1.5, speed: 1.2, zoom: 1.3 }, //1.25
-    { sec: 1.5, speed: 2, zoom: 1.3 }, //0.75
+    { sec: 1.5, speed: 1.2, zoom: 1.3 },
+    { sec: 1.5, speed: 2, zoom: 1.3 },
   ],
 };
 
@@ -88,6 +88,7 @@ export async function createCaptureVideo(size: number, cut: CutType) {
       canvasContext.drawImage(videoElem, 0, 0, width, height);
 
       const currentSec = videoElem.currentTime;
+      if (currentSec > seekSec - 1) tick++;
       if (currentSec > seekSec && !goal) {
         vsScore[team] += main.pts || 0;
         goal = true;
@@ -97,8 +98,6 @@ export async function createCaptureVideo(size: number, cut: CutType) {
         { ...cut, seekTime: formatTime(currentSec), vsScore },
         tick
       );
-
-      tick++;
       requestAnimationFrame(renderFrame);
     };
     renderFrame();

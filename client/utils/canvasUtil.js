@@ -24,8 +24,7 @@ export function drawBanner(canvas, props) {
 
   const fontAlpha = fontSize * 0.1; //폰트보정
 
-  ctx.font = `${fontSize}px ${font}`; // 원하는 폰트 및 크기로 설정
-  console.log({ letterWidthRatio });
+  ctx.font = `${fontSize}px ${font}`;
   const textWidth = ctx.measureText(text).width * letterWidthRatio;
 
   ctx.fillStyle = bgColor;
@@ -49,7 +48,6 @@ export function drawBanner(canvas, props) {
     ctx.shadowOffsetY = 5;
   }
 
-  // ctx.letterSpacing = letterSpace;
   ctx.fillText(text, textX, textY, textWidth);
 
   if (shadow) {
@@ -105,7 +103,7 @@ export function drawGrid(canvas, gridSize = 16) {
   }
 }
 
-export function drawVideoBanners(canvas, cut, tick = 0) {
+export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
   canvas?.getContext("2d").setTransform(1, 0, 0, 1, 0, 0);
 
   const {
@@ -175,7 +173,7 @@ export function drawVideoBanners(canvas, cut, tick = 0) {
     x: margin,
     y: top,
     text:
-      `🏀 ${formatDate(date)} ${name} 동아리 농구경기` +
+      `🏀 ${formatDate(date)} ${name} 농구경기` +
       (gameNo ? ` - ${gameNo}게임` : ""),
     font: "NanumSquareNeo-Variable",
     fontSize: 16,
@@ -185,7 +183,6 @@ export function drawVideoBanners(canvas, cut, tick = 0) {
   });
 
   const fps = 60;
-  const waitSec = 0.5;
   const floatingSec = 0.2;
   if (tick > fps * waitSec) {
     const tickY =
@@ -209,7 +206,7 @@ export function drawVideoBanners(canvas, cut, tick = 0) {
     yAlign: "top",
     x: margin,
     y: margin,
-    text: "@myhl",
+    text: "농구잘해🏀",
     font: "Giants-Bold",
     fontSize: 36,
     textColor: "orange",

@@ -72,7 +72,7 @@ export const addCuts = async (props: {
 };
 
 export const updateCut = async (
-  type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl",
+  type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl" | "seekTime",
   value: string,
   targetTime?: string
 ) => {
@@ -111,11 +111,9 @@ export const updateCut = async (
     c.seekTime === cutTime ? updateData : c
   );
 
-  if ("loading" === value) return;
-
   await useFetch("/api/highlights/sync", {
     method: "post",
-    body: { videoName, seekArr: [updateData] },
+    body: { videoName, seekTime: cutTime, seekArr: [updateData] },
   });
 };
 

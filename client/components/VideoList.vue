@@ -33,21 +33,15 @@ const submit = async (files: File[]) => {
   }
   const firstFile = videoList.value[0];
   selectFile(firstFile.name, firstFile.url, firstFile.size);
+  uploader.value.blur();
 };
 
 const selectFile = async (videoName: string, url: string, size: number) => {
   const [name, date] = videoName.split("_");
-
   videoProps.value.videoCode = name + "_" + date;
   videoProps.value.videoName = videoName;
   videoProps.value.videoUrl = url;
   videoProps.value.videoSize = size;
-
-  // const cutStore = useCutStore(videoName);
-  // await useFetch("/api/highlights/sync", {
-  //   method: "post",
-  //   body: { videoName, seekArr: cutStore.value },
-  // });
 };
 
 const columns = [

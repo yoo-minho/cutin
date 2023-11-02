@@ -67,10 +67,13 @@ export const skillExpression = (
       break;
     case "리바운드":
       expression.push(`${mainPlayer}의 리바운드!`);
+      break;
     case "오펜스리바":
       expression.push(`${mainPlayer}의 오펜스리바!`);
+      break;
     case "스틸":
       expression.push(`${mainPlayer}의 스틸!`);
+      break;
     case "블락":
       expression.push(`${mainPlayer}의 블락!`);
       break;
