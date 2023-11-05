@@ -13,21 +13,21 @@ const segmentSet = {
   //8초 => 6초
   deep: [
     { sec: 2.5, speed: 1.75 },
-    { sec: 0.5, speed: 1.75, zoom: 1.3 },
-    { sec: 3, speed: 1, zoom: 1.3 },
+    { sec: 0.5, speed: 1.75, zoom: 1 },
+    { sec: 3, speed: 1, zoom: 1 },
     { sec: 2, speed: 2 },
   ],
   //8초 => 5초
   wide: [
     { sec: 4, speed: 1.75 },
     { sec: 1, speed: 1 },
-    { sec: 3, speed: 2, zoom: 3 },
+    { sec: 3, speed: 2, zoom: 1 },
   ],
   //5초 => 3초
   short: [
     { sec: 2, speed: 2 }, //1
-    { sec: 1.5, speed: 1.2, zoom: 1.3 },
-    { sec: 1.5, speed: 2, zoom: 1.3 },
+    { sec: 1.5, speed: 1.2, zoom: 1 },
+    { sec: 1.5, speed: 2, zoom: 1 },
   ],
 };
 

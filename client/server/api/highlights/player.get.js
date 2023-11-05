@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const encPlayer = encodeURIComponent(player);
   const outputPath = playerPath + `${encPlayer}.mp4`;
 
-  if (existsSync(outputPath)) {
+  if (false && existsSync(outputPath)) {
     return {
       fileUrl: `/v/${clubCode}-${playDate}-player-${encPlayer}`,
     };
