@@ -1,7 +1,12 @@
 import ffmpeg from "fluent-ffmpeg";
+import { path } from "@ffmpeg-installer/ffmpeg";
+ffmpeg.setFfmpegPath(path);
+console.log({ path });
+
 import fs from "node:fs";
 
 export const ffmpegPromise = ({ inputPath, outputPath }) => {
+  console.log("ffmpegPromise", { inputPath, outputPath });
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
@@ -20,7 +25,7 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
         resolve();
       })
       .on("error", (x, y, z) => {
-        // console.log("uuu", x, y, z);
+        console.log("uuu", x, y, z);
         reject();
       })
       .run();

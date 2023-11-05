@@ -113,28 +113,16 @@ async function handleKeyPress(event: any, pressedKeys: any) {
   const controlState = useControlState();
   const { fastForwardSec, rewindSec } = controlState.value;
 
-  const moveNextTime = (n: 1 | 0 | -1) => {
-    const videoPropsStore = useVideoPropsStore();
-    const videoName = videoPropsStore.value.videoName;
-    const cutStore = useCutStore(videoName);
-    const cutTime = videoPropsStore.value.currentTime;
-    let targetIdx = -1;
-    cutStore.value.forEach((cut, idx) => {
-      if (targetIdx < 0 && cut.seekTime >= cutTime) targetIdx = idx;
-    });
-    if (!cutStore.value.find((cut) => cut.seekTime === cutTime)) n = 0;
-    const def = "0:00:00";
-    return cutStore.value.find((_, i) => i === targetIdx + n)?.seekTime || def;
-  };
+  const moveNextTime = async (n: 1 | 0 | -1) => (await moveNextCut(n)).seekTime;
 
   switch (event.key) {
     case "ArrowUp":
-      video.value.currentTime = time2sec(moveNextTime(-1));
+      video.value.currentTime = time2sec(await moveNextTime(-1));
       break;
 
     case "ArrowDown":
       //다음시간대로
-      video.value.currentTime = time2sec(moveNextTime(1));
+      video.value.currentTime = time2sec(await moveNextTime(1));
       break;
 
     case "ArrowLeft":

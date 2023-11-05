@@ -15,18 +15,19 @@ const gameTab = ref("1");
 const quaterTab = ref("1");
 const currGame = useCurrGame();
 
-let cutStore = ref<any[]>();
+let cutStore = await useCutStore(currVideoName.value);
 
 watch([gameTab, quaterTab], () => {
   currGame.value = gameTab.value + "g" + quaterTab.value + "q";
 });
 
-watch(currVideoName, () => {
-  cutStore = useCutStore(currVideoName.value);
+watch(currVideoName, async () => {
+  cutStore = await useCutStore(currVideoName.value);
   const temp = gameTab.value;
   gameTab.value = "";
   gameTab.value = temp;
 });
+``;
 
 const file = ref();
 const uploader = ref();
@@ -72,7 +73,7 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const getStatByCut = async (seekTime: string) => {
+const getStatByCut = async (seekTime?: string) => {
   const cuts = await fetchAllGameCut();
   const uniqueTeam = Array.from(new Set(cuts.map((v) => v.team)));
   const uniquePlayer = Array.from(
@@ -103,13 +104,13 @@ const getStatByCut = async (seekTime: string) => {
     if (!playerName) return;
     const { pts, tpm, reb, orb, blk, stl, ast } = playerStat[playerName];
     playerStat[playerName] = {
-      pts: pts + playerSkill.pts || 0,
-      tpm: tpm + playerSkill.tpm || 0,
-      reb: reb + playerSkill.reb || 0,
-      orb: orb + playerSkill.orb || 0,
-      blk: blk + playerSkill.blk || 0,
-      stl: stl + playerSkill.stl || 0,
-      ast: ast + playerSkill.ast || 0,
+      pts: pts + (playerSkill.pts || 0),
+      tpm: tpm + (playerSkill.tpm || 0),
+      reb: reb + (playerSkill.reb || 0),
+      orb: orb + (playerSkill.orb || 0),
+      blk: blk + (playerSkill.blk || 0),
+      stl: stl + (playerSkill.stl || 0),
+      ast: ast + (playerSkill.ast || 0),
     };
   };
 
@@ -127,6 +128,11 @@ const getStatByCut = async (seekTime: string) => {
     setPlayerStat(subPlayer, sub);
     return preCut;
   });
+  if (!seekTime)
+    return {
+      vsScore: { ...vsScore },
+      playerStat: { ...playerStat },
+    };
   return cutsWithStat.find((cut) => cut.seekTime === seekTime);
 };
 
@@ -134,9 +140,13 @@ const makeVideo = async (cut: CutType) => {
   const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
 
-  const statByCut = await getStatByCut(seekTime);
-  if (!statByCut) return;
+  console.log({ statByCut: await getStatByCut() });
 
+  const statByCut = await getStatByCut(seekTime);
+  if (!statByCut || !("seekTime" in statByCut)) {
+    console.log(statByCut);
+    return;
+  }
   await delay(0.3);
   const { videoName, videoSize } = videoProps.value;
   const [clubName, date, ...rest] = videoName.split("_");

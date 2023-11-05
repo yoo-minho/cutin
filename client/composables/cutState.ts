@@ -1,18 +1,14 @@
 import { Notify, Dialog } from "quasar";
 import { CutType } from "@/types";
 
-let first = true;
-export const useCutStore = (name: string = "") => {
+export const useCutStore = async (name: string = "") => {
   const videoPropsStore = useVideoPropsStore();
   name = name || videoPropsStore.value.videoName;
-  const x = useState<CutType[]>(`${name}CutStore`, () => []);
-  if (first) {
-    loadCutStore().then((data) => {
-      first = false;
-      x.value = data;
-    });
+  const state = useState<CutType[]>(`${name}CutStore`, () => []);
+  if (state.value.length === 0) {
+    state.value = await loadCutStore(name);
   }
-  return x;
+  return state;
 };
 
 export const addCut = async () => {
@@ -20,7 +16,7 @@ export const addCut = async () => {
   const { currentTime, videoName } = videoPropsStore.value;
 
   const currGame = useCurrGame();
-  const cutStore = useCutStore();
+  const cutStore = await useCutStore();
   const newStore = [...cutStore.value].filter(
     (c) => c.seekTime !== currentTime
   );
@@ -80,7 +76,7 @@ export const updateCut = async (
   const videoName = videoPropsStore.value.videoName;
   const cutTime = targetTime || videoPropsStore.value.currentTime;
 
-  const cutStore = useCutStore(videoName);
+  const cutStore = await useCutStore(videoName);
   const cut = cutStore.value.find((c) => c.seekTime === cutTime);
 
   if (!cut) {
@@ -117,9 +113,23 @@ export const updateCut = async (
   });
 };
 
-async function loadCutStore() {
+export const moveNextCut = async (n: 1 | 0 | -1) => {
   const videoPropsStore = useVideoPropsStore();
-  const videoName = videoPropsStore.value.videoName;
+  const { videoName, currentTime: cutTime } = videoPropsStore.value;
+  const cutStore = await useCutStore(videoName);
+  let targetIdx = -1;
+  cutStore.value.forEach((cut, idx) => {
+    if (targetIdx < 0 && cut.seekTime >= cutTime) targetIdx = idx;
+  });
+  if (!cutStore.value.find((cut) => cut.seekTime === cutTime)) n = 0;
+  return (
+    cutStore.value.find((_, i) => i === targetIdx + n) || {
+      seekTime: "0:00:00",
+    }
+  );
+};
+
+async function loadCutStore(videoName: string) {
   const { data } = await useFetch<CutType[]>("/api/highlights", {
     params: { videoName },
   });

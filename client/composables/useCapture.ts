@@ -14,7 +14,7 @@ const segmentSet = {
   deep: [
     { sec: 2.5, speed: 1.75 },
     { sec: 0.5, speed: 1.75, zoom: 1.3 },
-    { sec: 3, speed: 1, zoom: 3 },
+    { sec: 3, speed: 1, zoom: 1.3 },
     { sec: 2, speed: 2 },
   ],
   //8초 => 5초
