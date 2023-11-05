@@ -21,6 +21,24 @@ export async function getHighlightByVideoByGameNo(clubCode, playDate, gameNo) {
   }));
 }
 
+export async function getHighlightUrlByPlayer(
+  clubCode,
+  playDate,
+  gameNo,
+  player
+) {
+  return await prisma.highlight.findMany({
+    select: { videoUrl: true },
+    where: {
+      clubCode,
+      playDate,
+      gameNo: +gameNo,
+      OR: [{ mainPlayer: player }, { subPlayer: player }],
+    },
+    orderBy: [{ gameNo: "asc" }, { quaterNo: "asc" }, { seekTime: "asc" }],
+  });
+}
+
 export async function createManyHighlight(data) {
   const highlights = await prisma.highlight.createMany({
     data,

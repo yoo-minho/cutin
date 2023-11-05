@@ -50,7 +50,7 @@ export async function createCaptureVideo(size: number, cut: CutType) {
 
   const { team = "team", seekTime, skill, vsScore } = cut;
   const _skill = skill || "득점&어시";
-  const { main } = skillInfo(_skill);
+  const { main } = getSkillPoints(_skill);
   const seekSec = time2sec(seekTime);
   const segment = getSegment(_skill);
   const totalSec = segment.reduce((acc, seg) => acc + seg.sec, 0);

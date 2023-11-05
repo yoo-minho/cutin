@@ -39,7 +39,8 @@ function moveSeekPoint(time: string) {
 async function handleKeyPress(event: any, pressedKeys: any) {
   event.preventDefault();
 
-  const teamStore = useTeamStore();
+  const videoProps = useVideoPropsStore();
+  const teamStore = await useTeamStore(videoProps.value.videoName);
 
   const playerRow1 = teamStore.value[0];
   const playerRow2 = teamStore.value[1];

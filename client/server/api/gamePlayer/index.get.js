@@ -1,7 +1,6 @@
 import { getGamePlayer } from "~/server/data/gamePlayer";
 
 export default defineEventHandler(async (event) => {
-  const { videoCode } = getQuery(event);
-  const [clubCode, playDate] = videoCode.split("_");
+  const { clubCode, playDate } = getQuery(event);
   return await getGamePlayer(clubCode, playDate);
 });

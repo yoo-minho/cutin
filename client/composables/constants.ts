@@ -31,8 +31,9 @@ export const defaultSkill = [
   { key: "P" },
 ];
 
-export const skillInfo = (skill: string): any =>
-  [...defaultSkill, pts].find((k) => k.name === skill);
+export const getSkillPoints = (skill: string): any => {
+  return [...defaultSkill, pts].find((k) => k.name === skill);
+};
 
 export const skillExpression = (
   skill: string,

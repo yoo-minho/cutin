@@ -73,91 +73,29 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const getStatByCut = async (seekTime?: string) => {
-  const cuts = await fetchAllGameCut();
-  const uniqueTeam = Array.from(new Set(cuts.map((v) => v.team)));
-  const uniquePlayer = Array.from(
-    new Set([...cuts.map((v) => v.mainPlayer), ...cuts.map((v) => v.subPlayer)])
-  );
-
-  const vsScore = {} as { [key: string]: number };
-  uniqueTeam.forEach((name) => {
-    if (!name || vsScore[name]) return;
-    vsScore[name] = 0;
-  });
-
-  const playerStat = {} as { [key: string]: any };
-  uniquePlayer.forEach((name) => {
-    if (!name || playerStat[name]) return;
-    playerStat[name] = {
-      pts: 0,
-      tpm: 0,
-      reb: 0,
-      orb: 0,
-      ast: 0,
-      blk: 0,
-      stl: 0,
-    };
-  });
-
-  const setPlayerStat = (playerName: string, playerSkill: any) => {
-    if (!playerName) return;
-    const { pts, tpm, reb, orb, blk, stl, ast } = playerStat[playerName];
-    playerStat[playerName] = {
-      pts: pts + (playerSkill.pts || 0),
-      tpm: tpm + (playerSkill.tpm || 0),
-      reb: reb + (playerSkill.reb || 0),
-      orb: orb + (playerSkill.orb || 0),
-      blk: blk + (playerSkill.blk || 0),
-      stl: stl + (playerSkill.stl || 0),
-      ast: ast + (playerSkill.ast || 0),
-    };
-  };
-
-  const cutsWithStat = cuts.map((cut) => {
-    const preCut = {
-      ...cut,
-      vsScore: { ...vsScore },
-      playerStat: { ...playerStat },
-    };
-    const { team = "team", skill = "", mainPlayer = "", subPlayer = "" } = cut;
-    const { main, sub } = skillInfo(skill);
-
-    vsScore[team] += main.pts || 0;
-    setPlayerStat(mainPlayer, main);
-    setPlayerStat(subPlayer, sub);
-    return preCut;
-  });
-  if (!seekTime)
-    return {
-      vsScore: { ...vsScore },
-      playerStat: { ...playerStat },
-    };
-  return cutsWithStat.find((cut) => cut.seekTime === seekTime);
-};
-
 const makeVideo = async (cut: CutType) => {
   const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
 
-  console.log({ statByCut: await getStatByCut() });
-
-  const statByCut = await getStatByCut(seekTime);
-  if (!statByCut || !("seekTime" in statByCut)) {
-    console.log(statByCut);
-    return;
-  }
-  await delay(0.3);
   const { videoName, videoSize } = videoProps.value;
-  const [clubName, date, ...rest] = videoName.split("_");
+  const [clubCode, playDate, gameNo, ...rest] = videoName.split("_");
+
+  const cutsWithStat = await getCutsWithStat({
+    clubCode,
+    playDate,
+    gameNo,
+    seekTime,
+  });
+  if (!cutsWithStat || !("seekTime" in cutsWithStat)) return;
+
   const path = [
-    clubName,
-    date,
+    clubCode,
+    playDate,
     currGame.value,
     seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
   ].join("/");
 
-  const { file } = await createCaptureVideo(videoSize, statByCut);
+  const { file } = await createCaptureVideo(videoSize, cutsWithStat);
   if (file === null) return;
 
   const body = new FormData();

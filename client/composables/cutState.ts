@@ -1,12 +1,10 @@
 import { Notify, Dialog } from "quasar";
 import { CutType } from "@/types";
 
-export const useCutStore = async (name: string = "") => {
-  const videoPropsStore = useVideoPropsStore();
-  name = name || videoPropsStore.value.videoName;
-  const state = useState<CutType[]>(`${name}CutStore`, () => []);
+export const useCutStore = async (videoName: string) => {
+  const state = useState<CutType[]>(`${videoName}CutStore`, () => []);
   if (state.value.length === 0) {
-    state.value = await loadCutStore(name);
+    state.value = await loadCutStore(videoName);
   }
   return state;
 };
@@ -16,7 +14,7 @@ export const addCut = async () => {
   const { currentTime, videoName } = videoPropsStore.value;
 
   const currGame = useCurrGame();
-  const cutStore = await useCutStore();
+  const cutStore = await useCutStore(videoName);
   const newStore = [...cutStore.value].filter(
     (c) => c.seekTime !== currentTime
   );
@@ -136,11 +134,153 @@ async function loadCutStore(videoName: string) {
   return data.value || [];
 }
 
-export async function fetchAllGameCut() {
-  const videoPropsStore = useVideoPropsStore();
-  const videoName = videoPropsStore.value.videoName;
-  const { data } = await useFetch<CutType[]>("/api/highlights", {
-    params: { videoName, multiVideo: true },
+export async function fetchAllGameCut(props: {
+  clubCode: string;
+  playDate: string;
+  gameNo: string;
+}) {
+  const { clubCode, playDate, gameNo } = props;
+  const { data } = await useFetch<CutType[]>("/api/highlights/game", {
+    params: { clubCode, playDate, gameNo },
   });
   return data.value || [];
+}
+
+const uniqueTeam = (cuts: CutType[]) =>
+  Array.from(new Set(cuts.map((v) => v.team)));
+const uniquePlayer = (cuts: CutType[]) =>
+  Array.from(
+    new Set([...cuts.map((v) => v.mainPlayer), ...cuts.map((v) => v.subPlayer)])
+  );
+
+export const getCutsWithStat = async (props: any) => {
+  const { clubCode, playDate, gameNo, seekTime } = props;
+  const cuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
+
+  const vsScore = {} as { [key: string]: number };
+  uniqueTeam(cuts).forEach((name) => {
+    if (!name || vsScore[name]) return;
+    vsScore[name] = 0;
+  });
+
+  const playerStat = {} as { [key: string]: any };
+  uniquePlayer(cuts).forEach((name) => {
+    if (!name || playerStat[name]) return;
+    playerStat[name] = {
+      pts: 0,
+      tpm: 0,
+      reb: 0,
+      orb: 0,
+      ast: 0,
+      blk: 0,
+      stl: 0,
+    };
+  });
+
+  const setPlayerStat = (playerName: string, playerSkill: any) => {
+    if (!playerName) return;
+    const { pts, tpm, reb, orb, blk, stl, ast } = playerStat[playerName];
+    playerStat[playerName] = {
+      pts: pts + (playerSkill.pts || 0),
+      tpm: tpm + (playerSkill.tpm || 0),
+      reb: reb + (playerSkill.reb || 0),
+      orb: orb + (playerSkill.orb || 0),
+      blk: blk + (playerSkill.blk || 0),
+      stl: stl + (playerSkill.stl || 0),
+      ast: ast + (playerSkill.ast || 0),
+    };
+  };
+
+  const cutsWithStat = cuts.map((cut) => {
+    const preCut = {
+      ...cut,
+      vsScore: { ...vsScore },
+      playerStat: { ...playerStat },
+    };
+    const { team = "team", skill = "", mainPlayer = "", subPlayer = "" } = cut;
+    const { main, sub } = getSkillPoints(skill);
+
+    vsScore[team] += main.pts || 0;
+    setPlayerStat(mainPlayer, main);
+    setPlayerStat(subPlayer, sub);
+    return preCut;
+  });
+  return cutsWithStat.find((cut) => cut.seekTime === seekTime);
+};
+
+export const getCutsWithStat2 = async (playerArr: any[], props: any) => {
+  const vsScore = {} as { [key: string]: number };
+
+  let playerArrWithStat = playerArr
+    .filter((v) => !!v.player)
+    .map((v) => {
+      const { player, teamName } = v;
+      vsScore[teamName] = 0;
+      return {
+        name: player,
+        team: teamName,
+        ...{ pts: 0, tpm: 0, ast: 0 },
+        ...{ reb: 0, orb: 0, blk: 0, stl: 0 },
+      };
+    });
+
+  const setPlayerStat = (playerName: string, skillPoints: any) => {
+    playerArrWithStat = playerArrWithStat.map((v) => {
+      if (playerName !== v.name) return v;
+      const { pts, tpm, reb, orb, blk, stl, ast } = v;
+      const {
+        pts: _pts = 0,
+        tpm: _tpm = 0,
+        ast: _ast = 0,
+        reb: _reb = 0,
+        orb: _orb = 0,
+        blk: _blk = 0,
+        stl: _stl = 0,
+      } = skillPoints;
+      return {
+        ...v,
+        ...{ pts: pts + _pts, tpm: tpm + _tpm, ast: ast + _ast },
+        ...{ reb: reb + _reb, orb: orb + _orb },
+        ...{ blk: blk + _blk, stl: stl + _stl },
+      };
+    });
+  };
+
+  const { clubCode, playDate, gameNo } = props;
+  const cuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
+  cuts.forEach((cut) => {
+    const { team = "team", skill = "", mainPlayer = "", subPlayer = "" } = cut;
+    const { main, sub } = getSkillPoints(skill);
+    vsScore[team] += main.pts || 0;
+    setPlayerStat(mainPlayer, main);
+    setPlayerStat(subPlayer, sub);
+  });
+
+  //https://namu.wiki/w/%EB%86%8D%EA%B5%AC/%EA%B8%B0%EB%A1%9D%20%EA%B3%84%EC%82%B0%EB%B2%95#s-5.5.3
+  const getPlayerStatByTeam = (teamName: string) =>
+    playerArrWithStat
+      .map((v) => ({ ...v, kbl: kblEff(v) }))
+      .filter((v) => v.team === teamName)
+      .sort((a, b) => b.kbl - a.kbl);
+
+  const [teamName1, teamName2] = Object.keys(vsScore);
+
+  return [
+    {
+      teamName: teamName1,
+      totalPts: vsScore[teamName1],
+      playerStat: getPlayerStatByTeam(teamName1),
+    },
+    {
+      teamName: teamName2,
+      totalPts: vsScore[teamName2],
+      playerStat: getPlayerStatByTeam(teamName2),
+    },
+  ];
+};
+
+function kblEff(v: any) {
+  return (
+    (v.pts + v.stl + v.blk + (v.reb - v.orb)) * 1.0 + (v.orb + v.ast) * 1.5
+  );
 }
