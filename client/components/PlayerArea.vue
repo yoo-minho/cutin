@@ -2,10 +2,11 @@
 const videoProps = useVideoPropsStore();
 const currVideoName = toRef(videoProps.value, "videoName");
 
-let teamStore = await useTeamStore(currVideoName.value);
+const teams = ref();
 
 watch(currVideoName, async () => {
-  teamStore = await useTeamStore(currVideoName.value);
+  const teamStore = await useTeamStore(currVideoName.value);
+  teams.value = teamStore.value;
 });
 
 const _addTeam = () => {
@@ -42,13 +43,13 @@ const _addTeam = () => {
       {{ videoProps.videoCode ? `'${videoProps.videoCode}'` : "" }} 이 날의 팀
       추가
     </q-btn>
-    {{ videoProps }}
-    {{ teamStore }}
-    <player-list
-      v-for="team in teamStore"
-      :teamName="team.name"
-      :players="team.players.filter((v:any) => !!v.name)"
-    />
+    <template v-for="team in teams">
+      <PlayerList
+        :videoName="videoProps.videoName"
+        :teamName="team.name"
+        :players="team.players.filter((v:any) => !!v.name)"
+      />
+    </template>
   </div>
 </template>
 <style lang="scss" scoped></style>

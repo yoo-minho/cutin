@@ -11,12 +11,15 @@ export default defineEventHandler(async (event) => {
   const fileName = filePathArr[filePathArr.length - 1] + ".mp4";
   const filePath = `./upload/${filePathArr.join("/")}.mp4`;
 
+  console.log({ fileName, filePath });
+
   // 파일이 존재하는지 확인
   if (!existsSync(filePath)) {
     setResponseStatus(event, 404);
     return "No File";
   } else {
     console.log("파일있어!");
+    setResponseStatus(event, 200);
   }
 
   // 응답 헤더 설정

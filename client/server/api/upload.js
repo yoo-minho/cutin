@@ -1,8 +1,6 @@
-import { mkdirSync, unlinkSync, writeFileSync } from "fs";
 import { ffmpegPromise } from "../../utils/videoUtil";
 
 export default defineEventHandler(async (event) => {
-  console.log("xxxxxxx");
   const form = await readMultipartFormData(event);
 
   if (!form || form.length === 0) {

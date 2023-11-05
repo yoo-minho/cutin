@@ -35,6 +35,7 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
 export const mergePromise = ({ inputPaths, outputPath, isDelete }) => {
   return new Promise((resolve, reject) => {
     const ff = ffmpeg();
+    console.log({ inputPaths });
     inputPaths.forEach((path) => ff.input(path));
     ff.on("end", () => {
       if (isDelete) inputPaths.forEach(fs.unlinkSync);

@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { PlayerType } from "~/composables/playerState";
 
-const props = defineProps<{ teamName: string; players: PlayerType[] }>();
+const props = defineProps<{
+  videoName: string;
+  teamName: string;
+  players: PlayerType[];
+}>();
 
 const _addPlayer = () => {
   Dialog.create({
@@ -12,7 +16,7 @@ const _addPlayer = () => {
     ok: "추가",
     cancel: "취소",
   }).onOk((val: string) => {
-    addPlayerOnTeam(props.teamName, val);
+    addPlayerOnTeam(props.videoName, props.teamName, val);
   });
 };
 
@@ -22,7 +26,7 @@ const _removePlayer = (name: string) => {
     ok: "제거",
     cancel: "취소",
   }).onOk(() => {
-    removePlayerOnTeam(props.teamName, name);
+    removePlayerOnTeam(props.videoName, props.teamName, name);
   });
 };
 
@@ -32,7 +36,7 @@ const _removeTeam = () => {
     ok: "제거",
     cancel: "취소",
   }).onOk(() => {
-    removeTeam(props.teamName);
+    removeTeam(props.videoName, props.teamName);
   });
 };
 </script>

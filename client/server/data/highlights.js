@@ -27,7 +27,7 @@ export async function getHighlightUrlByPlayer(
   gameNo,
   player
 ) {
-  return await prisma.highlight.findMany({
+  const data = await prisma.highlight.findMany({
     select: { videoUrl: true },
     where: {
       clubCode,
@@ -37,6 +37,7 @@ export async function getHighlightUrlByPlayer(
     },
     orderBy: [{ gameNo: "asc" }, { quaterNo: "asc" }, { seekTime: "asc" }],
   });
+  return data.map((v) => v.videoUrl);
 }
 
 export async function createManyHighlight(data) {

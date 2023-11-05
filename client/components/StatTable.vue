@@ -73,7 +73,9 @@ const openViewer = async (player: string) => {
   const { data } = await useFetch("/api/highlights/player", {
     params: props,
   });
-  console.log(data.value);
+  const { fileUrl } = data.value || {};
+  if (!fileUrl) return;
+  videoViewerSrc.value = fileUrl;
 };
 </script>
 <template>
@@ -121,9 +123,9 @@ const openViewer = async (player: string) => {
           {{ props.row.kbl }}
         </q-td>
       </q-tr>
-      <q-dialog v-model="videoViewerOn">
-        <mini-video :src="videoViewerSrc" />
-      </q-dialog>
     </template>
   </q-table>
+  <q-dialog v-model="videoViewerOn">
+    <mini-video :src="videoViewerSrc" />
+  </q-dialog>
 </template>
