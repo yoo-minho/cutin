@@ -22,6 +22,7 @@ export default defineEventHandler(async (event) => {
   );
 
   const inputPaths = urls
+    .filter((url) => !!url)
     .map((url) => {
       const filePathArr = url.replace("/v/", "").split("-");
       return `./upload/${filePathArr.join("/")}.mp4`;

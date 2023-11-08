@@ -92,10 +92,18 @@ const makeVideo = async (cut: CutType) => {
     clubCode,
     playDate,
     currGame.value,
-    seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", ""),
+    seekTime.replace(/:/g, "") +
+      "_" +
+      rest.join("_").replace(".mp4", "").replace(".MOV", ""),
   ].join("/");
 
+  const start = performance.now();
   const { file } = await createCaptureVideo(videoSize, cutsWithStat);
+  console.log(
+    "canvas draw",
+    Math.round((performance.now() - start) / 100) / 10
+  );
+  const start2 = performance.now();
   if (file === null) return;
 
   const body = new FormData();
@@ -103,6 +111,7 @@ const makeVideo = async (cut: CutType) => {
   body.append("path", path);
   const { data } = await useFetch("/api/upload", { method: "POST", body });
   if (!data.value) return;
+  console.log("ffmpeg", Math.round((performance.now() - start2) / 100) / 10);
 
   const { fileUrl } = data.value;
   updateCut("videoUrl", fileUrl, seekTime);

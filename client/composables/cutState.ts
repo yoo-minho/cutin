@@ -257,11 +257,28 @@ export const getCutsWithStat2 = async (playerArr: any[], props: any) => {
   });
 
   //https://namu.wiki/w/%EB%86%8D%EA%B5%AC/%EA%B8%B0%EB%A1%9D%20%EA%B3%84%EC%82%B0%EB%B2%95#s-5.5.3
-  const getPlayerStatByTeam = (teamName: string) =>
-    playerArrWithStat
+  const getPlayerStatByTeam = (teamName: string) => {
+    const result = playerArrWithStat
       .map((v) => ({ ...v, kbl: kblEff(v) }))
       .filter((v) => v.team === teamName)
       .sort((a, b) => b.kbl - a.kbl);
+    const sum = (v: string) =>
+      result.reduce((curr, acc: any) => curr + acc[v], 0);
+
+    return [
+      ...result,
+      {
+        name: "전체",
+        pts: sum("pts"),
+        tpm: sum("tpm"),
+        ast: sum("ast"),
+        reb: sum("reb"),
+        orb: sum("orb"),
+        blk: sum("blk"),
+        stl: sum("stl"),
+      },
+    ];
+  };
 
   const [teamName1, teamName2] = Object.keys(vsScore);
 

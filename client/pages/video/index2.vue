@@ -2,7 +2,7 @@
 const props = {
   clubCode: "gba",
   playDate: "20231104",
-  gameNo: 1,
+  gameNo: 2,
 };
 
 const playerArr = await findPlayer(props);

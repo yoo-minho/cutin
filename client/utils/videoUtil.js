@@ -10,9 +10,11 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
-      .videoFilters("setpts=2*PTS")
-      .fps(30)
-      .videoCodec("libx265")
+      .videoFilters("setpts=2.5*PTS")
+      .fps(24)
+      .videoCodec("libx264") //압축 낮고 속도 높음
+      // .videoCodec("libx265") //압축 높이고 속도 낮음
+      .outputOptions(["-c:v h264_nvenc", "-preset fast"]) // NVENC 설정
       .output(outputPath)
       .on("start", function (commandLine) {
         // console.log("FFmpeg process started with command: " + commandLine);
@@ -36,12 +38,44 @@ export const mergePromise = ({ inputPaths, outputPath, isDelete }) => {
   return new Promise((resolve, reject) => {
     const ff = ffmpeg();
     console.log({ inputPaths });
-    inputPaths.forEach((path) => ff.input(path));
-    ff.on("end", () => {
-      if (isDelete) inputPaths.forEach(fs.unlinkSync);
-      resolve();
-    })
-      .on("error", () => reject())
+    let xx = "";
+
+    inputPaths.forEach((path, i) => {
+      ff.input(path);
+      xx += `[${i}:v]`;
+    });
+
+    console.log("xxxxxxxxxxxxxxx", xx);
+
+    //   ff.complexFilter([`${xx}concat=n=${inputPaths.length}:v=1:a=0[video]`])
+    //     .output(outputPath)
+    //     .outputOptions([
+    //       "-c:v copy", // Copy the video codec
+    //     ])
+    //     .on("end", () => {
+    //       if (isDelete) inputPaths.forEach(fs.unlinkSync);
+    //       resolve();
+    //     })
+    //     .on("error", (a, b, c) => {
+    //       console.log(a, b, c);
+    //       reject();
+    //     })
+    //     .run();
+    //   // .mergeToFile(outputPath, "./temp");
+    // });
+
+    ff
+      // .outputOptions([
+      //   "-c:v copy", // Copy the video codec
+      // ])
+      .on("end", () => {
+        if (isDelete) inputPaths.forEach(fs.unlinkSync);
+        resolve();
+      })
+      .on("error", (a, b, c) => {
+        console.log(a, b, c);
+        reject();
+      })
       .mergeToFile(outputPath, "./temp");
   });
 };

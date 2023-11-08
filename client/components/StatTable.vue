@@ -63,18 +63,23 @@ const videoViewerOn = ref(false);
 const videoViewerSrc = ref("");
 
 const openViewer = async (player: string) => {
-  videoViewerOn.value = true;
   const props = {
     clubCode: "gba",
     playDate: "20231104",
     gameNo: 1,
     player,
   };
+  const start = performance.now();
   const { data } = await useFetch("/api/highlights/player", {
     params: props,
   });
+  console.log(
+    "canvas draw",
+    Math.round((performance.now() - start) / 100) / 10
+  );
   const { fileUrl } = data.value || {};
   if (!fileUrl) return;
+  videoViewerOn.value = true;
   videoViewerSrc.value = fileUrl;
 };
 </script>

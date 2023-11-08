@@ -104,6 +104,12 @@ export function drawGrid(canvas, gridSize = 16) {
 }
 
 export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
+  const ratio = 0.75;
+  const bigFontSize = 48 * ratio;
+  const fontSize = 36 * ratio;
+  const smallFontSize = 18 * ratio;
+  const padding = 8 * ratio;
+  const margin = 32 * ratio;
   canvas?.getContext("2d").setTransform(1, 0, 0, 1, 0, 0);
 
   const {
@@ -124,16 +130,15 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
   const [hour, min, sec] = seekTime.split(":");
   const expression = skillExpression(skill, mainPlayer, subPlayer);
 
-  const margin = 32;
   const { top, right } = drawBanner(canvas, {
     x: margin,
     y: (canvas?.height || 0) - margin,
     text: `${aName}     ${aScore}`,
     font: "Giants-Bold",
-    fontSize: 32,
+    fontSize,
     textColor: "black",
     bgColor: "white",
-    padding: 8,
+    padding,
   });
 
   const { right: right2 } = drawBanner(canvas, {
@@ -141,10 +146,10 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     y: (canvas?.height || 0) - margin,
     text: `${quaterNo}Q`,
     font: "Giants-Bold",
-    fontSize: 32,
+    fontSize,
     textColor: "white",
     bgColor: "grey",
-    padding: 8,
+    padding,
   });
 
   const { right: right3 } = drawBanner(canvas, {
@@ -152,10 +157,10 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     y: (canvas?.height || 0) - margin,
     text: `${bScore}     ${bName}`,
     font: "Giants-Bold",
-    fontSize: 32,
+    fontSize,
     textColor: "black",
     bgColor: "white",
-    padding: 8,
+    padding,
   });
 
   drawBanner(canvas, {
@@ -163,10 +168,10 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     y: (canvas?.height || 0) - margin,
     text: `${min}:${sec}`,
     font: "Giants-Bold",
-    fontSize: 32,
+    fontSize,
     textColor: "white",
     bgColor: "black",
-    padding: 8,
+    padding,
   });
 
   drawBanner(canvas, {
@@ -176,17 +181,17 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
       `🏀 ${formatDate(date)} ${name} 농구경기` +
       (gameNo ? ` - ${gameNo}게임` : ""),
     font: "NanumSquareNeo-Variable",
-    fontSize: 16,
+    fontSize: smallFontSize,
     textColor: "white",
     bgColor: "yellowgreen",
-    padding: 8,
+    padding,
   });
 
   const fps = 60;
   const floatingSec = 0.2;
   if (tick > fps * waitSec) {
     const tickY =
-      (margin + 48) *
+      (margin + fontSize) *
       Math.max(1 - (tick - fps * waitSec) / (fps * floatingSec), 0);
     drawBanner(canvas, {
       xAlign: "right",
@@ -194,11 +199,11 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
       y: (canvas?.height || 0) - margin + tickY,
       text: expression,
       font: "Giants-Bold",
-      fontSize: 48,
+      fontSize: bigFontSize,
       textColor: "white",
       textStrokeColor: "black",
       letterWidthRatio: 0.95,
-      padding: 8,
+      padding,
     });
   }
 
@@ -206,12 +211,13 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     yAlign: "top",
     x: margin,
     y: margin,
-    text: "농구잘해🏀",
-    font: "Giants-Bold",
-    fontSize: 36,
-    textColor: "orange",
-    textStrokeColor: "black",
-    padding: 8,
+    text: "MyBasketRecord🏀",
+    font: "SDSamliphopangche_Outline",
+    fontSize: fontSize,
+    textColor: "black",
+    // textStrokeColor: "black",
+    letterWidthRatio: 0.95,
+    padding,
     shadow: true,
   });
 }
