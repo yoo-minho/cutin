@@ -1,4 +1,4 @@
-import { CutType } from "@/types";
+import type { CutType } from "@/types";
 
 const ratioSet = {
   "360p": [640, 360, 6],

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CutType } from "@/types";
+import type { CutType } from "@/types";
 import { Loading, QSpinner } from "quasar";
 
 const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
@@ -362,11 +362,7 @@ const columns = [
     <q-separator color="grey-7" size="0.5px" />
   </div>
 </template>
-<style lang="scss">
-.q-table__container {
-  border-radius: 0;
-}
-
+<style>
 .my-sticky-header-table {
   height: calc(100vh - 185px);
 
@@ -392,5 +388,9 @@ const columns = [
   tbody {
     scroll-margin-top: 48px;
   }
+}
+
+.q-table__container {
+  border-radius: 0;
 }
 </style>

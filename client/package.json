@@ -12,11 +12,11 @@
     "@nuxt/devtools": "latest",
     "@quasar/extras": "^1.16.6",
     "npm": "^10.1.0",
-    "nuxt": "^3.7.3",
+    "nuxt": "^3.8.1",
     "nuxt-quasar-ui": "^2.0.5",
     "prisma": "^5.4.1",
     "quasar": "^2.12.7",
-    "sass": "^1.67.0",
+    "sass": "^1.69.5",
     "sass-loader": "^13.3.2"
   },
   "dependencies": {

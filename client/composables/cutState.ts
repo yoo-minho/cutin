@@ -1,5 +1,5 @@
 import { Notify, Dialog } from "quasar";
-import { CutType } from "@/types";
+import type { CutType } from "@/types";
 
 export const useCutStore = async (videoName: string) => {
   const state = useState<CutType[]>(`${videoName}CutStore`, () => []);
