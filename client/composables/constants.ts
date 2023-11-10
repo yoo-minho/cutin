@@ -25,7 +25,7 @@ export const defaultSkill = [
   { key: "R", name: "리바운드", main: { reb: 1 } },
   { key: "T", name: "스틸", main: { stl: 1 } },
   { key: "Y", name: "블락", main: { blk: 1 } },
-  { key: "U" },
+  { key: "U", name: "블락&리바", main: { reb: 1, blk: 1 } },
   {
     key: "I",
     name: "3점슛&OREB",
@@ -50,59 +50,62 @@ export const skillExpression = (
   mainPlayer: string,
   subPlayer: string
 ) => {
-  const expression = [];
+  let mainExpression = "";
+  let subExpression = "";
   switch (skill) {
     case "득점&어시":
-      expression.push(`${mainPlayer}의 득점!`);
+      mainExpression = `${mainPlayer}의 득점!`;
       if (subPlayer) {
-        expression.push(`${subPlayer}의 어시!`);
+        subExpression = `${subPlayer}의 어시!`;
       }
       break;
     case "풋백":
-      expression.push(`${mainPlayer}의 풋백득점!`);
-      break;
-    case "자유투":
-      expression.push(`${mainPlayer}의 자유투!`);
+      mainExpression = `${mainPlayer}의 풋백 득점!`;
       break;
     case "3점슛":
-      expression.push(`${mainPlayer}의 Three Pointer!`);
+      mainExpression = `${mainPlayer}의 3점 득점!`;
+      if (subPlayer) {
+        subExpression = `${subPlayer}의 어시!`;
+      }
       break;
     case "속공":
-      expression.push(`${mainPlayer}의 속공 득점!`);
+      mainExpression = `${mainPlayer}의 속공 득점!`;
+      if (subPlayer) {
+        subExpression = `${subPlayer}의 어시!`;
+      }
       break;
     case "앤드원":
-      expression.push(`${mainPlayer}의 앤드원!!!`);
+      mainExpression = `${mainPlayer}의 앤드원!!!`;
+      if (subPlayer) {
+        subExpression = `${subPlayer}의 어시!`;
+      }
       break;
     case "스핀무브":
-      expression.push(`${mainPlayer}의 스핀무브!!!`);
-      break;
-    case "리바운드":
-      expression.push(`${mainPlayer}의 리바운드!`);
-      break;
-    case "오펜스리바":
-      expression.push(`${mainPlayer}의 오펜스리바!`);
-      break;
-    case "스틸":
-      expression.push(`${mainPlayer}의 스틸!`);
-      break;
-    case "블락":
-      expression.push(`${mainPlayer}의 블락!`);
+      mainExpression = `${mainPlayer}의 스핀무브!!!`;
+      if (subPlayer) {
+        subExpression = `${subPlayer}의 어시!`;
+      }
       break;
     case "킬패스":
-      expression.push(`${subPlayer}의 킬패스로`);
-      expression.push(`${mainPlayer}의 득점!`);
+      subExpression = `${subPlayer}의 킬패스로`;
+      mainExpression = `${mainPlayer} 득점!`;
       break;
     case "3점슛&OREB":
-      expression.push(`${subPlayer}의 공격리바 =>`);
-      expression.push(`${mainPlayer}의 3점슛!`);
+      subExpression = `${subPlayer}의 오펜스리바!!`;
+      mainExpression = `${mainPlayer}의 3점슛!`;
       break;
     case "득점&OREB":
-      expression.push(`${subPlayer}의 공격리바 =>`);
-      expression.push(`${mainPlayer}의 득점!`);
+      subExpression = `${subPlayer}의 오펜스리바!!`;
+      mainExpression = `${mainPlayer}의 득점!`;
       break;
+    case "자유투":
+    case "스틸":
+    case "리바운드":
+    case "오펜스리바":
+    case "블락":
     default:
-      expression.push(`${mainPlayer}의 ${skill}!`);
+      mainExpression = `${mainPlayer}의 ${skill}!`;
       break;
   }
-  return expression.join(" ");
+  return [mainExpression, subExpression];
 };

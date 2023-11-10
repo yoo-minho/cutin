@@ -304,6 +304,8 @@ const columns = [
       dark
       flat
       dense
+      class="my-sticky-header-table"
+      row-key="seekTime"
       :columns="columns"
       :rows="cutStore"
       :filter="[gameTab, quaterTab]"
@@ -312,8 +314,7 @@ const columns = [
       :hide-pagination="true"
     >
       <template #no-data>
-        <div class="full-width row flex-center text-green q-gutter-sm">
-          <q-icon size="2em" name="sports_basketball" />
+        <div>
           <span> 'C' 단축키를 눌러 득점 순간을 기록하세요! </span>
         </div>
       </template>
@@ -360,8 +361,35 @@ const columns = [
     <q-separator color="grey-7" size="0.5px" />
   </div>
 </template>
-<style scoped>
+<style lang="scss">
 .q-table__container {
   border-radius: 0;
+}
+
+.my-sticky-header-table {
+  height: calc(100vh - 185px);
+
+  .q-table__top,
+  .q-table__bottom,
+  thead tr:first-child th {
+    background-color: #000;
+  }
+
+  thead tr th {
+    position: sticky;
+    z-index: 1;
+  }
+
+  thead tr:first-child th {
+    top: 0;
+  }
+
+  &.q-table--loading thead tr:last-child th {
+    top: 48px;
+  }
+
+  tbody {
+    scroll-margin-top: 48px;
+  }
 }
 </style>

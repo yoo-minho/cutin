@@ -13,8 +13,8 @@ const segmentSet = {
   //8초 => 6초
   deep: [
     { sec: 2, speed: 2 }, //1초
-    { sec: 0.5, speed: 1, zoom: 1.3 }, //0.5초
-    { sec: 3.15, speed: 0.9, zoom: 1.3 }, //3.5초
+    { sec: 0.5, speed: 1, zoom: 1 }, //0.5초
+    { sec: 2.8, speed: 0.8, zoom: 1 }, //3.5초
     { sec: 2, speed: 2 }, //1초
   ],
   //8초 => 5초
@@ -61,7 +61,7 @@ export async function createCaptureVideo(
   const totalSec = segment.reduce((acc, seg) => acc + seg.sec, 0);
   const videoElem = document.getElementById("baseVideo") as HTMLVideoElement;
   const originBitrate = (size / videoElem.duration) * 8;
-  const [width, height, bitrateRatio] = ratioSet["540p"];
+  const [width, height, bitrateRatio] = ratioSet["720p"];
   const videoBitsPerSecond = originBitrate / bitrateRatio;
   const canvasElem = document.getElementById("baseCanvas") as HTMLCanvasElement;
   canvasElem.width = width;
@@ -77,22 +77,19 @@ export async function createCaptureVideo(
     goal = false;
   canvasContext.font = `1px Giants-Bold`; // 원하는 폰트 및 크기로 설정
 
-  // canvasContext.translate(-(width * ratio), -(height * ratio * 0.5));
-
   const playListener = () => {
     const renderFrame = () => {
       if (videoElem.paused || videoElem.ended) return;
 
       _zoom += zoomTick;
       if (_zoom <= 1) _zoom = 1;
-      const posNcanvasRatio = 1; //미세한 차이가 나는데...
-      const baseZoom = width / pos.width;
-      const left2 = ((_zoom - 1) * width) / 2;
-      const top2 = ((_zoom - 1) * height) / 2;
-      canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+      const baseZoom = pos.width > 0 ? 960 / pos.width : 1;
+      const left2 = (_zoom - 1) * pos.width;
+      const top2 = ((_zoom - 1) * pos.height) / 2;
+      canvasContext.clearRect(0, 0, width, height);
       canvasContext.translate(
-        -pos.left * posNcanvasRatio - left2,
-        -pos.top * posNcanvasRatio - top2
+        (-pos.left - left2) * (width / pos.width) || 0,
+        (-pos.top - top2) * (height / pos.height) || 0
       );
       canvasContext.scale(baseZoom * _zoom, baseZoom * _zoom);
       canvasContext.drawImage(videoElem, 0, 0, width, height);
@@ -140,7 +137,7 @@ export async function createCaptureVideo(
     mediaRecorder.start();
     for (const seg of segment) {
       const { sec, speed, zoom = 1 } = seg;
-      const segSpeed = speed * 2.5;
+      const segSpeed = speed * 2;
       videoElem.playbackRate = segSpeed;
       zoomTick = zoom === 1 ? 0 : (zoom - 1) / (fps * (sec / segSpeed));
       await delay(sec / segSpeed);

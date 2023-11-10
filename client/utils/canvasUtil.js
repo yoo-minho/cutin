@@ -104,8 +104,9 @@ export function drawGrid(canvas, gridSize = 16) {
 }
 
 export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
-  const ratio = 0.75;
-  const bigFontSize = 48 * ratio;
+  const currenrRatioSet = 720;
+  const ratio = currenrRatioSet / 720;
+  const bigFontSize = 64 * ratio;
   const fontSize = 36 * ratio;
   const smallFontSize = 18 * ratio;
   const padding = 8 * ratio;
@@ -128,7 +129,11 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
   const [aName, aScore] = vsScoreArr[0];
   const [bName, bScore] = vsScoreArr[1];
   const [hour, min, sec] = seekTime.split(":");
-  const expression = skillExpression(skill, mainPlayer, subPlayer);
+  const [mainExpression, subExpression] = skillExpression(
+    skill,
+    mainPlayer,
+    subPlayer
+  );
 
   const { top, right } = drawBanner(canvas, {
     x: margin,
@@ -193,13 +198,25 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     const tickY =
       (margin + fontSize) *
       Math.max(1 - (tick - fps * waitSec) / (fps * floatingSec), 0);
-    drawBanner(canvas, {
+    const { top } = drawBanner(canvas, {
       xAlign: "right",
-      x: (canvas?.width || 0) - margin,
-      y: (canvas?.height || 0) - margin + tickY,
-      text: expression,
+      x: (canvas?.width || 0) - margin + tickY,
+      y: (canvas?.height || 0) - margin,
+      text: mainExpression,
       font: "Giants-Bold",
       fontSize: bigFontSize,
+      textColor: "white",
+      textStrokeColor: "black",
+      letterWidthRatio: 0.95,
+      padding,
+    });
+    drawBanner(canvas, {
+      xAlign: "right",
+      x: (canvas?.width || 0) - margin + tickY,
+      y: top,
+      text: subExpression,
+      font: "Giants-Bold",
+      fontSize,
       textColor: "white",
       textStrokeColor: "black",
       letterWidthRatio: 0.95,
@@ -211,11 +228,11 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     yAlign: "top",
     x: margin,
     y: margin,
-    text: "MyBasketRecord🏀",
-    font: "SDSamliphopangche_Outline",
+    text: "MYHL🏀",
+    font: "Giants-Bold",
     fontSize: fontSize,
-    textColor: "black",
-    // textStrokeColor: "black",
+    textColor: "white",
+    textStrokeColor: "black",
     letterWidthRatio: 0.95,
     padding,
     shadow: true,
