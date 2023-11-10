@@ -17,8 +17,6 @@ const initSize = () => {
   height.value = 0;
 };
 
-const headerHeight = 68.96;
-
 watch([top, left, width, height], () => {
   backboardPositionState.value = {
     top: top.value,
@@ -43,7 +41,7 @@ watch(
       if (!isDragging) return;
 
       width.value = e.clientX - left.value - props.video.offsetLeft;
-      height.value = e.clientY - top.value - props.video.offsetTop;
+      height.value = width.value * 0.5625;
     });
 
     document.addEventListener("mouseup", () => {
@@ -63,10 +61,7 @@ watch(
         ok: "네!",
         cancel: "취소",
       })
-        .onOk(() => {
-          const videoBack = useBackVideoState();
-          videoBack.value.play();
-        })
+        .onOk(() => {})
         .onCancel(() => initSize());
     });
   }

@@ -26,9 +26,19 @@ export const defaultSkill = [
   { key: "T", name: "스틸", main: { stl: 1 } },
   { key: "Y", name: "블락", main: { blk: 1 } },
   { key: "U" },
-  { key: "I" },
+  {
+    key: "I",
+    name: "3점슛&OREB",
+    main: { pts: 2 },
+    sub: { ast: 1, reb: 1, orb: 1 },
+  },
   { key: "O", name: "오펜스리바", main: { reb: 1, orb: 1 } },
-  { key: "P" },
+  {
+    key: "P",
+    name: "득점&OREB",
+    main: { pts: 2 },
+    sub: { ast: 1, reb: 1, orb: 1 },
+  },
 ];
 
 export const getSkillPoints = (skill: string): any => {
@@ -80,6 +90,14 @@ export const skillExpression = (
       break;
     case "킬패스":
       expression.push(`${subPlayer}의 킬패스로`);
+      expression.push(`${mainPlayer}의 득점!`);
+      break;
+    case "3점슛&OREB":
+      expression.push(`${subPlayer}의 공격리바 =>`);
+      expression.push(`${mainPlayer}의 3점슛!`);
+      break;
+    case "득점&OREB":
+      expression.push(`${subPlayer}의 공격리바 =>`);
       expression.push(`${mainPlayer}의 득점!`);
       break;
     default:

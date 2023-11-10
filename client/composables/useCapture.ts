@@ -13,8 +13,8 @@ const segmentSet = {
   //8초 => 6초
   deep: [
     { sec: 2, speed: 2 }, //1초
-    { sec: 0.5, speed: 1, zoom: 1 }, //0.5초
-    { sec: 3.15, speed: 0.9 }, //3.5초
+    { sec: 0.5, speed: 1, zoom: 1.3 }, //0.5초
+    { sec: 3.15, speed: 0.9, zoom: 1.3 }, //3.5초
     { sec: 2, speed: 2 }, //1초
   ],
   //8초 => 5초
@@ -43,8 +43,13 @@ const getSegment = (_skill: string) => {
 let chunks = [] as any;
 let _zoom = 1;
 let zoomTick = 0;
+type PostionType = { top: number; left: number; width: number; height: number };
 
-export async function createCaptureVideo(size: number, cut: CutType) {
+export async function createCaptureVideo(
+  size: number,
+  cut: CutType,
+  pos: PostionType
+) {
   chunks = [];
   _zoom = 1;
 
@@ -72,19 +77,24 @@ export async function createCaptureVideo(size: number, cut: CutType) {
     goal = false;
   canvasContext.font = `1px Giants-Bold`; // 원하는 폰트 및 크기로 설정
 
+  // canvasContext.translate(-(width * ratio), -(height * ratio * 0.5));
+
   const playListener = () => {
     const renderFrame = () => {
       if (videoElem.paused || videoElem.ended) return;
 
       _zoom += zoomTick;
-      const ratio = (_zoom - 1) / (_zoom * 2);
-      if (ratio > 0) {
-        canvasContext.setTransform(1, 0, 0, 1, 0, 0);
-        canvasContext.scale(_zoom, _zoom);
-        canvasContext.translate(-(width * ratio), -(height * ratio * 0.5));
-      } else {
-        _zoom = 1;
-      }
+      if (_zoom <= 1) _zoom = 1;
+      const posNcanvasRatio = 1; //미세한 차이가 나는데...
+      const baseZoom = width / pos.width;
+      const left2 = ((_zoom - 1) * width) / 2;
+      const top2 = ((_zoom - 1) * height) / 2;
+      canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+      canvasContext.translate(
+        -pos.left * posNcanvasRatio - left2,
+        -pos.top * posNcanvasRatio - top2
+      );
+      canvasContext.scale(baseZoom * _zoom, baseZoom * _zoom);
       canvasContext.drawImage(videoElem, 0, 0, width, height);
 
       const currentSec = videoElem.currentTime;

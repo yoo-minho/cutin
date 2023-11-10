@@ -98,7 +98,14 @@ const makeVideo = async (cut: CutType) => {
   ].join("/");
 
   const start = performance.now();
-  const { file } = await createCaptureVideo(videoSize, cutsWithStat);
+  const backboardPositionState = useBackboardPositionState();
+  const { top, left, width, height } = backboardPositionState.value;
+  const { file } = await createCaptureVideo(videoSize, cutsWithStat, {
+    top,
+    left,
+    width,
+    height,
+  });
   console.log(
     "canvas draw",
     Math.round((performance.now() - start) / 100) / 10

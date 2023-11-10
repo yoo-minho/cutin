@@ -66,7 +66,7 @@ const openViewer = async (player: string) => {
   const props = {
     clubCode: "gba",
     playDate: "20231104",
-    gameNo: 1,
+    gameNo: 2,
     player,
   };
   const start = performance.now();
