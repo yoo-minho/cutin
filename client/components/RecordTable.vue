@@ -80,12 +80,13 @@ const makeVideo = async (cut: CutType) => {
   const { videoName, videoSize } = videoProps.value;
   const [clubCode, playDate, gameNo, ...rest] = videoName.split("_");
 
-  const cutsWithStat = await getCutsWithStat({
-    clubCode,
-    playDate,
-    gameNo,
-    seekTime,
-  });
+  const cuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
+  const getLastQuaterSec = (q: number) =>
+    cuts
+      .filter((c) => c.quaterNo === q)
+      .map((c) => time2sec(c.seekTime))
+      .sort((a, b) => b - a)[0];
+  const cutsWithStat = await getCutsWithStat({ cuts, seekTime });
   if (!cutsWithStat || !("seekTime" in cutsWithStat)) return;
 
   const path = [
@@ -99,13 +100,13 @@ const makeVideo = async (cut: CutType) => {
 
   const start = performance.now();
   const backboardPositionState = useBackboardPositionState();
-  const { top, left, width, height } = backboardPositionState.value;
-  const { file } = await createCaptureVideo(videoSize, cutsWithStat, {
-    top,
-    left,
-    width,
-    height,
-  });
+  const lastQuaterSec = getLastQuaterSec(+quaterTab.value);
+  const { file } = await createCaptureVideo(
+    videoSize,
+    cutsWithStat,
+    backboardPositionState.value,
+    lastQuaterSec
+  );
   console.log(
     "canvas draw",
     Math.round((performance.now() - start) / 100) / 10

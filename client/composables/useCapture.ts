@@ -48,7 +48,8 @@ type PostionType = { top: number; left: number; width: number; height: number };
 export async function createCaptureVideo(
   size: number,
   cut: CutType,
-  pos: PostionType
+  pos: PostionType,
+  lastQuaterSec: number
 ) {
   chunks = [];
   _zoom = 1;
@@ -103,7 +104,11 @@ export async function createCaptureVideo(
 
       drawVideoBanners(
         canvasElem,
-        { ...cut, seekTime: formatTime(currentSec), vsScore },
+        {
+          ...cut,
+          seekTime: formatTime(currentSec + 10 * 60 - lastQuaterSec),
+          vsScore,
+        },
         tick
       );
       requestAnimationFrame(renderFrame);

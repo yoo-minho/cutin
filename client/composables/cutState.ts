@@ -154,8 +154,7 @@ const uniquePlayer = (cuts: CutType[]) =>
   );
 
 export const getCutsWithStat = async (props: any) => {
-  const { clubCode, playDate, gameNo, seekTime } = props;
-  const cuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
+  const { cuts, seekTime } = props;
 
   const vsScore = {} as { [key: string]: number };
   uniqueTeam(cuts).forEach((name) => {
@@ -191,7 +190,7 @@ export const getCutsWithStat = async (props: any) => {
     };
   };
 
-  const cutsWithStat = cuts.map((cut) => {
+  const cutsWithStat = cuts.map((cut: any) => {
     const preCut = {
       ...cut,
       vsScore: { ...vsScore },
@@ -205,7 +204,7 @@ export const getCutsWithStat = async (props: any) => {
     setPlayerStat(subPlayer, sub);
     return preCut;
   });
-  return cutsWithStat.find((cut) => cut.seekTime === seekTime);
+  return cutsWithStat.find((cut: any) => cut.seekTime === seekTime);
 };
 
 export const getCutsWithStat2 = async (playerArr: any[], props: any) => {
