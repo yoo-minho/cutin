@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PlayerType } from "~/composables/playerState";
+import type { PlayerType } from "~/composables/playerState";
 
 const props = defineProps<{
   videoName: string;
