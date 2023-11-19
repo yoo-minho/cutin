@@ -63,7 +63,7 @@ export const skillExpression = (
       mainExpression = `${mainPlayer}의 풋백 득점!`;
       break;
     case "3점슛":
-      mainExpression = `${mainPlayer}의 3점 득점!`;
+      mainExpression = `${mainPlayer}의 쓰리포인트!`;
       if (subPlayer) {
         subExpression = `${subPlayer}의 어시!`;
       }
@@ -92,7 +92,7 @@ export const skillExpression = (
       break;
     case "3점슛&OREB":
       subExpression = `${subPlayer}의 오펜스리바!!`;
-      mainExpression = `${mainPlayer}의 3점슛!`;
+      mainExpression = `${mainPlayer}의 쓰리포인트!`;
       break;
     case "득점&OREB":
       subExpression = `${subPlayer}의 오펜스리바!!`;

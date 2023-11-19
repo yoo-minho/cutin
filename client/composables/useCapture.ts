@@ -144,7 +144,7 @@ export async function createCaptureVideo(
     mediaRecorder.start();
     for (const seg of segment) {
       const { sec, speed, zoom = 1 } = seg;
-      const segSpeed = speed * 2;
+      const segSpeed = speed * 1.5;
       videoElem.playbackRate = segSpeed;
       zoomTick = zoom === 1 ? 0 : (zoom - 1) / (fps * (sec / segSpeed));
       await delay(sec / segSpeed);

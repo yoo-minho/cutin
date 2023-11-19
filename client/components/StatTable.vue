@@ -63,15 +63,17 @@ const videoViewerOn = ref(false);
 const videoViewerSrc = ref("");
 
 const openViewer = async (player: string) => {
-  const props = {
-    clubCode: "gba",
-    playDate: "20231104",
-    gameNo: 2,
+  const route = useRoute();
+  const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
+  const params = {
+    clubCode,
+    playDate,
+    gameNo,
     player,
   };
   const start = performance.now();
   const { data } = await useFetch("/api/highlights/player", {
-    params: props,
+    params,
   });
   console.log(
     "canvas draw",
@@ -85,9 +87,9 @@ const openViewer = async (player: string) => {
 </script>
 <template>
   <q-table
-    dark
     flat
     dense
+    bordered
     :columns="columns"
     :rows="playerStat"
     :rows-per-page-options="[0]"

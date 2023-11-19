@@ -1,7 +1,9 @@
 import ffmpeg from "fluent-ffmpeg";
-import { path } from "@ffmpeg-installer/ffmpeg";
-ffmpeg.setFfmpegPath(path);
-console.log({ path });
+import ffmpegI from "@ffmpeg-installer/ffmpeg";
+import ffprobeI from "@ffprobe-installer/ffprobe";
+ffmpeg.setFfmpegPath(ffmpegI.path);
+ffmpeg.setFfprobePath(ffprobeI.path);
+console.log({ ffmpeg: ffmpegI.path, ffprobe: ffprobeI.path });
 
 import fs from "node:fs";
 
@@ -10,7 +12,7 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
-      .videoFilters("setpts=2*PTS")
+      .videoFilters("setpts=1.5*PTS")
       .fps(24)
       .videoCodec("libx264") //압축 낮고 속도 높음
       // .videoCodec("libx265") //압축 높이고 속도 낮음
@@ -37,6 +39,7 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
 export const mergePromise = ({ inputPaths, outputPath, isDelete }) => {
   return new Promise((resolve, reject) => {
     const ff = ffmpeg();
+    inputPaths.forEach((path) => ff.input(path));
     ff.on("end", () => {
       if (isDelete) inputPaths.forEach(fs.unlinkSync);
       resolve();

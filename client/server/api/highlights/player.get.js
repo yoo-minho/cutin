@@ -29,9 +29,14 @@ export default defineEventHandler(async (event) => {
     })
     .filter((path) => existsSync(path));
 
+  if (inputPaths.length === 0) {
+    return { error: true, fileUrl: "" };
+  }
+
   mkdirSync(playerPath, { recursive: true });
   await mergePromise({ inputPaths, outputPath });
   return {
+    error: false,
     fileUrl: `/v/${clubCode}-${playDate}-player-${player}`,
   };
 });

@@ -183,7 +183,7 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     x: margin,
     y: top,
     text:
-      `🏀 ${formatDate(date)} ${name} 농구경기` +
+      `${formatDate(date)} ${name} 농구경기` +
       (gameNo ? ` - ${gameNo}게임` : ""),
     font: "NanumSquareNeo-Variable",
     fontSize: smallFontSize,

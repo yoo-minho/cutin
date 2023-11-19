@@ -17,13 +17,8 @@ const getTeamName = () => {
 const backEvent = () => {
   const route = useRoute();
   const router = useRouter();
-  if (route.redirectedFrom) {
-    router.back();
-  } else {
-    const routePath = String(route.path);
-    const teamName = String(route.params.teamName) || "";
-    router.replace(routePath.replace("/" + teamName, ""));
-  }
+  const routePath = String(route.path);
+  router.replace(routePath.split("/").slice(0, -1).join("/"));
 };
 </script>
 <template>
