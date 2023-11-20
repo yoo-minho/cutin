@@ -12,26 +12,26 @@ const fps = 60;
 const segmentSet = {
   //8초 => 6초
   deep: [
-    { sec: 2, speed: 2 }, //1초
-    { sec: 0.5, speed: 1, zoom: 1 }, //0.5초
-    { sec: 2.8, speed: 0.8, zoom: 1 }, //3.5초
-    { sec: 2, speed: 2 }, //1초
+    { sec: 3, speed: 1.5, zoom: 1 }, //0.5초
+    { sec: 3, speed: 0.8, zoom: 1 }, //3.5초
+    { sec: 2, speed: 1.5, zoom: 1 }, //1초
   ],
   //8초 => 5초
   wide: [
-    { sec: 4, speed: 1.75 },
-    { sec: 1, speed: 1 },
-    { sec: 3, speed: 2, zoom: 1 },
+    { sec: 3, speed: 1.5, zoom: 1 },
+    { sec: 2, speed: 0.8, zoom: 1 },
+    { sec: 3, speed: 1.5, zoom: 1 },
   ],
   //5초 => 3초
   short: [
-    { sec: 2, speed: 2 }, //1
-    { sec: 1.5, speed: 1.2, zoom: 1 },
-    { sec: 1.5, speed: 2, zoom: 1 },
+    { sec: 2, speed: 1.5, zoom: 1 }, //1
+    { sec: 1.5, speed: 1, zoom: 1 },
+    { sec: 1.5, speed: 1.5, zoom: 1 },
   ],
 };
 
-const getSegment = (_skill: string) => {
+const getSegment = (_skill: string, subPlayer?: string) => {
+  if (!!subPlayer) return segmentSet.deep;
   if (["오펜스리바", "리바운드", "스틸", "자유투", "속공"].includes(_skill))
     return segmentSet.short;
   if (["득점&어시", "풋백", "스핀무브", "앤드원"].includes(_skill))
@@ -54,11 +54,11 @@ export async function createCaptureVideo(
   chunks = [];
   _zoom = 1;
 
-  const { team = "team", seekTime, skill, vsScore } = cut;
+  const { team = "team", seekTime, skill, vsScore, subPlayer } = cut;
   const _skill = skill || "득점&어시";
   const { main } = getSkillPoints(_skill);
   const seekSec = time2sec(seekTime);
-  const segment = getSegment(_skill);
+  const segment = getSegment(_skill, subPlayer);
   const totalSec = segment.reduce((acc, seg) => acc + seg.sec, 0);
   const videoElem = document.getElementById("baseVideo") as HTMLVideoElement;
   const originBitrate = (size / videoElem.duration) * 8;
@@ -70,7 +70,7 @@ export async function createCaptureVideo(
   const canvasContext = canvasElem.getContext("2d");
   if (!canvasContext) return { file: null };
 
-  const start = seekSec - totalSec + 1.5;
+  const start = seekSec - totalSec + 2;
   const originSpeed = videoElem.playbackRate;
   const mimeType = "video/webm; codecs=vp9";
   const opt = { mimeType, videoBitsPerSecond };
@@ -144,7 +144,7 @@ export async function createCaptureVideo(
     mediaRecorder.start();
     for (const seg of segment) {
       const { sec, speed, zoom = 1 } = seg;
-      const segSpeed = speed * 1.5;
+      const segSpeed = speed * 2.5;
       videoElem.playbackRate = segSpeed;
       zoomTick = zoom === 1 ? 0 : (zoom - 1) / (fps * (sec / segSpeed));
       await delay(sec / segSpeed);

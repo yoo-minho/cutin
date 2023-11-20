@@ -73,21 +73,20 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const makeVideo = async (cut: CutType) => {
+const makeVideo = async (cut: CutType, allGameCuts: CutType[]) => {
   const { seekTime } = cut;
   emits("moveSeekPoint", seekTime);
 
-  const { videoName, videoSize } = videoProps.value;
-  const [clubCode, playDate, gameNo, ...rest] = videoName.split("_");
-
-  const cuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
   const getLastQuaterSec = (q: number) =>
-    cuts
+    allGameCuts
       .filter((c) => c.quaterNo === q)
       .map((c) => time2sec(c.seekTime))
       .sort((a, b) => b - a)[0];
-  const cutsWithStat = await getCutsWithStat({ cuts, seekTime });
+  const cutsWithStat = await getCutsWithStat({ cuts: allGameCuts, seekTime });
   if (!cutsWithStat || !("seekTime" in cutsWithStat)) return;
+
+  const { videoName, videoSize } = videoProps.value;
+  const [clubCode, playDate, _, ...rest] = videoName.split("_");
 
   const path = [
     clubCode,
@@ -106,10 +105,6 @@ const makeVideo = async (cut: CutType) => {
     cutsWithStat,
     backboardPositionState.value,
     lastQuaterSec
-  );
-  console.log(
-    "canvas draw",
-    Math.round((performance.now() - start) / 100) / 10
   );
   const start2 = performance.now();
   if (file === null) return;
@@ -142,6 +137,10 @@ const makeAllVideo = async () => {
     Notify.create("작업이 취소되었습니다.");
   });
 
+  const { videoName } = videoProps.value;
+  const [clubCode, playDate, gameNo] = videoName.split("_");
+  const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
+
   let message;
   for (const [idx, cut] of cutStore.value?.entries() || []) {
     if (isCancel) break;
@@ -157,8 +156,7 @@ const makeAllVideo = async () => {
       `(${totalSize}건 중 ${idx + 1}건)<br/>` +
       `소요시간 : ${elapsedTime}`;
     dialog.update({ message });
-    await makeVideo(cut);
-    await delay(1);
+    await makeVideo(cut, allGameCuts);
   }
 
   const elapsedTime = prettyElapsedTime(startTime, new Date());
@@ -181,7 +179,10 @@ const makeVideoWithLoading = async (cut: CutType) => {
     boxClass: "bg-grey-2 text-grey-9",
     spinnerColor: "primary",
   });
-  await makeVideo(cut);
+  const { videoName } = videoProps.value;
+  const [clubCode, playDate, gameNo] = videoName.split("_");
+  const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
+  await makeVideo(cut, allGameCuts);
   Loading.hide();
 };
 

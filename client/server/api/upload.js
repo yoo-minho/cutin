@@ -15,13 +15,13 @@ export default defineEventHandler(async (event) => {
   const path = Buffer.from(form[1].data).toString();
   const pathArr = path.split("/");
   const realPath = pathArr.splice(0, [pathArr.length - 1]).join("/");
-  const inputPath = "./upload/" + path + ".webm";
+  const inputPath = "./upload/" + path + ".mp4";
   const outputPath = "./upload/" + path + ".mp4";
 
   mkdirSync("./upload/" + realPath, { recursive: true });
   writeFileSync(inputPath, file.data);
-  await ffmpegPromise({ inputPath, outputPath });
-  unlinkSync(inputPath);
+  // await ffmpegPromise({ inputPath, outputPath });
+  // unlinkSync(inputPath);
   return {
     fileUrl: `/v/${path.replace(/\//g, "-")}`,
   };

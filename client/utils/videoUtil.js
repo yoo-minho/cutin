@@ -12,7 +12,7 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
-      .videoFilters("setpts=1.5*PTS")
+      .videoFilters("setpts=2.5*PTS")
       .fps(24)
       .videoCodec("libx264") //압축 낮고 속도 높음
       // .videoCodec("libx265") //압축 높이고 속도 낮음
@@ -48,6 +48,7 @@ export const mergePromise = ({ inputPaths, outputPath, isDelete }) => {
         console.log(a, b, c);
         reject();
       })
+      .outputOptions(["-c:v h264_nvenc", "-preset fast"]) // NVENC 설정
       .mergeToFile(outputPath, "./temp");
   });
 };
