@@ -60,7 +60,7 @@ const columns = [
 ] as any;
 
 const videoViewerOn = ref(false);
-const videoViewerSrc = ref("");
+const videoViewerSrc = ref([]);
 
 const openViewer = async (player: string) => {
   const route = useRoute();
@@ -79,10 +79,11 @@ const openViewer = async (player: string) => {
     "canvas draw",
     Math.round((performance.now() - start) / 100) / 10
   );
-  const { fileUrl } = data.value || {};
-  if (!fileUrl) return;
+  const { videoUrlArr } = data.value || {};
+  console.log({ videoUrlArr });
+  if (!videoUrlArr) return;
   videoViewerOn.value = true;
-  videoViewerSrc.value = fileUrl;
+  videoViewerSrc.value = videoUrlArr;
 };
 </script>
 <template>
@@ -133,6 +134,6 @@ const openViewer = async (player: string) => {
     </template>
   </q-table>
   <q-dialog v-model="videoViewerOn">
-    <mini-video :src="videoViewerSrc" />
+    <mini-video :video-url-arr="videoViewerSrc" />
   </q-dialog>
 </template>

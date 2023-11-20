@@ -112,12 +112,18 @@ const makeVideo = async (cut: CutType, allGameCuts: CutType[]) => {
   const body = new FormData();
   body.append("file", file);
   body.append("path", path);
+  body.append("videoName", videoName);
+  body.append("seekTime", seekTime);
   const { data } = await useFetch("/api/upload", { method: "POST", body });
   if (!data.value) return;
   console.log("ffmpeg", Math.round((performance.now() - start2) / 100) / 10);
 
-  const { fileUrl } = data.value;
-  updateCut("videoUrl", fileUrl, seekTime);
+  const { error, videoUrl } = data.value;
+  if (error) {
+    console.error("에러닷");
+    return;
+  }
+  updateCutWithoutFetch("videoUrl", videoUrl, seekTime);
 };
 
 const makeAllVideo = async () => {
@@ -239,7 +245,7 @@ const columns = [
 <template>
   <div class="bg-dark" style="height: 100%; border-left: 0.5px solid grey">
     <q-dialog v-model="videoViewerOn">
-      <mini-video :src="videoViewerSrc" />
+      <mini-video :video-url-arr="[videoViewerSrc]" />
     </q-dialog>
     <div class="row" style="gap: 12px; padding: 12px">
       <q-btn

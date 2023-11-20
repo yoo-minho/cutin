@@ -14,12 +14,14 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const urls = await getHighlightUrlByPlayer(
+  const videoUrlArr = await getHighlightUrlByPlayer(
     clubCode,
     playDate,
     gameNo,
     player
   );
+
+  return { videoUrlArr };
 
   const inputPaths = urls
     .filter((url) => !!url)

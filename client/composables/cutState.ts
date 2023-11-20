@@ -65,6 +65,21 @@ export const addCuts = async (props: {
   });
 };
 
+export const updateCutWithoutFetch = async (
+  type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl" | "seekTime",
+  value: string,
+  targetTime?: string
+) => {
+  const videoPropsStore = useVideoPropsStore();
+  const videoName = videoPropsStore.value.videoName;
+  const cutStore = await useCutStore(videoName);
+  const cut = cutStore.value.find((c) => c.seekTime === targetTime);
+  const updateData = { ...cut, [type]: value } as CutType;
+  cutStore.value = cutStore.value.map((c) =>
+    c.seekTime === targetTime ? updateData : c
+  );
+};
+
 export const updateCut = async (
   type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl" | "seekTime",
   value: string,

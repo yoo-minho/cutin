@@ -1,5 +1,5 @@
-import { ffmpegPromise } from "../../utils/videoUtil";
 import { mkdirSync, writeFileSync, unlinkSync } from "fs";
+import { updateVideoUrl } from "../data/highlights";
 
 export default defineEventHandler(async (event) => {
   const form = await readMultipartFormData(event);
@@ -13,16 +13,16 @@ export default defineEventHandler(async (event) => {
 
   const file = form[0];
   const path = Buffer.from(form[1].data).toString();
+  const videoName = Buffer.from(form[2].data).toString();
+  const seekTime = Buffer.from(form[3].data).toString();
   const pathArr = path.split("/");
   const realPath = pathArr.splice(0, [pathArr.length - 1]).join("/");
-  const inputPath = "./upload/" + path + ".mp4";
-  const outputPath = "./upload/" + path + ".mp4";
-
+  const inputPath = "./upload/" + path + ".webm";
+  const oldInputPath = "./upload/" + path + ".mp4";
   mkdirSync("./upload/" + realPath, { recursive: true });
   writeFileSync(inputPath, file.data);
-  // await ffmpegPromise({ inputPath, outputPath });
-  // unlinkSync(inputPath);
-  return {
-    fileUrl: `/v/${path.replace(/\//g, "-")}`,
-  };
+  unlinkSync(oldInputPath);
+  const videoUrl = `/v/${path.replace(/\//g, "-")}`;
+  await updateVideoUrl(videoUrl, videoName, seekTime);
+  return { error: false, videoUrl };
 });

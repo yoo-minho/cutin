@@ -8,7 +8,6 @@ console.log({ ffmpeg: ffmpegI.path, ffprobe: ffprobeI.path });
 import fs from "node:fs";
 
 export const ffmpegPromise = ({ inputPath, outputPath }) => {
-  console.log("ffmpegPromise", { inputPath, outputPath });
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
