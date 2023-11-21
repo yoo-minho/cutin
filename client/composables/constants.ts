@@ -41,6 +41,17 @@ export const defaultSkill = [
   },
 ];
 
+export const getRecordName = (recordType: string) =>
+  ({
+    pts: "득점",
+    reb: "리바운드",
+    orb: "공격리바운드",
+    ast: "어시스트",
+    stl: "스틸",
+    blk: "블락",
+    tpm: "3점",
+  }[recordType] || "");
+
 export const isMyHighlight = (
   areYouMainPlayer: boolean,
   skill: string,

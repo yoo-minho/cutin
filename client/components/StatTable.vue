@@ -61,8 +61,11 @@ const columns = [
 
 const videoViewerOn = ref(false);
 const _highlights = ref();
+const selectedPlayer = ref("");
+const selectedRecord = ref("");
 
 const openViewer = async (player: string, record?: string) => {
+  if (player === "전체") return;
   const route = useRoute();
   const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
   const params = {
@@ -78,6 +81,8 @@ const openViewer = async (player: string, record?: string) => {
   if (!highlights) return;
 
   videoViewerOn.value = true;
+  selectedPlayer.value = player;
+  selectedRecord.value = record || "";
   if (record) {
     _highlights.value = highlights.filter((hl) =>
       isMyHighlight(hl.mainPlayer === player, hl.skill || "득점&어시", record)
@@ -108,7 +113,12 @@ const openViewer = async (player: string, record?: string) => {
           </div>
         </q-td>
         <q-td key="pts" :props="props">
-          {{ props.row.pts }}
+          <div
+            class="text-pre-wrap cursor-pointer"
+            @click="openViewer(props.row.name, 'pts')"
+          >
+            {{ props.row.pts }}
+          </div>
         </q-td>
         <q-td key="reb" :props="props">
           <div
@@ -127,16 +137,36 @@ const openViewer = async (player: string, record?: string) => {
           </div>
         </q-td>
         <q-td key="tpm" :props="props">
-          {{ props.row.tpm }}
+          <div
+            class="text-pre-wrap cursor-pointer"
+            @click="openViewer(props.row.name, 'tpm')"
+          >
+            {{ props.row.tpm }}
+          </div>
         </q-td>
         <q-td key="orb" :props="props">
-          {{ props.row.orb }}
+          <div
+            class="text-pre-wrap cursor-pointer"
+            @click="openViewer(props.row.name, 'orb')"
+          >
+            {{ props.row.orb }}
+          </div>
         </q-td>
         <q-td key="stl" :props="props">
-          {{ props.row.stl }}
+          <div
+            class="text-pre-wrap cursor-pointer"
+            @click="openViewer(props.row.name, 'stl')"
+          >
+            {{ props.row.stl }}
+          </div>
         </q-td>
         <q-td key="blk" :props="props">
-          {{ props.row.blk }}
+          <div
+            class="text-pre-wrap cursor-pointer"
+            @click="openViewer(props.row.name, 'blk')"
+          >
+            {{ props.row.blk }}
+          </div>
         </q-td>
         <q-td key="kbl" :props="props">
           {{ props.row.kbl }}
@@ -144,31 +174,14 @@ const openViewer = async (player: string, record?: string) => {
       </q-tr>
     </template>
   </q-table>
-  <q-dialog v-model="videoViewerOn">
-    <q-btn flat v-close-popup round dense icon="close" class="close-btn" />
-    <mini-video :highlights="_highlights" />
-  </q-dialog>
+  <mini-video
+    v-model="videoViewerOn"
+    :selectedPlayer="selectedPlayer"
+    :selectedRecord="selectedRecord"
+    :highlights="_highlights"
+  />
 </template>
 <style>
-@media only screen and (max-width: 767px) {
-  .close-btn {
-    position: absolute;
-    color: white;
-    font-size: 24px;
-    right: 0;
-    z-index: 1;
-    bottom: 0;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .close-btn {
-    position: absolute;
-    color: white;
-    font-size: 24px;
-    right: 0;
-    z-index: 1;
-    top: 0;
-  }
+.a {
 }
 </style>

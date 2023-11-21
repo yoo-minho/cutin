@@ -104,11 +104,14 @@ export async function createCaptureVideo(
         goal = true;
       }
 
+      let sec = currentSec + quaterTotalSec - lastQuaterSec;
+      sec = sec < 0 ? sec + 60 : sec;
+
       drawVideoBanners(
         canvasElem,
         {
           ...cut,
-          seekTime: formatTime(currentSec + quaterTotalSec - lastQuaterSec),
+          seekTime: formatTime(sec),
           vsScore,
         },
         tick

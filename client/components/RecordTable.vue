@@ -9,7 +9,7 @@ const currTime = toRef(videoProps.value, "currentTime");
 const currVideoName = toRef(videoProps.value, "videoName");
 
 const videoViewerOn = ref(false);
-const videoViewerSrc = ref("");
+const highlights = ref();
 
 const gameTab = ref("1");
 const quaterTab = ref("1");
@@ -201,7 +201,9 @@ const openViewer = async (videoUrl: string, cut: CutType) => {
     await delay(0.3);
   }
   videoViewerOn.value = true;
-  videoViewerSrc.value = videoUrl;
+  highlights.value = [
+    { videoUrl, mainPlayer: cut.mainPlayer, skill: cut.skill },
+  ];
 };
 
 const columns = [
@@ -244,9 +246,7 @@ const columns = [
 </script>
 <template>
   <div class="bg-dark" style="height: 100%; border-left: 0.5px solid grey">
-    <q-dialog v-model="videoViewerOn">
-      <mini-video :video-url-arr="[videoViewerSrc]" />
-    </q-dialog>
+    <mini-video v-model="videoViewerOn" :highlights="highlights" />
     <div class="row" style="gap: 12px; padding: 12px">
       <q-btn
         color="pink"
