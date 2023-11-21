@@ -60,9 +60,9 @@ const columns = [
 ] as any;
 
 const videoViewerOn = ref(false);
-const videoViewerSrc = ref([]);
+const _highlights = ref();
 
-const openViewer = async (player: string) => {
+const openViewer = async (player: string, record?: string) => {
   const route = useRoute();
   const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
   const params = {
@@ -71,19 +71,20 @@ const openViewer = async (player: string) => {
     gameNo,
     player,
   };
-  const start = performance.now();
   const { data } = await useFetch("/api/highlights/player", {
     params,
   });
-  console.log(
-    "canvas draw",
-    Math.round((performance.now() - start) / 100) / 10
-  );
-  const { videoUrlArr } = data.value || {};
-  console.log({ videoUrlArr });
-  if (!videoUrlArr) return;
+  const { highlights } = data.value || {};
+  if (!highlights) return;
+
   videoViewerOn.value = true;
-  videoViewerSrc.value = videoUrlArr;
+  if (record) {
+    _highlights.value = highlights.filter((hl) =>
+      isMyHighlight(hl.mainPlayer === player, hl.skill || "득점&어시", record)
+    );
+  } else {
+    _highlights.value = highlights;
+  }
 };
 </script>
 <template>
@@ -110,10 +111,20 @@ const openViewer = async (player: string) => {
           {{ props.row.pts }}
         </q-td>
         <q-td key="reb" :props="props">
-          {{ props.row.reb }}
+          <div
+            class="text-pre-wrap cursor-pointer"
+            @click="openViewer(props.row.name, 'reb')"
+          >
+            {{ props.row.reb }}
+          </div>
         </q-td>
         <q-td key="ast" :props="props">
-          {{ props.row.ast }}
+          <div
+            class="text-pre-wrap cursor-pointer"
+            @click="openViewer(props.row.name, 'ast')"
+          >
+            {{ props.row.ast }}
+          </div>
         </q-td>
         <q-td key="tpm" :props="props">
           {{ props.row.tpm }}
@@ -134,6 +145,30 @@ const openViewer = async (player: string) => {
     </template>
   </q-table>
   <q-dialog v-model="videoViewerOn">
-    <mini-video :video-url-arr="videoViewerSrc" />
+    <q-btn flat v-close-popup round dense icon="close" class="close-btn" />
+    <mini-video :highlights="_highlights" />
   </q-dialog>
 </template>
+<style>
+@media only screen and (max-width: 767px) {
+  .close-btn {
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    right: 0;
+    z-index: 1;
+    bottom: 0;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .close-btn {
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    right: 0;
+    z-index: 1;
+    top: 0;
+  }
+}
+</style>

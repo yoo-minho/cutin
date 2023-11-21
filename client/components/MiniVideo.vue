@@ -1,5 +1,9 @@
 <script setup lang="ts">
-const props = defineProps<{ videoUrlArr: string[] }>();
+type Highlight = { videoUrl: string; mainPlayer: string; skill?: string };
+
+const props = defineProps<{
+  highlights: Highlight[];
+}>();
 const miniVideo = ref();
 const idx = ref(0);
 
@@ -7,7 +11,7 @@ onMounted(() => {
   watch(
     idx,
     () => {
-      miniVideo.value.src = props.videoUrlArr[idx.value];
+      miniVideo.value.src = props.highlights[idx.value].videoUrl;
     },
     { immediate: true }
   );
@@ -23,8 +27,8 @@ const nextVideo = () => {
 </script>
 <template>
   <div class="wrap">
-    <div class="shorts_banner">
-      {{ videoUrlArr.length }}개 중 {{ idx + 1 }}번째 하이라이트
+    <div class="shorts_banner font1">
+      {{ highlights.length }}개 중 {{ idx + 1 }}번째 하이라이트
     </div>
     <video
       ref="miniVideo"
@@ -35,23 +39,19 @@ const nextVideo = () => {
       loop
     />
     <div class="landscape">
-      <div v-if="idx > 0" class="prev_button" @click="prevVideo()">이전</div>
-      <div
-        v-if="idx < videoUrlArr.length - 1"
-        class="next_button"
-        @click="nextVideo()"
-      >
-        다음
+      <div class="prev_button font1" @click="prevVideo()">
+        <q-icon v-if="idx > 0" name="skip_previous" />
+      </div>
+      <div class="next_button font1" @click="nextVideo()">
+        <q-icon v-if="idx < highlights.length - 1" name="skip_next" />
       </div>
     </div>
     <div class="portrait row justify-center" style="gap: 16px">
-      <div v-if="idx > 0" class="shorts_banner" @click="prevVideo()">이전</div>
-      <div
-        v-if="idx < videoUrlArr.length - 1"
-        class="shorts_banner"
-        @click="nextVideo()"
-      >
-        다음
+      <div class="shorts_banner font1" @click="prevVideo()">
+        <q-icon v-if="idx > 0" name="skip_previous" />
+      </div>
+      <div class="shorts_banner font1" @click="nextVideo()">
+        <q-icon v-if="idx < highlights.length - 1" name="skip_next" />
       </div>
     </div>
   </div>
@@ -71,6 +71,11 @@ const nextVideo = () => {
 
 /* CSS에서 미디어 쿼리 사용 */
 @media only screen and (max-width: 767px) {
+  .portrait {
+  }
+  .landscape {
+    display: none;
+  }
   .miniVideo {
     width: 100%;
     height: 100%;
@@ -80,43 +85,47 @@ const nextVideo = () => {
     color: white;
     text-align: center;
   }
-  .landscape {
-    display: none;
-  }
 }
 
 @media only screen and (min-width: 768px) {
-  .miniVideo {
-    width: 100%;
-    height: 100vh;
+  .font1 {
+    font-size: 36px;
+    margin: 16px;
+    line-height: 36px;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7);
   }
   .shorts_banner {
-    font-size: 4em;
-    font-weight: bold;
-    color: white;
-    margin: 1rem;
-    text-align: center;
     position: absolute;
+    color: white;
+    font-weight: bold;
     top: 0;
     right: 0;
   }
-  .prev_button {
-    cursor: pointer;
-    font-size: 2em;
-    font-weight: bold;
-    color: white;
-    position: fixed;
-    top: 50vh;
-    left: 1em;
+  .landscape {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .prev_button {
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+      left: 1em;
+    }
+    .next_button {
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+      right: 1em;
+    }
   }
-  .next_button {
-    cursor: pointer;
-    font-size: 2em;
-    font-weight: bold;
-    color: white;
-    position: fixed;
-    top: 50vh;
-    right: 1em;
+  .miniVideo {
+    width: 100%;
+    height: 100vh;
   }
   .portrait {
     display: none;

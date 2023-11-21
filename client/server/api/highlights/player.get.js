@@ -4,25 +4,19 @@ import { mergePromise } from "@/utils/videoUtil";
 
 export default defineEventHandler(async (event) => {
   const { clubCode, playDate, gameNo, player } = getQuery(event);
-  const playerPath = `./upload/` + `${clubCode}/${playDate}/player/`;
-  const encPlayer = encodeURIComponent(player);
-  const outputPath = playerPath + `${encPlayer}.mp4`;
-
-  if (false && existsSync(outputPath)) {
-    return {
-      fileUrl: `/v/${clubCode}-${playDate}-player-${encPlayer}`,
-    };
-  }
-
-  const videoUrlArr = await getHighlightUrlByPlayer(
+  const highlights = await getHighlightUrlByPlayer(
     clubCode,
     playDate,
     gameNo,
     player
   );
+  return { highlights };
+});
 
-  return { videoUrlArr };
-
+async function xx() {
+  const playerPath = `./upload/` + `${clubCode}/${playDate}/player/`;
+  const encPlayer = encodeURIComponent(player);
+  const outputPath = playerPath + `${encPlayer}.mp4`;
   const inputPaths = urls
     .filter((url) => !!url)
     .map((url) => {
@@ -41,4 +35,4 @@ export default defineEventHandler(async (event) => {
     error: false,
     fileUrl: `/v/${clubCode}-${playDate}-player-${player}`,
   };
-});
+}

@@ -41,6 +41,19 @@ export const defaultSkill = [
   },
 ];
 
+export const isMyHighlight = (
+  areYouMainPlayer: boolean,
+  skill: string,
+  record: string
+) => {
+  const stat = [...defaultSkill, pts].find((v) => v.name === skill);
+  if (areYouMainPlayer) {
+    return Object.keys(stat?.main || {}).find((k) => k === record);
+  } else {
+    return Object.keys(stat?.sub || {}).find((k) => k === record);
+  }
+};
+
 export const getSkillPoints = (skill: string): any => {
   return [...defaultSkill, pts].find((k) => k.name === skill);
 };
