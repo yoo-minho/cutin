@@ -10,3 +10,16 @@ export type CutType = {
   vsScore?: any;
   playerStat?: any;
 };
+
+export type VsType = {
+  playDate: string;
+  gameNo: number;
+  gameCode?: string;
+  dateInfo?: string;
+  match: [VsInfoType, VsInfoType];
+};
+
+export type VsInfoType = {
+  teamName: string;
+  score: number;
+};

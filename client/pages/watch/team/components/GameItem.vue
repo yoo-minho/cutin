@@ -1,15 +1,12 @@
 <script setup lang="ts">
-const props = defineProps<{
-  vs: {
-    dateInfo: string;
-    aTeamName: string;
-    aScore: number;
-    bTeamName: string;
-    bScore: number;
-  };
-}>();
+import type { VsType } from "@/types";
 
-const whoWin = props.vs.bScore > props.vs.aScore ? "b" : "a";
+const props = defineProps<{ vs: VsType }>();
+
+const { score: aScore, teamName: aTeamName } = props.vs.match[0];
+const { score: bScore, teamName: bTeamName } = props.vs.match[1];
+
+const whoWin = bScore > aScore ? "b" : "a";
 </script>
 <template>
   <q-item-label class="q-mx-sm" :class="'cursor-pointer'" @click="">
@@ -23,15 +20,15 @@ const whoWin = props.vs.bScore > props.vs.aScore ? "b" : "a";
           class="row items-center"
           style="justify-content: space-around"
         >
-          <q-item-label class="teamName">{{ vs.aTeamName }}</q-item-label>
+          <q-item-label class="teamName">{{ aTeamName }}</q-item-label>
           <q-item-label class="score" :class="whoWin === 'a' ? 'win' : ''">
-            {{ vs.aScore }}
+            {{ aScore }}
           </q-item-label>
           <q-item-label class="vs">VS</q-item-label>
           <q-item-label class="score" :class="whoWin === 'b' ? 'win' : ''">
-            {{ vs.bScore }}
+            {{ bScore }}
           </q-item-label>
-          <q-item-label class="teamName">{{ vs.bTeamName }}</q-item-label>
+          <q-item-label class="teamName">{{ bTeamName }}</q-item-label>
         </q-item-label>
       </q-item-section>
     </q-item>

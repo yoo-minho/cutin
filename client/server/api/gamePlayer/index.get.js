@@ -1,4 +1,4 @@
-import { getGamePlayer } from "~/server/data/gamePlayer";
+import { getGamePlayer } from "@/server/data/gamePlayer";
 
 export default defineEventHandler(async (event) => {
   const { clubCode, playDate } = getQuery(event);

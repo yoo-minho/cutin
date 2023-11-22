@@ -25,6 +25,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@prisma/client": "^5.4.1",
+    "dayjs": "^1.11.10",
     "ffmpeg": "^0.0.4",
     "fluent-ffmpeg": "^2.1.2"
   }

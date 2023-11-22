@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import type { VsType } from "@/types";
 import GameItem from "../components/GameItem.vue";
+const route = useRoute();
+const teamName = route.params.teamName as string;
 
 const exapmpleVs = [
   {
@@ -22,6 +25,18 @@ const exapmpleVs = [
   },
 ];
 
+const { data } = await useFetch<VsType[]>("/api/gameStat/match", {
+  params: { clubCode: teamName },
+});
+const currentVsState = useState<VsType[]>("currentVsState", () => []);
+currentVsState.value = (data.value || []).map((vs) => {
+  return {
+    ...vs,
+    dateInfo: formatGameDate(vs.playDate, vs.gameNo),
+    gameCode: `${teamName}_${vs.playDate}_${vs.gameNo}`,
+  };
+});
+
 const moveGame = (gameCode: string) => {
   const route = useRoute();
   const router = useRouter();
@@ -30,8 +45,8 @@ const moveGame = (gameCode: string) => {
 </script>
 <template>
   <q-list bordered>
-    <template v-for="vs in exapmpleVs">
-      <GameItem :vs="vs" @click="moveGame(vs.gameCode)" />
+    <template v-for="vs in currentVsState">
+      <GameItem v-if="vs.gameCode" :vs="vs" @click="moveGame(vs.gameCode)" />
       <q-separator />
     </template>
   </q-list>
