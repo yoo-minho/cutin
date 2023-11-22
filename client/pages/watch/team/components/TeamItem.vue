@@ -5,12 +5,12 @@ const props = defineProps<{
     place: string;
     cycle: string;
     method: string;
-    memberCount: number;
+    memberCount: string;
   };
 }>();
 </script>
 <template>
-  <q-item-label class="q-mx-sm" :class="'cursor-pointer'" @click="">
+  <q-item-label class="q-mx-sm cursor-pointer">
     <q-item class="q-px-sm q-pt-sm">
       <q-item-section>
         <q-item-label class="text-weight-bolder row" style="font-size: 20px">
@@ -23,7 +23,6 @@ const props = defineProps<{
       </q-item-section>
     </q-item>
   </q-item-label>
-  <q-separator class="q-my-sm" />
 </template>
 
 <style lang="scss" scoped></style>

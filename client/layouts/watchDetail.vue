@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import WatchHeader from "./components/WatchHeader.vue";
 
-const tab2 = ref("");
-
-const isMain = () => {
-  const route = useRoute();
-  const routePath = String(route.path || "");
-  return routePath === "/watch/team" || routePath === "/watch/player";
-};
-
 const getTeamName = () => {
   const route = useRoute();
   return route.params.teamName || "";
@@ -23,52 +15,15 @@ const backEvent = () => {
 </script>
 <template>
   <q-layout>
-    <template v-if="isMain()">
-      <WatchHeader type="MAIN" :title="'MYHL 🏀'" style="position: relative" />
-      <q-tabs
-        v-model="tab2"
-        dense
-        :class="`text-grey js-tab bg-dark`"
-        :active-color="`green-3`"
-        :indicator-color="`green-3`"
-      >
-        <q-route-tab
-          name="team"
-          label="Team"
-          to="/watch/team"
-          :replace="true"
-          no-caps
-          style="flex: 1"
-        />
-        <q-route-tab
-          name="player"
-          label="Player"
-          to="/watch/player"
-          :replace="true"
-          no-caps
-          style="flex: 1"
-        />
-      </q-tabs>
-      <q-tab-panels v-model="tab2" animated class="my-panels">
-        <q-tab-panel name="team" class="q-pa-none">
-          <slot />
-        </q-tab-panel>
-        <q-tab-panel name="player" class="q-pa-none">
-          <slot />
-        </q-tab-panel>
-      </q-tab-panels>
-    </template>
-    <template v-else>
-      <WatchHeader
-        type="DETAIL"
-        :title="getTeamName() + ' - MYHL 🏀'"
-        @back-event="backEvent()"
-        style="position: relative"
-      />
-      <div class="bg-white">
-        <slot />
-      </div>
-    </template>
+    <WatchHeader
+      type="DETAIL"
+      :title="getTeamName() + ' - MYHL 🏀'"
+      @back-event="backEvent()"
+      style="position: relative"
+    />
+    <div class="bg-white" style="overflow: scroll; height: calc(100vh - 51px)">
+      <slot />
+    </div>
   </q-layout>
 </template>
 

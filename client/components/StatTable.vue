@@ -78,17 +78,18 @@ const openViewer = async (player: string, record?: string) => {
     params,
   });
   const { highlights } = data.value || {};
-  if (!highlights) return;
 
-  videoViewerOn.value = true;
-  selectedPlayer.value = player;
-  selectedRecord.value = record || "";
-  if (record) {
-    _highlights.value = highlights.filter((hl) =>
-      isMyHighlight(hl.mainPlayer === player, hl.skill || "득점&어시", record)
-    );
-  } else {
-    _highlights.value = highlights;
+  if (highlights) {
+    videoViewerOn.value = true;
+    selectedPlayer.value = player;
+    selectedRecord.value = record || "";
+    if (record) {
+      _highlights.value = highlights.filter((hl) =>
+        isMyHighlight(hl.mainPlayer === player, hl.skill || "득점&어시", record)
+      );
+    } else {
+      _highlights.value = highlights;
+    }
   }
 };
 </script>
@@ -175,6 +176,7 @@ const openViewer = async (player: string, record?: string) => {
     </template>
   </q-table>
   <mini-video
+    v-if="_highlights"
     v-model="videoViewerOn"
     :selectedPlayer="selectedPlayer"
     :selectedRecord="selectedRecord"

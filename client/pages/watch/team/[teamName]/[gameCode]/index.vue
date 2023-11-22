@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import GameItem from "../../components/GameItem.vue";
 
+definePageMeta({
+  layout: "watch-detail",
+});
+
 const route = useRoute();
 const gameCode = route.params.gameCode as string;
 const [clubCode, playDate, gameNo] = gameCode.split("_");
@@ -9,12 +13,20 @@ const playerArr = await findPlayer(props);
 const [aTeam, bTeam] = await getCutsWithStat2(playerArr, props);
 
 const currentVsState = useState<VsType[]>("currentVsState", () => []);
-const currentVs = currentVsState.value.find((vs) => vs.gameCode === gameCode);
+const currentVs = ref();
+if (currentVsState.value.length > 0) {
+  currentVs.value = currentVsState.value.find((vs) => vs.gameCode === gameCode);
+} else {
+  const { data } = await useFetch<VsType[]>("/api/gameStat/match", {
+    params: { gameCode },
+  });
+  currentVs.value = data.value[0];
+}
 </script>
 <template>
   <q-card>
     <GameItem :vs="currentVs" />
-    <q-separator />
+    <q-separator color="#ccc" class="q-py-xs" />
     <q-card-section>
       <div class="column items-center align-center">
         <div>

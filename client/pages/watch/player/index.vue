@@ -1,17 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+definePageMeta({
+  layout: "watch-main",
+});
+</script>
 <template>
-  <div>player</div>
-  <div>player</div>
-  <div>player</div>
-
-  <div>player</div>
-  <div>player</div>
-  <div>player</div>
-  <div>player</div>
-  <div>player</div>
-
-  <div>player</div>
-  <div>player</div>
+  <div>준비중</div>
 </template>
 
 <style lang="scss" scoped></style>

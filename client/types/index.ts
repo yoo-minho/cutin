@@ -23,3 +23,12 @@ export type VsInfoType = {
   teamName: string;
   score: number;
 };
+
+export type TeamInfoType = {
+  id: string,
+  name: string,
+  place: string,
+  cycle: string,
+  method: string,
+  memberCount: string,
+},

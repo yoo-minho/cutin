@@ -1,41 +1,42 @@
 <script setup lang="ts">
-import type { VsType } from "@/types";
+import type { TeamInfoType, VsType } from "@/types";
 import GameItem from "../components/GameItem.vue";
+import TeamItem from "../components/TeamItem.vue";
+
+definePageMeta({
+  layout: "watch-detail",
+});
+
 const route = useRoute();
 const teamName = route.params.teamName as string;
-
-const exapmpleVs = [
-  {
-    gameCode: "gba_20231104_1",
-    playDate: "20231104",
-    gameNo: 1,
-    dateInfo: "2023.11.4.(토) 1게임",
-    aTeamName: "화이트",
-    aScore: 70,
-    bTeamName: "블랙",
-    bScore: 60,
-  },
-  {
-    gameCode: "gba_20231104_2",
-    dateInfo: "2023.11.4.(토) 2게임",
-    aTeamName: "화이트",
-    aScore: 67,
-    bTeamName: "블랙",
-    bScore: 91,
-  },
-];
 
 const { data } = await useFetch<VsType[]>("/api/gameStat/match", {
   params: { clubCode: teamName },
 });
+
+const currentTeam = ref();
+const currentTeamState = useState<TeamInfoType[]>("currentTeamState", () => []);
+if (currentTeamState.value.length > 0) {
+  currentTeam.value = currentTeamState.value.find(
+    (team) => team.id === teamName
+  );
+}
+
 const currentVsState = useState<VsType[]>("currentVsState", () => []);
-currentVsState.value = (data.value || []).map((vs) => {
-  return {
-    ...vs,
-    dateInfo: formatGameDate(vs.playDate, vs.gameNo),
-    gameCode: `${teamName}_${vs.playDate}_${vs.gameNo}`,
-  };
-});
+watch(
+  data,
+  (newData) => {
+    if (!newData) return;
+    currentVsState.value = newData.map((vs) => {
+      return {
+        ...vs,
+        dateInfo: formatGameDate(vs.playDate, vs.gameNo),
+        gameCode: `${teamName}_${vs.playDate}_${vs.gameNo}`,
+      };
+    });
+  },
+  { immediate: true }
+);
 
 const moveGame = (gameCode: string) => {
   const route = useRoute();
@@ -44,7 +45,9 @@ const moveGame = (gameCode: string) => {
 };
 </script>
 <template>
-  <q-list bordered>
+  <TeamItem :team="currentTeam" />
+  <q-separator color="#ccc" class="q-py-xs" />
+  <q-list>
     <template v-for="vs in currentVsState">
       <GameItem v-if="vs.gameCode" :vs="vs" @click="moveGame(vs.gameCode)" />
       <q-separator />

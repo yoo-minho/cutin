@@ -3,7 +3,7 @@ const route = useRoute();
 </script>
 <template>
   <template v-if="route.path.includes('/watch')">
-    <NuxtLayout name="watch" class="max-width">
+    <NuxtLayout class="max-width">
       <NuxtPage />
     </NuxtLayout>
   </template>
