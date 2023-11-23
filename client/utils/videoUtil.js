@@ -15,7 +15,7 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
       .fps(24)
       .videoCodec("libx264") //압축 낮고 속도 높음
       // .videoCodec("libx265") //압축 높이고 속도 낮음
-      .outputOptions(["-c:v h264_nvenc", "-preset fast"]) // NVENC 설정
+      // .outputOptions(["-c:v h264_nvenc", "-preset fast"]) // NVENC 설정
       .output(outputPath)
       .on("start", function (commandLine) {
         // console.log("FFmpeg process started with command: " + commandLine);
