@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync, unlinkSync } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import { updateVideoUrl } from "../data/highlights";
 
 export default defineEventHandler(async (event) => {
