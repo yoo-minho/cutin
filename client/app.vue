@@ -17,6 +17,21 @@ body {
 }
 
 @font-face {
+  font-family: "Giants-Bold";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-1@1.1/Giants-Bold.woff2")
+    format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Pretendard-Regular";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/assets/fonts/Pretendard-Regular.ttf") format("truetype");
+}
+
+@font-face {
   font-family: "NanumSquareNeo-Variable";
   src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_11-01@1.0/NanumSquareNeo-Variable.woff2")
     format("woff2");

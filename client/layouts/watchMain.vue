@@ -42,14 +42,6 @@ const tab2 = ref("");
 </template>
 
 <style lang="scss">
-@font-face {
-  font-family: "Pretendard-Regular";
-  font-style: normal;
-  font-weight: 400;
-  src: url("/assets/fonts/Pretendard-Regular.woff") format("woff"),
-    url("/assets/fonts/Pretendard-Regular.ttf") format("truetype");
-}
-
 body {
   overflow: hidden;
 }

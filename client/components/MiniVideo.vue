@@ -126,7 +126,7 @@ const recordSuffix = () => {
   </q-dialog>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .q-dialog__inner--minimized {
   padding: 0;
 }

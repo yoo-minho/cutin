@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync, unlinkSync, existsSync } from "fs";
 import { updateVideoUrl } from "../data/highlights";
 
 export default defineEventHandler(async (event) => {
@@ -18,8 +18,10 @@ export default defineEventHandler(async (event) => {
   const pathArr = path.split("/");
   const realPath = pathArr.splice(0, [pathArr.length - 1]).join("/");
   const inputPath = "./upload/" + path + ".webm";
+  const oldPath = "./upload/" + path + ".mp4";
   mkdirSync("./upload/" + realPath, { recursive: true });
   writeFileSync(inputPath, file.data);
+  if (existsSync(oldPath)) unlinkSync(oldPath);
   const videoUrl = `/v/${path.replace(/\//g, "-")}.mp4`;
   await updateVideoUrl(videoUrl, videoName, seekTime);
   return { error: false, videoUrl };
