@@ -63,11 +63,39 @@ const recordSuffix = () => {
     ? getRecordName(props.selectedRecord) + " H/L"
     : "HighLight";
 };
+
+const orientationType = ref(String(window.screen.orientation.type));
+const rotateScreen = async () => {
+  try {
+    if (window.screen && window.screen.orientation) {
+      if (window.screen.orientation.type.includes("portrait")) {
+        await window.screen.orientation.lock("landscape");
+        orientationType.value = "landscape";
+      } else if (window.screen.orientation.type.includes("landscape")) {
+        window.screen.orientation.unlock();
+        orientationType.value = "landscaportraitpe";
+      }
+    }
+  } catch (e) {
+    console.error("이 기능은 지원되지 않습니다.");
+  }
+};
 </script>
 <template>
   <q-dialog v-model="videoViewerOn">
     <div class="wrap">
-      <q-btn flat v-close-popup round icon="close" class="close-btn" />
+      <div class="top-btns">
+        <q-btn
+          flat
+          round
+          :icon="`stay_current_${
+            orientationType === 'portrait' ? 'landscape' : 'portrait'
+          }`"
+          class="landscape"
+          @click="rotateScreen()"
+        />
+        <q-btn flat v-close-popup round icon="close" class="close" />
+      </div>
       <template v-if="selectedPlayer">
         <div class="banner">
           <div class="title">{{ selectedPlayer }}의 {{ recordSuffix() }}</div>
@@ -90,12 +118,8 @@ const recordSuffix = () => {
       />
       <template v-if="selectedPlayer">
         <div class="bar">
-          <div @click="prevVideo()">
-            <q-icon name="skip_previous" />
-          </div>
-          <div @click="nextVideo()">
-            <q-icon name="skip_next" />
-          </div>
+          <q-btn icon="skip_previous" round @click="prevVideo()" />
+          <q-btn icon="skip_next" @click="nextVideo()" />
         </div>
       </template>
     </div>
@@ -107,6 +131,10 @@ const recordSuffix = () => {
   padding: 0;
 }
 
+.q-dialog__backdrop {
+  background-color: #010101;
+}
+
 .wrap {
   max-width: 100vw !important;
   max-height: 100vh !important;
@@ -116,6 +144,10 @@ const recordSuffix = () => {
 
 /* 모바일 세로방향 화면 (0px ~ 767px) */
 @media screen and (max-width: 666px) {
+  .miniVideo {
+    width: 100%;
+    height: 100%;
+  }
   .banner {
     color: white;
     text-align: center;
@@ -128,25 +160,24 @@ const recordSuffix = () => {
       font-size: 24px;
     }
   }
-  .miniVideo {
-    width: 100%;
-    height: 100%;
-  }
   .bar {
-    color: white;
-    font-size: 36px;
     display: flex;
     justify-content: space-around;
-    div {
+    z-index: 1;
+    button {
+      color: white;
+      font-size: 24px;
       cursor: pointer;
     }
   }
-  .close-btn {
-    cursor: pointer;
-    width: 100%;
-    color: white;
-    font-size: 24px;
-    right: 0;
+  .top-btns {
+    display: flex;
+    justify-content: center;
+    z-index: 1;
+    button {
+      color: white;
+      font-size: 24px;
+    }
   }
 }
 
@@ -174,25 +205,28 @@ const recordSuffix = () => {
   }
   .bar {
     position: absolute;
-    color: white;
-    font-size: 48px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     top: 0;
     height: 100%;
     width: 100%;
-    div {
+    button {
+      color: white;
+      font-size: 24px;
       cursor: pointer;
     }
   }
-  .close-btn {
-    cursor: pointer;
+  .top-btns {
     position: absolute;
-    color: white;
-    font-size: 24px;
-    right: 0;
+    display: flex;
+    justify-content: center;
     z-index: 1;
+    right: 0;
+    button {
+      color: white;
+      font-size: 24px;
+    }
   }
 }
 
@@ -239,13 +273,18 @@ const recordSuffix = () => {
       cursor: pointer;
     }
   }
-  .close-btn {
-    cursor: pointer;
+  .top-btns {
+    display: flex;
     position: absolute;
-    color: white;
-    font-size: 24px;
+    top: 0;
     right: 0;
+
     z-index: 1;
+
+    button {
+      color: white;
+      font-size: 32px;
+    }
   }
 }
 </style>
