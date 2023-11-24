@@ -19,7 +19,9 @@ body {
 @font-face {
   font-family: "Giants-Bold";
   src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-1@1.1/Giants-Bold.woff2")
-    format("woff2");
+      format("woff2"),
+    url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-1@1.1/Giants-Bold.woff")
+      format("woff");
   font-weight: 700;
   font-style: normal;
 }
