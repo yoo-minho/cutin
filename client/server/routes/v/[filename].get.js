@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     "Content-Disposition",
     `attachment; filename="${newFileName}`
   );
-  setHeader(event, "content-type", "application/octet-stream");
+  setHeader(event, "content-type", "video/mp4");
   const buffer = readFileSync(newFilePath);
   return buffer;
 });

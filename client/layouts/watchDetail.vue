@@ -32,8 +32,7 @@ const backEvent = () => {
   font-family: "Pretendard-Regular";
   font-style: normal;
   font-weight: 400;
-  src: url("/assets/fonts/Pretendard-Regular.woff2") format("woff2"),
-    url("/assets/fonts/Pretendard-Regular.woff") format("woff"),
+  src: url("/assets/fonts/Pretendard-Regular.woff") format("woff"),
     url("/assets/fonts/Pretendard-Regular.ttf") format("truetype");
 }
 

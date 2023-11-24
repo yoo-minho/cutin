@@ -80,11 +80,8 @@ const recordSuffix = () => {
         height="540"
         autoplay
         loop
-      >
-        <source :src="currentSrc" type="application/octet-stream" />
-        Your browser does not support the video tag.
-      </video>
-
+        :src="currentSrc"
+      />
       <template v-if="selectedPlayer">
         <div class="bar">
           <div @click="prevVideo()">
