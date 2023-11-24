@@ -21,7 +21,7 @@ const backEvent = () => {
       @back-event="backEvent()"
       style="position: relative"
     />
-    <div class="bg-white" style="overflow: scroll; height: calc(100vh - 51px)">
+    <div class="bg-white" style="overflow: auto; height: calc(100vh - 51px)">
       <slot />
     </div>
   </q-layout>

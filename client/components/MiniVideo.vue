@@ -34,7 +34,8 @@ watch(
   (newHighlights) => {
     idx.value = 0;
     currentSrc.value = newHighlights?.[idx.value].videoUrl;
-  }
+  },
+  { immediate: true }
 );
 
 watch(idx, (newIdx) => {
@@ -79,7 +80,12 @@ const recordSuffix = () => {
         width="960"
         height="540"
         autoplay
+        play
         loop
+        tabindex="-1"
+        webkit-playsinline
+        playsinline
+        controlslist="nodownload"
         :src="currentSrc"
       />
       <template v-if="selectedPlayer">

@@ -2,6 +2,7 @@
 import type { TeamInfoType, VsType } from "@/types";
 import GameItem from "../components/GameItem.vue";
 import TeamItem from "../components/TeamItem.vue";
+import { getTeams } from "@/server/data/gameTeam";
 
 definePageMeta({
   layout: "watch-detail",
@@ -20,6 +21,9 @@ if (currentTeamState.value.length > 0) {
   currentTeam.value = currentTeamState.value.find(
     (team) => team.id === teamName
   );
+} else {
+  const { data } = await getTeams(teamName);
+  currentTeam.value = data;
 }
 
 const currentVsState = useState<VsType[]>("currentVsState", () => []);
