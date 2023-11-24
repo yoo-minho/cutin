@@ -64,28 +64,28 @@ const recordSuffix = () => {
     : "HighLight";
 };
 
-const orientationType = ref(String(window.screen.orientation.type));
-const rotateScreen = async () => {
-  try {
-    if (window.screen && window.screen.orientation) {
-      if (window.screen.orientation.type.includes("portrait")) {
-        await window.screen.orientation.lock("landscape");
-        orientationType.value = "landscape";
-      } else if (window.screen.orientation.type.includes("landscape")) {
-        window.screen.orientation.unlock();
-        orientationType.value = "landscaportraitpe";
-      }
-    }
-  } catch (e) {
-    console.error("이 기능은 지원되지 않습니다.");
-  }
-};
+// const orientationType = ref(String(window.screen.orientation.type));
+// const rotateScreen = async () => {
+//   try {
+//     if (window.screen && window.screen.orientation) {
+//       if (window.screen.orientation.type.includes("portrait")) {
+//         await window.screen.orientation.lock("landscape");
+//         orientationType.value = "landscape";
+//       } else if (window.screen.orientation.type.includes("landscape")) {
+//         window.screen.orientation.unlock();
+//         orientationType.value = "landscaportraitpe";
+//       }
+//     }
+//   } catch (e) {
+//     console.error("이 기능은 지원되지 않습니다.");
+//   }
+// };
 </script>
 <template>
   <q-dialog v-model="videoViewerOn">
     <div class="wrap">
       <div class="top-btns">
-        <q-btn
+        <!-- <q-btn
           flat
           round
           :icon="`stay_current_${
@@ -93,7 +93,7 @@ const rotateScreen = async () => {
           }`"
           class="landscape"
           @click="rotateScreen()"
-        />
+        /> -->
         <q-btn flat v-close-popup round icon="close" class="close" />
       </div>
       <template v-if="selectedPlayer">
