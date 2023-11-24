@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   const inputPath = "./upload/" + path + ".webm";
   mkdirSync("./upload/" + realPath, { recursive: true });
   writeFileSync(inputPath, file.data);
-  const videoUrl = `/v/${path.replace(/\//g, "-")}`;
+  const videoUrl = `/v/${path.replace(/\//g, "-")}.mp4`;
   await updateVideoUrl(videoUrl, videoName, seekTime);
   return { error: false, videoUrl };
 });
