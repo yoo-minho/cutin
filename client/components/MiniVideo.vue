@@ -28,8 +28,17 @@ watch(
 
 const currentSrc = ref("");
 const idx = ref(0);
-watch([() => props.highlights, () => idx.value], ([newHighlights, newIdx]) => {
-  currentSrc.value = newHighlights?.[newIdx].videoUrl;
+
+watch(
+  () => props.highlights,
+  (newHighlights) => {
+    idx.value = 0;
+    currentSrc.value = newHighlights?.[idx.value].videoUrl;
+  }
+);
+
+watch(idx, (newIdx) => {
+  currentSrc.value = props.highlights?.[newIdx].videoUrl;
 });
 
 const prevVideo = () => {

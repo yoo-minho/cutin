@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   //ex) filename = ./upload/gba/20231007/1g1q/00136_1_A.mp4
 
   // 파일 경로 및 이름 설정
-  const filePathArr = filename.split("-");
+  const filePathArr = filename.replace(".mp4", "").split("-");
   const newFileName = filePathArr[filePathArr.length - 1] + ".mp4";
   const oldFilePath = `./upload/${filePathArr.join("/")}.webm`;
   const newFilePath = `./upload/${filePathArr.join("/")}.mp4`;

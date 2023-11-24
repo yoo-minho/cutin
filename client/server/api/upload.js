@@ -18,10 +18,8 @@ export default defineEventHandler(async (event) => {
   const pathArr = path.split("/");
   const realPath = pathArr.splice(0, [pathArr.length - 1]).join("/");
   const inputPath = "./upload/" + path + ".webm";
-  const oldInputPath = "./upload/" + path + ".mp4";
   mkdirSync("./upload/" + realPath, { recursive: true });
   writeFileSync(inputPath, file.data);
-  unlinkSync(oldInputPath);
   const videoUrl = `/v/${path.replace(/\//g, "-")}`;
   await updateVideoUrl(videoUrl, videoName, seekTime);
   return { error: false, videoUrl };
