@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { serviceName } from "@/composables/constants";
 import WatchHeader from "./components/WatchHeader.vue";
 
 const tab2 = ref("");
 </script>
 <template>
   <q-layout>
-    <WatchHeader type="MAIN" :title="'MYHL 🏀'" style="position: relative" />
+    <WatchHeader type="MAIN" :title="serviceName" style="position: relative" />
     <q-tabs
       v-model="tab2"
       dense
@@ -52,8 +53,6 @@ ul {
 }
 
 body {
-  font-family: "Pretendard-Regular", "Noto Sans KR", Avenir, Helvetica, Arial,
-    sans-serif;
   background-color: $grey-4;
 }
 

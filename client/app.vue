@@ -14,6 +14,16 @@ const route = useRoute();
 <style>
 body {
   overflow: hidden;
+  font-family: "Noto Sans KR", Arial, Helvetica, sans-serif;
+}
+
+@font-face {
+  font-family: "Noto Sans KR";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/NotoSansKR-Regular.woff2") format("woff2");
+  unicode-range: U+AC00-D7A3;
 }
 
 @font-face {

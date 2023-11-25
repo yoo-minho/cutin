@@ -1,3 +1,5 @@
+import { serverName } from "../composables/constants";
+
 export function drawBanner(canvas, props) {
   const ctx = canvas?.getContext("2d");
 
@@ -228,7 +230,7 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     yAlign: "top",
     x: margin,
     y: margin,
-    text: "MYHL🏀",
+    text: serverName,
     font: "Giants-Bold",
     fontSize: fontSize,
     textColor: "white",

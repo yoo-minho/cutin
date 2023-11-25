@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { serviceName } from "@/composables/constants";
 import WatchHeader from "./components/WatchHeader.vue";
 
 const getTeamName = () => {
@@ -17,7 +18,7 @@ const backEvent = () => {
   <q-layout>
     <WatchHeader
       type="DETAIL"
-      :title="getTeamName() + ' - MYHL 🏀'"
+      :title="getTeamName() + ' - ' + serviceName"
       @back-event="backEvent()"
       style="position: relative"
     />
@@ -38,8 +39,6 @@ ul {
 }
 
 body {
-  font-family: "Pretendard-Regular", "Noto Sans KR", Avenir, Helvetica, Arial,
-    sans-serif;
   background-color: $grey-4;
 }
 
