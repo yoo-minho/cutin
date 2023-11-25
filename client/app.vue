@@ -22,7 +22,34 @@ body {
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/assets/fonts/NotoSansKR-Regular.woff2") format("woff2");
+  src: url(/assets/fonts/NotoSansKR-Regular.woff2) format("woff2");
+  unicode-range: U+AC00-D7A3;
+}
+
+@font-face {
+  font-family: "Noto Sans KR";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/assets/fonts/NotoSansKR-Medium.woff2) format("woff2");
+  unicode-range: U+AC00-D7A3;
+}
+
+@font-face {
+  font-family: "Noto Sans KR";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/assets/fonts/NotoSansKR-Bold.woff2) format("woff2");
+  unicode-range: U+AC00-D7A3;
+}
+
+@font-face {
+  font-family: "Noto Sans KR";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(/assets/fonts/NotoSansKR-Black.woff2) format("woff2");
   unicode-range: U+AC00-D7A3;
 }
 
