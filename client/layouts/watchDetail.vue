@@ -15,14 +15,14 @@ const backEvent = () => {
 };
 </script>
 <template>
-  <q-layout>
+  <q-layout class="column" style="height: 100vh">
     <WatchHeader
       type="DETAIL"
-      :title="getTeamName() + ' - ' + serviceName"
+      title=""
       @back-event="backEvent()"
       style="position: relative"
     />
-    <div class="bg-white" style="overflow: auto; height: calc(100vh - 51px)">
+    <div class="bg-white" style="overflow: auto; flex: 1">
       <slot />
     </div>
   </q-layout>

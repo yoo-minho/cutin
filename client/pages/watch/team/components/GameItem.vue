@@ -12,7 +12,7 @@ const whoWin = bScore > aScore ? "b" : "a";
   <q-item-label class="q-mx-sm" :class="'cursor-pointer'" @click="">
     <q-item class="q-px-sm q-pt-sm">
       <q-item-section>
-        <q-item-label>
+        <q-item-label class="row">
           <q-icon name="event" class="q-mr-xs" />
           {{ vs.dateInfo }}
         </q-item-label>

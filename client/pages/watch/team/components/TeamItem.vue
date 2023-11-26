@@ -13,7 +13,7 @@ defineProps<{
   <q-item-label class="q-mx-sm cursor-pointer q-mt-sm">
     <q-item class="q-px-sm q-pt-sm">
       <q-item-section>
-        <q-item-label class="text-weight-bold row items-center">
+        <q-item-label class="text-weight-bold row items-center q-mb-sm">
           <h2>{{ team.name }}</h2>
           <span class="text-grey-5 q-mx-sm">{{ team.memberCount }}</span>
         </q-item-label>

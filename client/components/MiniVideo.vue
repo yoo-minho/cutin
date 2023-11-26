@@ -213,7 +213,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
   /* 모바일 세로방향 화면 (0px ~ 767px) */
   @media screen and (max-width: 666px) {
     .miniVideo {
-      width: 100%;
+      width: 100vw;
       height: 100%;
     }
     .banner {
