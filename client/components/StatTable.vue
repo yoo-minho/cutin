@@ -1,5 +1,8 @@
 <script setup lang="ts">
-defineProps<{ playerStat: any }>();
+const props = defineProps<{ playerStat: any }>();
+const getSelectedPlayerStat = (playerName: string) =>
+  props.playerStat.find((v: { name: string }) => v.name === playerName) || {};
+
 const columns = [
   {
     label: "선수",
@@ -66,6 +69,7 @@ const selectedRecord = ref("");
 
 const openViewer = async (player: string, record?: string) => {
   if (player === "전체") return;
+
   const route = useRoute();
   const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
   const params = {
@@ -74,27 +78,32 @@ const openViewer = async (player: string, record?: string) => {
     gameNo,
     player,
   };
-  const { data } = await useFetch("/api/highlights/player", {
+  const { data } = await useFetch<any>("/api/highlights/player", {
     params,
   });
-  const { highlights } = data.value || {};
+  const { highlights } = data.value || [];
 
-  if (highlights) {
-    videoViewerOn.value = true;
+  if (highlights?.length > 0) {
     selectedPlayer.value = player;
     selectedRecord.value = record || "";
     if (record) {
-      _highlights.value = highlights.filter((hl) =>
+      _highlights.value = highlights.filter((hl: any) =>
         isMyHighlight(hl.mainPlayer === player, hl.skill || "득점&어시", record)
       );
     } else {
       _highlights.value = highlights;
+    }
+    if (_highlights.value.length > 0) {
+      videoViewerOn.value = true;
+    } else {
+      Notify.create("영상 기록이 없습니다!");
     }
   }
 };
 </script>
 <template>
   <q-table
+    class="stat-table"
     flat
     dense
     bordered
@@ -106,12 +115,20 @@ const openViewer = async (player: string, record?: string) => {
     <template #body="props">
       <q-tr :props="props">
         <q-td key="name" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="openViewer(props.row.name)"
-          >
+          <template v-if="props.row.name === '전체'">
             {{ props.row.name }}
-          </div>
+          </template>
+          <template v-else>
+            <q-btn
+              dense
+              icon-right="smart_display"
+              class="q-ma-xs q-py-none text-pre-wrap"
+              style="font-size: 13px"
+              @click="openViewer(props.row.name)"
+            >
+              {{ props.row.name }}
+            </q-btn>
+          </template>
         </q-td>
         <q-td key="pts" :props="props">
           <div
@@ -179,11 +196,23 @@ const openViewer = async (player: string, record?: string) => {
     v-if="_highlights"
     v-model="videoViewerOn"
     :selectedPlayer="selectedPlayer"
+    :selectedPlayerStat="getSelectedPlayerStat(selectedPlayer)"
     :selectedRecord="selectedRecord"
     :highlights="_highlights"
   />
 </template>
-<style>
-.a {
+<style lang="scss">
+.stat-table {
+  td {
+    padding: 0 !important;
+  }
+
+  .q-btn__content {
+    gap: 4px;
+
+    .q-icon {
+      font-size: 1.2em;
+    }
+  }
 }
 </style>

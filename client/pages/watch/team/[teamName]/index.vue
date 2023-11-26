@@ -50,7 +50,7 @@ const moveGame = (gameCode: string) => {
 </script>
 <template>
   <TeamItem :team="currentTeam" />
-  <q-separator color="#ccc" class="q-py-xs" />
+  <q-separator color="#ccc" class="q-mt-sm q-py-xs" />
   <q-list>
     <template v-for="vs in currentVsState">
       <GameItem v-if="vs.gameCode" :vs="vs" @click="moveGame(vs.gameCode)" />

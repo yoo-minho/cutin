@@ -1,3 +1,3 @@
 <script setup lang="ts">
-navigateTo("/watch/");
+navigateTo("/watch/team");
 </script>

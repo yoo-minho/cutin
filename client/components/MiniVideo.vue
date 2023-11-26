@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { getRecordName } from "@/composables/constants";
-
 type Highlight = { videoUrl: string; mainPlayer: string; skill?: string };
+type PlayerStat = {
+  tpm: number;
+  ast: number;
+  reb: number;
+  orb: number;
+  blk: number;
+  stl: number;
+  [x: string]: number;
+};
 
 const props = defineProps<{
   modelValue: boolean;
   selectedPlayer?: string;
+  selectedPlayerStat?: any;
   selectedRecord?: string;
   highlights: Highlight[];
 }>();
 const emits = defineEmits();
+
+const miniVideo = ref<HTMLVideoElement>();
+const loadingScreen = ref(false);
 
 const videoViewerOn = ref(props.modelValue);
 watch(
@@ -32,13 +43,16 @@ const idx = ref(0);
 watch(
   () => props.highlights,
   (newHighlights) => {
-    idx.value = 0;
-    currentSrc.value = newHighlights?.[idx.value].videoUrl;
+    if (newHighlights?.length > 0) {
+      idx.value = 0;
+      currentSrc.value = newHighlights?.[idx.value]?.videoUrl;
+    }
   },
   { immediate: true }
 );
 
 watch(idx, (newIdx) => {
+  loadingScreen.value = true;
   currentSrc.value = props.highlights?.[newIdx].videoUrl;
 });
 
@@ -57,11 +71,26 @@ const nextVideo = () => {
   }
 };
 
-const recordSuffix = () => {
-  if (!props.selectedRecord) return "HighLight";
-  return props.selectedRecord.length > 0
-    ? getRecordName(props.selectedRecord) + " H/L"
-    : "HighLight";
+const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
+  const getContents = (statName: string) => {
+    if (statName === "pts") return "득점";
+    if (statName === "ast") return "어시";
+    if (statName === "reb") return "리바";
+    if (statName === "stl") return "스틸";
+    if (statName === "blk") return "블락";
+    return "";
+  };
+  const x = Object.keys(selectedPlayerStat)
+    .filter((k) => ["ast", "reb", "blk", "stl"].includes(k))
+    .map((k) => ({ name: k, val: selectedPlayerStat[k] }))
+    .filter((v) => v.val > 2)
+    .sort((a, b) => b.val - a.val);
+  const subStat = x.map((v) => v.val + getContents(v.name)).join(" ");
+  if (selectedPlayerStat.pts > 0) {
+    return selectedPlayerStat.pts + "득점 " + subStat;
+  } else {
+    return subStat;
+  }
 };
 
 // const orientationType = ref(String(window.screen.orientation.type));
@@ -82,7 +111,7 @@ const recordSuffix = () => {
 // };
 </script>
 <template>
-  <q-dialog v-model="videoViewerOn">
+  <q-dialog v-model="videoViewerOn" class="mini-video">
     <div class="wrap">
       <div class="top-btns">
         <!-- <q-btn
@@ -98,11 +127,24 @@ const recordSuffix = () => {
       </div>
       <template v-if="selectedPlayer">
         <div class="banner">
-          <div class="title">{{ selectedPlayer }}의 {{ recordSuffix() }}</div>
-          <div class="number">(#{{ idx + 1 }}/{{ highlights.length }})</div>
+          <div class="title">{{ selectedPlayer }}</div>
+          <div class="number">
+            {{ getTitleWithStat(selectedPlayerStat) }}
+          </div>
+        </div>
+        <div class="row">
+          <div
+            v-for="index in highlights.length"
+            style="height: 3px; flex: 1; margin: 1px; border-radius: 4px"
+            :style="{
+              'background-color': idx + 1 === index ? 'orange' : 'white',
+            }"
+          ></div>
         </div>
       </template>
+      <div v-show="loadingScreen" class="video-loading">Loading...</div>
       <video
+        v-show="!loadingScreen"
         ref="miniVideo"
         class="miniVideo"
         width="960"
@@ -115,175 +157,201 @@ const recordSuffix = () => {
         playsinline
         controlslist="nodownload"
         :src="currentSrc"
+        @loadeddata="() => (loadingScreen = false)"
       />
       <template v-if="selectedPlayer">
         <div class="bar">
-          <q-btn icon="skip_previous" round @click="prevVideo()" />
-          <q-btn icon="skip_next" @click="nextVideo()" />
+          <q-btn
+            push
+            color="white"
+            text-color="primary"
+            icon="skip_previous"
+            @click="prevVideo()"
+          />
+          <q-btn
+            push
+            color="white"
+            text-color="primary"
+            icon="skip_next"
+            @click="nextVideo()"
+          />
         </div>
       </template>
     </div>
   </q-dialog>
 </template>
 
-<style lang="scss" scoped>
-.q-dialog__inner--minimized {
-  padding: 0;
-}
+<style lang="scss">
+.mini-video {
+  .q-dialog__inner--minimized {
+    padding: 0;
+  }
 
-.q-dialog__backdrop {
-  background-color: #010101;
-}
+  .q-dialog__backdrop {
+    background-color: #010101;
+  }
 
-.wrap {
-  max-width: 100vw !important;
-  max-height: 100vh !important;
-  overflow: hidden !important;
-  position: relative;
-}
-
-/* 모바일 세로방향 화면 (0px ~ 767px) */
-@media screen and (max-width: 666px) {
-  .miniVideo {
-    width: 100%;
-    height: 100%;
-  }
-  .banner {
-    color: white;
-    text-align: center;
-    .title {
-      font-size: 32px;
-      line-height: 32px;
-      font-weight: bold;
-    }
-    .number {
-      font-size: 24px;
-    }
-  }
-  .bar {
-    display: flex;
-    justify-content: space-around;
-    z-index: 1;
-    button {
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-    }
-  }
-  .top-btns {
-    display: flex;
-    justify-content: center;
-    z-index: 1;
-    button {
-      color: white;
-      font-size: 24px;
-    }
-  }
-}
-
-/* 모바일 가로방향 화면 (768px ~ 1279px) */
-@media screen and (min-width: 667px) and (max-width: 1279px) {
-  .banner {
-    position: absolute;
-    color: white;
-    text-align: center;
-    width: 100%;
-    margin-top: 12px;
-
-    .title {
-      font-size: 32px;
-      line-height: 32px;
-      font-weight: bold;
-    }
-    .number {
-      font-size: 24px;
-    }
-  }
-  .miniVideo {
-    width: 100%;
-    height: 100vh;
-  }
-  .bar {
-    position: absolute;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    button {
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-    }
-  }
-  .top-btns {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    z-index: 1;
-    right: 0;
-    button {
-      color: white;
-      font-size: 24px;
-    }
-  }
-}
-
-/* 웹 화면 (1280px 이상) */
-@media screen and (min-width: 1280px) {
   .wrap {
-    max-width: 1280px !important;
+    max-width: 100vw !important;
     max-height: 100vh !important;
     overflow: hidden !important;
     position: relative;
-  }
 
-  .banner {
-    position: absolute;
-    color: white;
-    text-align: center;
-    width: 100%;
-    margin-top: 12px;
-
-    .title {
-      font-size: 32px;
-      line-height: 32px;
-      font-weight: bold;
-    }
-    .number {
+    .video-loading {
+      width: 100vw;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: static;
       font-size: 24px;
     }
   }
-  .miniVideo {
-    width: 100%;
-    height: 100vh;
-  }
-  .bar {
-    position: absolute;
-    color: white;
-    font-size: 48px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    div {
-      cursor: pointer;
+
+  /* 모바일 세로방향 화면 (0px ~ 767px) */
+  @media screen and (max-width: 666px) {
+    .miniVideo {
+      width: 100%;
+      height: 100%;
+    }
+    .banner {
+      color: white;
+      text-align: center;
+      .title {
+        font-size: 32px;
+        line-height: 32px;
+        font-weight: bold;
+      }
+      .number {
+        font-size: 24px;
+      }
+    }
+    .bar {
+      display: flex;
+      justify-content: space-around;
+      z-index: 1;
+      button {
+        font-size: 16px;
+        cursor: pointer;
+      }
+    }
+    .top-btns {
+      display: flex;
+      justify-content: center;
+      z-index: 1;
+      button {
+        color: white;
+        font-size: 24px;
+      }
     }
   }
-  .top-btns {
-    display: flex;
-    position: absolute;
-    top: 0;
-    right: 0;
 
-    z-index: 1;
-
-    button {
+  /* 모바일 가로방향 화면 (768px ~ 1279px) */
+  @media screen and (min-width: 667px) and (max-width: 1279px) {
+    .banner {
+      position: absolute;
       color: white;
-      font-size: 32px;
+      text-align: center;
+      width: 100%;
+      margin-top: 12px;
+
+      .title {
+        font-size: 32px;
+        line-height: 32px;
+        font-weight: bold;
+      }
+      .number {
+        font-size: 24px;
+      }
+    }
+    .miniVideo {
+      width: 100%;
+      height: 100vh;
+    }
+    .bar {
+      position: absolute;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      button {
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+      }
+    }
+    .top-btns {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      z-index: 1;
+      right: 0;
+      button {
+        color: white;
+        font-size: 24px;
+      }
+    }
+  }
+
+  /* 웹 화면 (1280px 이상) */
+  @media screen and (min-width: 1280px) {
+    .wrap {
+      max-width: 1280px !important;
+      max-height: 100vh !important;
+      overflow: hidden !important;
+      position: relative;
+    }
+
+    .banner {
+      position: absolute;
+      color: white;
+      text-align: center;
+      width: 100%;
+      margin-top: 12px;
+
+      .title {
+        font-size: 32px;
+        line-height: 32px;
+        font-weight: bold;
+      }
+      .number {
+        font-size: 24px;
+      }
+    }
+    .miniVideo {
+      width: 100%;
+      height: 100vh;
+    }
+    .bar {
+      position: absolute;
+      color: white;
+      font-size: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      div {
+        cursor: pointer;
+      }
+    }
+    .top-btns {
+      display: flex;
+      position: absolute;
+      top: 0;
+      right: 0;
+
+      z-index: 1;
+
+      button {
+        color: white;
+        font-size: 32px;
+      }
     }
   }
 }

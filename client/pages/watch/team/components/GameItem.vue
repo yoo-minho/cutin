@@ -13,6 +13,7 @@ const whoWin = bScore > aScore ? "b" : "a";
     <q-item class="q-px-sm q-pt-sm">
       <q-item-section>
         <q-item-label>
+          <q-icon name="event" class="q-mr-xs" />
           {{ vs.dateInfo }}
         </q-item-label>
 
@@ -39,6 +40,10 @@ const whoWin = bScore > aScore ? "b" : "a";
 .teamName {
   font-size: 24px;
   font-weight: bold;
+}
+
+.vs {
+  font-size: 24px;
 }
 .score {
   font-size: 36px;
