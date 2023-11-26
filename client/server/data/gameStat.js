@@ -6,7 +6,7 @@ export async function getMatchByClubCode(clubCode) {
         SELECT "playDate", "gameNo", json_agg(jsonb_build_object('teamName',"teamName",'score',"score")) as match FROM (
             SELECT 
                 hl."playDate", hl."gameNo", gp."teamName", 
-                SUM((CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락') THEN 0 WHEN hl.skill in ('3점슛','앤드원') THEN 3 ELSE 2 END)) score
+                SUM((CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN hl.skill in ('3점슛','앤드원') THEN 3 ELSE 2 END)) score
             FROM "Highlight" as hl
             INNER JOIN "GamePlayer" AS gp ON gp."clubCode" = hl."clubCode" and gp."playDate" = hl."playDate" AND hl."mainPlayer" = gp."player"
             WHERE hl."clubCode" = ${clubCode} 
