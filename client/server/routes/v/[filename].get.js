@@ -13,15 +13,18 @@ export default defineEventHandler(async (event) => {
   const oldFilePath = `./upload/${filePathArr.join("/")}.webm`;
   const newFilePath = `./upload/${filePathArr.join("/")}.mp4`;
 
-  // 파일이 존재하는지 확인
-  if (existsSync(newFilePath)) {
-    //pass
-  } else if (existsSync(oldFilePath)) {
-    await ffmpegPromise({ inputPath: oldFilePath, outputPath: newFilePath });
-    unlinkSync(oldFilePath);
-  } else {
-    setResponseStatus(event, 404);
+  const existsNew = existsSync(newFilePath);
+  const existsOld = existsSync(oldFilePath);
+
+  if (!existsNew && !existsOld) {
     return "No File";
+  }
+
+  const buffer = readFileSync(existsNew ? newFilePath : oldFilePath);
+
+  if (existsOld) {
+    // await ffmpegPromise({ inputPath: oldFilePath, outputPath: newFilePath });
+    // unlinkSync(oldFilePath);
   }
 
   // 응답 헤더 설정
@@ -33,6 +36,6 @@ export default defineEventHandler(async (event) => {
     `attachment; filename="${newFileName}`
   );
   setHeader(event, "content-type", "video/mp4");
-  const buffer = readFileSync(newFilePath);
+
   return buffer;
 });
