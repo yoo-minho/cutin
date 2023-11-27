@@ -94,6 +94,13 @@ const nextVideo = () => {
   }
 };
 
+const loadVideoCallback = () => {
+  loadingScreen.value = false;
+  if (miniVideo.value) {
+    miniVideo.value.playbackRate = 1 / 2.5;
+  }
+};
+
 const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
   const getContents = (statName: string) => {
     if (statName === "pts") return "득점";
@@ -162,7 +169,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
             playsinline
             controlslist="nodownload"
             :src="currentSrc"
-            @loadeddata="() => (loadingScreen = false)"
+            @loadeddata="loadVideoCallback"
           />
         </div>
       </div>
