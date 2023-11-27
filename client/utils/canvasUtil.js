@@ -190,7 +190,7 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     font: "NanumSquareNeo-Variable",
     fontSize: smallFontSize,
     textColor: "white",
-    bgColor: "yellowgreen",
+    bgColor: "orange",
     padding,
   });
 
