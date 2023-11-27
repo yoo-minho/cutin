@@ -47,7 +47,6 @@ export async function createManyHighlight(data) {
 }
 
 export async function updateVideoUrl(videoUrl, videoName, seekTime) {
-  console.log({ videoUrl, videoName, seekTime });
   await prisma.highlight.update({
     data: { videoUrl },
     where: { videoName_seekTime: { videoName, seekTime } },

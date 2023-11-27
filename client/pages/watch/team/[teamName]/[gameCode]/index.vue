@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { VsType } from "@/types";
 import GameItem from "../../components/GameItem.vue";
 
 definePageMeta({
@@ -20,26 +21,31 @@ if (currentVsState.value.length > 0) {
   const { data } = await useFetch<VsType[]>("/api/gameStat/match", {
     params: { gameCode },
   });
-  currentVs.value = data.value[0];
+  if (data.value) {
+    currentVs.value = data.value.map((vs) => {
+      return {
+        ...vs,
+        dateInfo: formatGameDate(vs.playDate, vs.gameNo),
+        gameCode,
+      };
+    })[0];
+  }
 }
 </script>
 <template>
-  <q-card>
-    <GameItem :vs="currentVs" />
-    <q-separator color="#ccc" class="q-py-xs" />
-    <q-card-section>
-      <div class="column items-center align-center">
-        <div>
-          <div class="text-h6">{{ aTeam?.teamName }}</div>
-          <StatTable :player-stat="aTeam?.playerStat" />
-        </div>
-        <div class="q-mt-md">
-          <div class="text-h6">{{ bTeam?.teamName }}</div>
-          <StatTable :player-stat="bTeam?.playerStat" />
-        </div>
-      </div>
-    </q-card-section>
-  </q-card>
+  <GameItem :vs="currentVs" type="MATCH" />
+  <q-separator color="#ccc" class="q-py-xs" />
+  <div class="column items-center align-center q-my-md">
+    <div>
+      <div class="text-h6">{{ aTeam?.teamName }}</div>
+      <StatTable :player-stat="aTeam?.playerStat" />
+    </div>
+    <div class="q-mt-md">
+      <div class="text-h6">{{ bTeam?.teamName }}</div>
+      <StatTable :player-stat="bTeam?.playerStat" />
+    </div>
+  </div>
+  <q-separator color="#ccc" style="padding: 60px" />
 </template>
 
 <style lang="scss" scoped>

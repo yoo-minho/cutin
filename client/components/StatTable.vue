@@ -130,65 +130,14 @@ const openViewer = async (player: string, record?: string) => {
             </q-btn>
           </template>
         </q-td>
-        <q-td key="pts" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="openViewer(props.row.name, 'pts')"
-          >
-            {{ props.row.pts }}
-          </div>
-        </q-td>
-        <q-td key="reb" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="openViewer(props.row.name, 'reb')"
-          >
-            {{ props.row.reb }}
-          </div>
-        </q-td>
-        <q-td key="ast" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="openViewer(props.row.name, 'ast')"
-          >
-            {{ props.row.ast }}
-          </div>
-        </q-td>
-        <q-td key="tpm" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="openViewer(props.row.name, 'tpm')"
-          >
-            {{ props.row.tpm }}
-          </div>
-        </q-td>
-        <q-td key="orb" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="openViewer(props.row.name, 'orb')"
-          >
-            {{ props.row.orb }}
-          </div>
-        </q-td>
-        <q-td key="stl" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="openViewer(props.row.name, 'stl')"
-          >
-            {{ props.row.stl }}
-          </div>
-        </q-td>
-        <q-td key="blk" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="openViewer(props.row.name, 'blk')"
-          >
-            {{ props.row.blk }}
-          </div>
-        </q-td>
-        <q-td key="kbl" :props="props">
-          {{ props.row.kbl }}
-        </q-td>
+        <q-td key="pts" :props="props"> {{ props.row.pts }} </q-td>
+        <q-td key="reb" :props="props"> {{ props.row.reb }} </q-td>
+        <q-td key="ast" :props="props"> {{ props.row.ast }} </q-td>
+        <q-td key="tpm" :props="props"> {{ props.row.tpm }} </q-td>
+        <q-td key="orb" :props="props"> {{ props.row.orb }} </q-td>
+        <q-td key="stl" :props="props"> {{ props.row.stl }} </q-td>
+        <q-td key="blk" :props="props"> {{ props.row.blk }} </q-td>
+        <q-td key="kbl" :props="props"> {{ props.row.kbl }} </q-td>
       </q-tr>
     </template>
   </q-table>

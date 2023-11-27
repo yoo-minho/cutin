@@ -49,4 +49,27 @@ export async function getMatchByGameCode(gameCode) {
   }
 }
 
-//http://localhost:3000/api/gameStat/match?clubCode=gba_20231104_1
+export async function getAllMatchStatByPlayer(gameCode) {
+  const [clubCode, playDate, gameNo] = gameCode.split("_");
+  try {
+    return await prisma.$queryRaw`
+          select 
+            "playDate", 
+            "gameNo", 
+            SUM((CASE WHEN skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN skill in ('3점슛','앤드원') THEN 3 ELSE 2 END)) filter (where "mainPlayer" = '최성민') score,
+            count(1) filter (where skill in ('오펜스리바','리바운드','풋백','블락&리바')) reb,
+            count(1) filter (where "subPlayer" = '최성민') ast,
+            count(1) filter (where skill in ('3점슛')) tpm,
+            count(1) filter (where skill in ('오펜스리바','풋백')) orb,
+            count(1) filter (where skill in ('스틸')) stl,
+            count(1) filter (where skill in ('블락','블락&리바')) blk
+          from "Highlight"
+          where "clubCode" = 'gba' and ("mainPlayer" = '최성민' OR "subPlayer" = '최성민')
+          group by "playDate", "gameNo";
+      `;
+  } catch (error) {
+    console.error("Error executing raw query:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}

@@ -20,6 +20,7 @@ const props = defineProps<{
 const emits = defineEmits();
 
 const miniVideo = ref<HTMLVideoElement>();
+const miniCanvas = ref<HTMLCanvasElement>();
 const loadingScreen = ref(false);
 
 const videoViewerOn = ref(props.modelValue);
@@ -45,6 +46,7 @@ watch(
   (newHighlights) => {
     if (newHighlights?.length > 0) {
       idx.value = 0;
+      loadingScreen.value = true;
       currentSrc.value = newHighlights?.[idx.value]?.videoUrl;
     }
   },
@@ -52,6 +54,27 @@ watch(
 );
 
 watch(idx, (newIdx) => {
+  if (miniCanvas.value && miniVideo.value) {
+    const ctx = miniCanvas.value.getContext("2d");
+    if (ctx) {
+      ctx.font = "20px Arial";
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(
+        "로딩중...",
+        miniCanvas.value.width / 2,
+        miniCanvas.value.height / 2
+      );
+      ctx.drawImage(
+        miniVideo.value,
+        0,
+        0,
+        miniCanvas.value.width,
+        miniCanvas.value.height
+      );
+    }
+  }
   loadingScreen.value = true;
   currentSrc.value = props.highlights?.[newIdx].videoUrl;
 });
@@ -92,37 +115,11 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
     return subStat;
   }
 };
-
-// const orientationType = ref(String(window.screen.orientation.type));
-// const rotateScreen = async () => {
-//   try {
-//     if (window.screen && window.screen.orientation) {
-//       if (window.screen.orientation.type.includes("portrait")) {
-//         await window.screen.orientation.lock("landscape");
-//         orientationType.value = "landscape";
-//       } else if (window.screen.orientation.type.includes("landscape")) {
-//         window.screen.orientation.unlock();
-//         orientationType.value = "landscaportraitpe";
-//       }
-//     }
-//   } catch (e) {
-//     console.error("이 기능은 지원되지 않습니다.");
-//   }
-// };
 </script>
 <template>
-  <q-dialog v-model="videoViewerOn" class="mini-video">
+  <q-dialog v-model="videoViewerOn" class="mini-video" persistent>
     <div class="wrap">
       <div class="top-btns">
-        <!-- <q-btn
-          flat
-          round
-          :icon="`stay_current_${
-            orientationType === 'portrait' ? 'landscape' : 'portrait'
-          }`"
-          class="landscape"
-          @click="rotateScreen()"
-        /> -->
         <q-btn flat v-close-popup round icon="close" class="close" />
       </div>
       <template v-if="selectedPlayer">
@@ -142,27 +139,38 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
           ></div>
         </div>
       </template>
-      <div v-show="loadingScreen" class="video-loading">Loading...</div>
-      <video
-        v-show="!loadingScreen"
-        ref="miniVideo"
-        class="miniVideo"
-        width="960"
-        height="540"
-        autoplay
-        play
-        loop
-        tabindex="-1"
-        webkit-playsinline
-        playsinline
-        controlslist="nodownload"
-        :src="currentSrc"
-        @loadeddata="() => (loadingScreen = false)"
-      />
+      <div>
+        <div v-show="loadingScreen">
+          <canvas
+            ref="miniCanvas"
+            width="960"
+            height="540"
+            class="miniVideo"
+          ></canvas>
+        </div>
+        <div v-show="!loadingScreen">
+          <video
+            ref="miniVideo"
+            class="miniVideo"
+            width="960"
+            height="540"
+            autoplay
+            play
+            loop
+            tabindex="-1"
+            webkit-playsinline
+            playsinline
+            controlslist="nodownload"
+            :src="currentSrc"
+            @loadeddata="() => (loadingScreen = false)"
+          />
+        </div>
+      </div>
       <template v-if="selectedPlayer">
         <div class="bar">
           <q-btn
             push
+            round
             color="white"
             text-color="primary"
             icon="skip_previous"
@@ -170,6 +178,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
           />
           <q-btn
             push
+            round
             color="white"
             text-color="primary"
             icon="skip_next"
@@ -202,6 +211,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
       aspect-ratio: 16 / 9;
       overflow: hidden;
       color: white;
+      background: $orange-5;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -214,7 +224,8 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
   @media screen and (max-width: 666px) {
     .miniVideo {
       width: 100vw;
-      height: 100%;
+      aspect-ratio: 16/9;
+      height: auto;
     }
     .banner {
       color: white;
@@ -266,10 +277,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
         font-size: 24px;
       }
     }
-    .miniVideo {
-      width: 100%;
-      height: 100vh;
-    }
+
     .bar {
       position: absolute;
       display: flex;
@@ -279,6 +287,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
       height: 100%;
       width: 100%;
       button {
+        opacity: 0.5;
         color: white;
         font-size: 24px;
         cursor: pointer;
@@ -322,21 +331,18 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
         font-size: 24px;
       }
     }
-    .miniVideo {
-      width: 100%;
-      height: 100vh;
-    }
     .bar {
       position: absolute;
-      color: white;
-      font-size: 48px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       top: 0;
       height: 100%;
       width: 100%;
-      div {
+      button {
+        opacity: 0.5;
+        color: white;
+        font-size: 24px;
         cursor: pointer;
       }
     }

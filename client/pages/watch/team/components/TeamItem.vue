@@ -13,9 +13,10 @@ defineProps<{
   <q-item-label class="q-mx-sm cursor-pointer q-mt-sm">
     <q-item class="q-px-sm q-pt-sm">
       <q-item-section>
-        <q-item-label class="text-weight-bold row items-center q-mb-sm">
-          <h2>{{ team.name }}</h2>
-          <span class="text-grey-5 q-mx-sm">{{ team.memberCount }}</span>
+        <q-item-label class="text-weight-bold row items-center q-mb-xs">
+          <div class="teamName">
+            {{ team.name }}
+          </div>
         </q-item-label>
         <q-item-label
           ><q-icon name="place" class="q-mr-xs" /> {{ team.place }}
@@ -33,4 +34,11 @@ defineProps<{
   </q-item-label>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.teamName {
+  font-size: 28px;
+  line-height: 28px;
+  letter-spacing: -3px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+</style>

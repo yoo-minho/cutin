@@ -10,9 +10,9 @@ const tab2 = ref("");
     <q-tabs
       v-model="tab2"
       dense
-      :class="`text-grey js-tab bg-dark`"
-      :active-color="`green-3`"
-      :indicator-color="`green-3`"
+      :class="`text-grey bg-dark`"
+      :active-color="`orange-5`"
+      :indicator-color="`orange-5`"
     >
       <q-route-tab
         name="team"

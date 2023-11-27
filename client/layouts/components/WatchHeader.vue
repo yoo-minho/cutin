@@ -17,14 +17,6 @@ const emits = defineEmits<{ (e: "backEvent"): void }>();
       <q-toolbar-title class="name">
         <h1>{{ title }}</h1>
       </q-toolbar-title>
-      <q-btn
-        area-label="shareBottomSheet"
-        icon="share"
-        flat
-        round
-        dense
-        @click=""
-      />
     </q-toolbar>
   </q-header>
 </template>

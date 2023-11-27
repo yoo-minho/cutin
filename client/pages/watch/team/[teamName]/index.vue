@@ -47,16 +47,38 @@ const moveGame = (gameCode: string) => {
   const router = useRouter();
   router.push(route.path + "/" + gameCode);
 };
+
+const tab2 = ref("match");
 </script>
 <template>
   <TeamItem :team="currentTeam" />
-  <q-separator color="#ccc" class="q-mt-sm q-py-xs" />
-  <q-list>
-    <template v-for="vs in currentVsState">
-      <GameItem v-if="vs.gameCode" :vs="vs" @click="moveGame(vs.gameCode)" />
-      <q-separator />
-    </template>
-  </q-list>
+  <q-separator color="#ccc" class="q-mt-sm" />
+  <q-tabs
+    v-model="tab2"
+    dense
+    :class="`text-grey js-tab bg-white`"
+    :active-color="`orange-5`"
+    :indicator-color="`orange-5`"
+  >
+    <q-tab name="match" label="경기" />
+    <q-tab name="player" label="플레이어" />
+  </q-tabs>
+  <q-tab-panels v-model="tab2" animated>
+    <q-tab-panel name="match" class="q-pa-none">
+      <q-list>
+        <template v-for="vs in currentVsState">
+          <GameItem
+            v-if="vs.gameCode"
+            :vs="vs"
+            type="TEAM"
+            @click="moveGame(vs.gameCode)"
+          />
+          <q-separator />
+        </template>
+      </q-list>
+    </q-tab-panel>
+    <q-tab-panel name="player" class="q-pa-none"> 준비중... </q-tab-panel>
+  </q-tab-panels>
 </template>
 
 <style lang="scss" scoped>
