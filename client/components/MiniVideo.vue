@@ -45,15 +45,6 @@ const drawMiddleCanvas = () => {
   if (!(miniCanvas.value && miniVideo.value)) return;
   const ctx = miniCanvas.value.getContext("2d");
   if (!ctx) return;
-  ctx.font = "20px Arial";
-  ctx.fillStyle = "white";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(
-    "로딩중...",
-    miniCanvas.value.width / 2,
-    miniCanvas.value.height / 2
-  );
   ctx.drawImage(
     miniVideo.value,
     0,
@@ -98,7 +89,9 @@ const nextVideo = () => {
 };
 
 const loadVideoCallback = () => {
-  loadingScreen.value = false;
+  setTimeout(() => {
+    loadingScreen.value = false;
+  }, 1000);
   if (miniVideo.value) {
     // miniVideo.value.playbackRate = 1 / 2.5;
   }
@@ -151,6 +144,9 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
       </template>
       <div>
         <div v-show="loadingScreen">
+          <q-inner-loading :showing="true" dark>
+            <q-spinner size="20vw" />
+          </q-inner-loading>
           <canvas
             ref="miniCanvas"
             width="960"
