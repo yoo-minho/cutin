@@ -62,7 +62,7 @@ export async function createCaptureVideo(
   const totalSec = segment.reduce((acc, seg) => acc + seg.sec, 0);
   const videoElem = document.getElementById("baseVideo") as HTMLVideoElement;
   const originBitrate = (size / videoElem.duration) * 8;
-  const [width, height, bitrateRatio] = ratioSet["720p"];
+  const [width, height, bitrateRatio] = ratioSet["540p"];
   const videoBitsPerSecond = originBitrate / bitrateRatio;
   const canvasElem = document.getElementById("baseCanvas") as HTMLCanvasElement;
   canvasElem.width = width;

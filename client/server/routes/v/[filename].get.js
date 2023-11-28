@@ -20,12 +20,12 @@ export default defineEventHandler(async (event) => {
     return "No File";
   }
 
-  const buffer = readFileSync(existsNew ? newFilePath : oldFilePath);
-
+  // const buffer = readFileSync(existsNew ? newFilePath : oldFilePath);
   if (existsOld) {
-    // await ffmpegPromise({ inputPath: oldFilePath, outputPath: newFilePath });
-    // unlinkSync(oldFilePath);
+    await ffmpegPromise({ inputPath: oldFilePath, outputPath: newFilePath });
+    unlinkSync(oldFilePath);
   }
+  const buffer = readFileSync(newFilePath);
 
   // 응답 헤더 설정
   setHeader(event, "cache-control", "no-cache");

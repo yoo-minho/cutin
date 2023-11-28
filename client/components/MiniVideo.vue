@@ -41,11 +41,34 @@ watch(
 const currentSrc = ref("");
 const idx = ref(0);
 
+const drawMiddleCanvas = () => {
+  if (!(miniCanvas.value && miniVideo.value)) return;
+  const ctx = miniCanvas.value.getContext("2d");
+  if (!ctx) return;
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(
+    "로딩중...",
+    miniCanvas.value.width / 2,
+    miniCanvas.value.height / 2
+  );
+  ctx.drawImage(
+    miniVideo.value,
+    0,
+    0,
+    miniCanvas.value.width,
+    miniCanvas.value.height
+  );
+};
+
 watch(
   () => props.highlights,
   (newHighlights) => {
     if (newHighlights?.length > 0) {
       idx.value = 0;
+      drawMiddleCanvas();
       loadingScreen.value = true;
       currentSrc.value = newHighlights?.[idx.value]?.videoUrl;
     }
@@ -54,27 +77,7 @@ watch(
 );
 
 watch(idx, (newIdx) => {
-  if (miniCanvas.value && miniVideo.value) {
-    const ctx = miniCanvas.value.getContext("2d");
-    if (ctx) {
-      ctx.font = "20px Arial";
-      ctx.fillStyle = "white";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(
-        "로딩중...",
-        miniCanvas.value.width / 2,
-        miniCanvas.value.height / 2
-      );
-      ctx.drawImage(
-        miniVideo.value,
-        0,
-        0,
-        miniCanvas.value.width,
-        miniCanvas.value.height
-      );
-    }
-  }
+  drawMiddleCanvas();
   loadingScreen.value = true;
   currentSrc.value = props.highlights?.[newIdx].videoUrl;
 });
@@ -97,7 +100,7 @@ const nextVideo = () => {
 const loadVideoCallback = () => {
   loadingScreen.value = false;
   if (miniVideo.value) {
-    miniVideo.value.playbackRate = 1 / 2.5;
+    // miniVideo.value.playbackRate = 1 / 2.5;
   }
 };
 

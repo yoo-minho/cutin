@@ -106,7 +106,7 @@ export function drawGrid(canvas, gridSize = 16) {
 }
 
 export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
-  const currenrRatioSet = 720;
+  const currenrRatioSet = 540;
   const ratio = currenrRatioSet / 720;
   const bigFontSize = 64 * ratio;
   const fontSize = 36 * ratio;
