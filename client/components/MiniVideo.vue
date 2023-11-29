@@ -130,22 +130,22 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
       <q-header bordered class="max-width" style="position: relative">
         <q-toolbar>
           <q-btn
-            area-label="back"
-            icon="keyboard_arrow_down"
-            flat
-            round
             dense
+            icon="keyboard_arrow_down"
             @click="videoViewerOn = false"
           />
           <q-toolbar-title>Highlight</q-toolbar-title>
           <q-btn
-            side
-            area-label="back"
-            icon="download"
-            flat
-            round
             dense
-            @click="Notify.create('준비중!')"
+            side
+            icon="aspect_ratio"
+            @click="Notify.create('가로보기 준비중!')"
+          />
+          <q-btn
+            dense
+            side
+            icon="download"
+            @click="Notify.create('다운로드 준비중!')"
           />
         </q-toolbar>
       </q-header>
