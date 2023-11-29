@@ -135,12 +135,16 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
           <q-btn
             side
             icon="aspect_ratio"
-            @click="Notify.create('가로보기 준비중!')"
+            flat
+            dense
+            @click="Notify.create('가로보기 기능 준비중!')"
           />
           <q-btn
             side
+            flat
+            dense
             icon="download"
-            @click="Notify.create('다운로드 준비중!')"
+            @click="Notify.create('다운로드 기능 준비중!')"
           />
         </q-toolbar>
       </q-header>
