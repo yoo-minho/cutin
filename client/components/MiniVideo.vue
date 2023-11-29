@@ -89,9 +89,7 @@ const nextVideo = () => {
 };
 
 const loadVideoCallback = () => {
-  setTimeout(() => {
-    loadingScreen.value = false;
-  }, 1000);
+  loadingScreen.value = false;
   if (miniVideo.value) {
     // miniVideo.value.playbackRate = 1 / 2.5;
   }
@@ -135,13 +133,11 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
           />
           <q-toolbar-title>Highlight</q-toolbar-title>
           <q-btn
-            dense
             side
             icon="aspect_ratio"
             @click="Notify.create('가로보기 준비중!')"
           />
           <q-btn
-            dense
             side
             icon="download"
             @click="Notify.create('다운로드 준비중!')"
