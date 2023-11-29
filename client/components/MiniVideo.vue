@@ -122,9 +122,8 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
 <template>
   <q-dialog
     v-model="videoViewerOn"
-    class="mini-video"
+    class="mini-video max-width"
     position="bottom"
-    maximized
   >
     <div class="wrap">
       <q-header bordered class="max-width" style="position: relative">
@@ -150,29 +149,45 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
         </q-toolbar>
       </q-header>
       <div>
-        <div class="bar">
-          <q-btn text-color="white" icon="skip_previous" @click="prevVideo()" />
-          <q-btn text-color="white" icon="skip_next" @click="nextVideo()" />
+        <div class="bar max-width">
+          <q-btn
+            text-color="white"
+            icon="skip_previous"
+            flat
+            round
+            @click="prevVideo()"
+          />
+          <q-btn
+            text-color="white"
+            icon="skip_next"
+            flat
+            round
+            @click="nextVideo()"
+          />
         </div>
         <div
+          class="max-width"
           style="position: absolute"
           :style="{ 'z-index': loadingScreen ? 0 : -1 }"
         >
-          <q-inner-loading :showing="true" style="aspect-ratio: 16/9">
+          <q-inner-loading
+            :showing="true"
+            class="max-width"
+            style="aspect-ratio: 16/9"
+          >
             <q-spinner size="20vw" />
           </q-inner-loading>
           <canvas
             ref="miniCanvas"
             width="960"
             height="540"
-            class="miniVideo"
+            class="miniVideo max-width"
           ></canvas>
         </div>
-
         <div>
           <video
             ref="miniVideo"
-            class="miniVideo"
+            class="miniVideo max-width"
             width="960"
             height="540"
             autoplay
@@ -280,7 +295,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
   }
   .bar {
     position: absolute;
-    opacity: 0.7;
+    opacity: 0.8;
     display: flex;
     justify-content: space-between;
     align-items: center;
