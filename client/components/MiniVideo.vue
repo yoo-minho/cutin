@@ -120,31 +120,45 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
 };
 </script>
 <template>
-  <q-dialog v-model="videoViewerOn" class="mini-video" persistent>
+  <q-dialog
+    v-model="videoViewerOn"
+    class="mini-video"
+    position="bottom"
+    maximized
+  >
     <div class="wrap">
-      <div class="top-btns">
-        <q-btn flat v-close-popup round icon="close" class="close" />
-      </div>
-      <template v-if="selectedPlayer">
-        <div class="banner">
-          <div class="title">{{ selectedPlayer }}</div>
-          <div class="number">
-            {{ getTitleWithStat(selectedPlayerStat) }}
-          </div>
-        </div>
-        <div class="row">
-          <div
-            v-for="index in highlights.length"
-            style="height: 3px; flex: 1; margin: 1px; border-radius: 4px"
-            :style="{
-              'background-color': idx + 1 === index ? 'orange' : 'white',
-            }"
-          ></div>
-        </div>
-      </template>
+      <q-header bordered class="max-width" style="position: relative">
+        <q-toolbar>
+          <q-btn
+            area-label="back"
+            icon="keyboard_arrow_down"
+            flat
+            round
+            dense
+            @click="videoViewerOn = false"
+          />
+          <q-toolbar-title>Highlight</q-toolbar-title>
+          <q-btn
+            side
+            area-label="back"
+            icon="download"
+            flat
+            round
+            dense
+            @click="Notify.create('준비중!')"
+          />
+        </q-toolbar>
+      </q-header>
       <div>
-        <div v-show="loadingScreen">
-          <q-inner-loading :showing="true" dark>
+        <div class="bar">
+          <q-btn text-color="white" icon="skip_previous" @click="prevVideo()" />
+          <q-btn text-color="white" icon="skip_next" @click="nextVideo()" />
+        </div>
+        <div
+          style="position: absolute"
+          :style="{ 'z-index': loadingScreen ? 0 : -1 }"
+        >
+          <q-inner-loading :showing="true" style="aspect-ratio: 16/9">
             <q-spinner size="20vw" />
           </q-inner-loading>
           <canvas
@@ -154,7 +168,8 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
             class="miniVideo"
           ></canvas>
         </div>
-        <div v-show="!loadingScreen">
+
+        <div>
           <video
             ref="miniVideo"
             class="miniVideo"
@@ -172,8 +187,26 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
           />
         </div>
       </div>
+      <div class="row">
+        <div
+          v-for="index in highlights.length"
+          style="height: 3px; flex: 1; margin: 1px; border-radius: 4px"
+          :style="{
+            'background-color': idx + 1 === index ? 'orange' : 'white',
+          }"
+        ></div>
+      </div>
       <template v-if="selectedPlayer">
-        <div class="bar">
+        <div class="banner">
+          <div class="title">{{ selectedPlayer }}</div>
+          <div class="number">
+            {{ getTitleWithStat(selectedPlayerStat) }}
+          </div>
+        </div>
+      </template>
+
+      <template v-if="selectedPlayer">
+        <!-- <div class="bar">
           <q-btn
             push
             round
@@ -190,7 +223,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
             icon="skip_next"
             @click="nextVideo()"
           />
-        </div>
+        </div> -->
       </template>
     </div>
   </q-dialog>
@@ -207,10 +240,9 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
   }
 
   .wrap {
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
-    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 
     .video-loading {
       width: 100vw;
@@ -227,144 +259,151 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
   }
 
   /* 모바일 세로방향 화면 (0px ~ 767px) */
-  @media screen and (max-width: 666px) {
-    .miniVideo {
-      width: 100vw;
-      aspect-ratio: 16/9;
-      height: auto;
+  // @media screen and (max-width: 666px) {
+  .miniVideo {
+    width: 100vw;
+    aspect-ratio: 16/9;
+    height: auto;
+  }
+  .banner {
+    color: white;
+    margin: 16px;
+    .title {
+      font-size: 28px;
+      line-height: 28px;
+      font-weight: bold;
     }
-    .banner {
-      color: white;
-      text-align: center;
-      .title {
-        font-size: 32px;
-        line-height: 32px;
-        font-weight: bold;
-      }
-      .number {
-        font-size: 24px;
-      }
-    }
-    .bar {
-      display: flex;
-      justify-content: space-around;
-      z-index: 1;
-      button {
-        font-size: 16px;
-        cursor: pointer;
-      }
-    }
-    .top-btns {
-      display: flex;
-      justify-content: center;
-      z-index: 1;
-      button {
-        color: white;
-        font-size: 24px;
-      }
+    .number {
+      font-size: 16px;
+      color: #ccc;
     }
   }
-
-  /* 모바일 가로방향 화면 (768px ~ 1279px) */
-  @media screen and (min-width: 667px) and (max-width: 1279px) {
-    .banner {
-      position: absolute;
-      color: white;
-      text-align: center;
-      width: 100%;
-      margin-top: 12px;
-
-      .title {
-        font-size: 32px;
-        line-height: 32px;
-        font-weight: bold;
-      }
-      .number {
-        font-size: 24px;
-      }
-    }
-
-    .bar {
-      position: absolute;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      top: 0;
-      height: 100%;
-      width: 100%;
-      button {
-        opacity: 0.5;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-      }
-    }
-    .top-btns {
-      position: absolute;
-      display: flex;
-      justify-content: center;
-      z-index: 1;
-      right: 0;
-      button {
-        color: white;
-        font-size: 24px;
-      }
+  .bar {
+    position: absolute;
+    opacity: 0.7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1;
+    position: absolute;
+    width: 100%;
+    aspect-ratio: 16/9;
+    button {
+      cursor: pointer;
+      font-size: 24px;
     }
   }
-
-  /* 웹 화면 (1280px 이상) */
-  @media screen and (min-width: 1280px) {
-    .wrap {
-      max-width: 1280px !important;
-      max-height: 100vh !important;
-      overflow: hidden !important;
-      position: relative;
-    }
-
-    .banner {
-      position: absolute;
+  .top-btns {
+    display: flex;
+    justify-content: center;
+    z-index: 1;
+    button {
       color: white;
-      text-align: center;
-      width: 100%;
-      margin-top: 12px;
-
-      .title {
-        font-size: 32px;
-        line-height: 32px;
-        font-weight: bold;
-      }
-      .number {
-        font-size: 24px;
-      }
-    }
-    .bar {
-      position: absolute;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      top: 0;
-      height: 100%;
-      width: 100%;
-      button {
-        opacity: 0.5;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-      }
-    }
-    .top-btns {
-      display: flex;
-      position: absolute;
-      top: 0;
-      right: 0;
-
-      z-index: 1;
-
-      button {
-        color: white;
-        font-size: 32px;
-      }
+      font-size: 24px;
     }
   }
+  // }
+
+  // /* 모바일 가로방향 화면 (768px ~ 1279px) */
+  // @media screen and (min-width: 667px) and (max-width: 1279px) {
+  //   .banner {
+  //     position: absolute;
+  //     color: white;
+  //     text-align: center;
+  //     width: 100%;
+  //     margin-top: 12px;
+
+  //     .title {
+  //       font-size: 32px;
+  //       line-height: 32px;
+  //       font-weight: bold;
+  //     }
+  //     .number {
+  //       font-size: 24px;
+  //     }
+  //   }
+
+  //   .bar {
+  //     position: absolute;
+  //     display: flex;
+  //     justify-content: space-between;
+  //     align-items: center;
+  //     top: 0;
+  //     height: 100%;
+  //     width: 100%;
+  //     button {
+  //       opacity: 0.5;
+  //       color: white;
+  //       font-size: 24px;
+  //       cursor: pointer;
+  //     }
+  //   }
+  //   .top-btns {
+  //     position: absolute;
+  //     display: flex;
+  //     justify-content: center;
+  //     z-index: 1;
+  //     right: 0;
+  //     button {
+  //       color: white;
+  //       font-size: 24px;
+  //     }
+  //   }
+  // }
+
+  // /* 웹 화면 (1280px 이상) */
+  // @media screen and (min-width: 1280px) {
+  //   .wrap {
+  //     max-width: 1280px !important;
+  //     max-height: 100vh !important;
+  //     overflow: hidden !important;
+  //     position: relative;
+  //   }
+
+  //   .banner {
+  //     position: absolute;
+  //     color: white;
+  //     text-align: center;
+  //     width: 100%;
+  //     margin-top: 12px;
+
+  //     .title {
+  //       font-size: 32px;
+  //       line-height: 32px;
+  //       font-weight: bold;
+  //     }
+  //     .number {
+  //       font-size: 24px;
+  //     }
+  //   }
+  //   .bar {
+  //     position: absolute;
+  //     display: flex;
+  //     justify-content: space-between;
+  //     align-items: center;
+  //     top: 0;
+  //     height: 100%;
+  //     width: 100%;
+  //     button {
+  //       opacity: 0.5;
+  //       color: white;
+  //       font-size: 24px;
+  //       cursor: pointer;
+  //     }
+  //   }
+  //   .top-btns {
+  //     display: flex;
+  //     position: absolute;
+  //     top: 0;
+  //     right: 0;
+
+  //     z-index: 1;
+
+  //     button {
+  //       color: white;
+  //       font-size: 32px;
+  //     }
+  //   }
+  // }
 }
 </style>
