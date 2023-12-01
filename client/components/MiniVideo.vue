@@ -13,7 +13,7 @@ type PlayerStat = {
 const props = defineProps<{
   modelValue: boolean;
   selectedPlayer?: string;
-  selectedPlayerStat?: any;
+  selectedPlayerStat?: PlayerStat;
   selectedRecord?: string;
   highlights: Highlight[];
 }>();
@@ -23,17 +23,33 @@ const miniVideo = ref<HTMLVideoElement>();
 const miniCanvas = ref<HTMLCanvasElement>();
 const loadingScreen = ref(false);
 
-const options = [
+const options = () => [
   { label: "전체", value: "" },
-  { label: "득점", value: "pts" },
-  { label: "리바", value: "reb" },
-  { label: "어시", value: "ast" },
-  { label: "3점", value: "tpm" },
-  { label: "공리", value: "orb" },
-  { label: "스틸", value: "stl" },
-  { label: "블락", value: "blk" },
+  ...[
+    ,
+    { label: "득점", value: "pts" },
+    { label: "리바", value: "reb" },
+    { label: "어시", value: "ast" },
+    { label: "3점", value: "tpm" },
+    { label: "공리", value: "orb" },
+    { label: "스틸", value: "stl" },
+    { label: "블락", value: "blk" },
+  ].filter(
+    (o) =>
+      o && props.selectedPlayerStat && props.selectedPlayerStat[o.value] > 0
+  ),
 ];
-const model = ref(options[0]);
+const model = ref(options()[0]);
+const idx = ref(0);
+const currentSrc = ref("");
+const currentHighlights = ref(props.highlights);
+
+const beforeShow = () => {
+  model.value = options()[0];
+  idx.value = 0;
+  currentHighlights.value = props.highlights;
+  currentSrc.value = currentHighlights.value?.[idx.value]?.videoUrl;
+};
 
 const videoViewerOn = ref(props.modelValue);
 watch(
@@ -50,10 +66,6 @@ watch(
   }
 );
 
-const currentSrc = ref("");
-const idx = ref(0);
-const currentHighlights = ref(props.highlights);
-
 const drawMiddleCanvas = () => {
   if (!(miniCanvas.value && miniVideo.value)) return;
   const ctx = miniCanvas.value.getContext("2d");
@@ -67,43 +79,43 @@ const drawMiddleCanvas = () => {
   );
 };
 
-watch(
-  currentHighlights,
-  () => {
-    if (currentHighlights.value?.length > 0) {
-      idx.value = 0;
-      drawMiddleCanvas();
-      loadingScreen.value = true;
-      currentSrc.value = currentHighlights.value?.[idx.value]?.videoUrl;
-    }
-  },
-  { immediate: true }
-);
-
-watch(idx, (newIdx) => {
-  drawMiddleCanvas();
-  loadingScreen.value = true;
-  currentSrc.value = currentHighlights.value?.[newIdx].videoUrl;
-});
-
-watch(model, (newVal, oldVal) => {
-  if (newVal.value === "") {
+watch(model, (newVal) => {
+  if (newVal?.value === "") {
     currentHighlights.value = props.highlights;
     return;
   }
   const filteredHighlights = props.highlights.filter((hl) => {
     const _skill = hl.skill || "";
     const areYouMainPlayer = hl.mainPlayer === props.selectedPlayer;
-    if (newVal.value === "ast") return !areYouMainPlayer;
-    return isSkillOk(_skill, newVal.value);
+    if (newVal?.value === "ast") return !areYouMainPlayer;
+    return isSkillOk(_skill, newVal?.value || "");
   });
-  if (filteredHighlights.length === 0) {
-    Notify.create("기록이 존재하지 않습니다!");
-    model.value = oldVal;
-    loadingScreen.value = false;
-    return;
-  }
   currentHighlights.value = filteredHighlights;
+});
+
+watch(
+  currentHighlights,
+  (newVal) => {
+    if (newVal?.length > 0) {
+      idx.value = 0;
+      drawMiddleCanvas();
+      const newVideoUrl = newVal?.[idx.value].videoUrl;
+      if (currentSrc.value !== newVideoUrl) {
+        loadingScreen.value = true;
+      }
+      currentSrc.value = newVideoUrl;
+    }
+  },
+  { immediate: true }
+);
+
+watch(idx, () => {
+  drawMiddleCanvas();
+  const newVideoUrl = currentHighlights.value?.[idx.value].videoUrl;
+  if (currentSrc.value !== newVideoUrl) {
+    loadingScreen.value = true;
+  }
+  currentSrc.value = newVideoUrl;
 });
 
 const prevVideo = () => {
@@ -155,6 +167,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
     v-model="videoViewerOn"
     class="mini-video max-width"
     position="bottom"
+    @before-show="beforeShow()"
   >
     <div class="wrap">
       <q-header bordered class="max-width" style="position: relative">
@@ -248,7 +261,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
         <div class="banner-wrap">
           <div class="banner">
             <div class="title">{{ selectedPlayer }}</div>
-            <div class="number">
+            <div v-if="selectedPlayerStat" class="number">
               {{ getTitleWithStat(selectedPlayerStat) }}
             </div>
           </div>
@@ -260,7 +273,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
               standout
               stack-label
               v-model="model"
-              :options="options"
+              :options="options()"
               label="기록 필터"
             />
           </div>
@@ -299,9 +312,9 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
   /* 모바일 세로방향 화면 (0px ~ 767px) */
   // @media screen and (max-width: 666px) {
   .miniVideo {
-    width: 100vw;
     aspect-ratio: 16/9;
     height: auto;
+    overflow: hidden;
   }
   .banner-wrap {
     display: flex;
