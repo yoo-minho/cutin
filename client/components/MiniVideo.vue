@@ -88,7 +88,7 @@ watch(model, (newVal) => {
     const _skill = hl.skill || "";
     const areYouMainPlayer = hl.mainPlayer === props.selectedPlayer;
     if (newVal?.value === "ast") return !areYouMainPlayer;
-    return isSkillOk(_skill, newVal?.value || "");
+    return areYouMainPlayer && isSkillOk(_skill, newVal?.value || "");
   });
   currentHighlights.value = filteredHighlights;
 });
@@ -120,13 +120,13 @@ watch(idx, () => {
 
 const prevVideo = () => {
   if (idx.value === 0) {
-    idx.value = props.highlights.length - 1;
+    idx.value = currentHighlights.value.length - 1;
   } else {
     idx.value -= 1;
   }
 };
 const nextVideo = () => {
-  if (idx.value === props.highlights.length - 1) {
+  if (idx.value === currentHighlights.value.length - 1) {
     idx.value = 0;
   } else {
     idx.value += 1;
