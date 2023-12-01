@@ -1,4 +1,4 @@
-export const serviceName = "CutIn.cc 🏀";
+export const serviceName = "cutin.cc 🏀";
 export const keySet = {
   first: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
   second: ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -58,12 +58,19 @@ export const isMyHighlight = (
   skill: string,
   record: string
 ) => {
+  skill = skill || "득점&어시";
   const stat = [...defaultSkill, pts].find((v) => v.name === skill);
   if (areYouMainPlayer) {
     return Object.keys(stat?.main || {}).find((k) => k === record);
   } else {
     return Object.keys(stat?.sub || {}).find((k) => k === record);
   }
+};
+
+export const isSkillOk = (skill: string, record: string) => {
+  const stat = [...defaultSkill, pts].find((v) => v.name === skill);
+  const isSubOk = Object.keys(stat?.sub || {}).find((k) => k === record);
+  return Object.keys(stat?.main || {}).find((k) => k === record) || isSubOk;
 };
 
 export const getSkillPoints = (skill: string): any => {

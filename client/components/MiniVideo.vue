@@ -23,6 +23,18 @@ const miniVideo = ref<HTMLVideoElement>();
 const miniCanvas = ref<HTMLCanvasElement>();
 const loadingScreen = ref(false);
 
+const options = [
+  { label: "전체", value: "" },
+  { label: "득점", value: "pts" },
+  { label: "리바", value: "reb" },
+  { label: "어시", value: "ast" },
+  { label: "3점", value: "tpm" },
+  { label: "공리", value: "orb" },
+  { label: "스틸", value: "stl" },
+  { label: "블락", value: "blk" },
+];
+const model = ref(options[0]);
+
 const videoViewerOn = ref(props.modelValue);
 watch(
   () => props.modelValue,
@@ -40,6 +52,7 @@ watch(
 
 const currentSrc = ref("");
 const idx = ref(0);
+const currentHighlights = ref(props.highlights);
 
 const drawMiddleCanvas = () => {
   if (!(miniCanvas.value && miniVideo.value)) return;
@@ -55,13 +68,13 @@ const drawMiddleCanvas = () => {
 };
 
 watch(
-  () => props.highlights,
-  (newHighlights) => {
-    if (newHighlights?.length > 0) {
+  currentHighlights,
+  () => {
+    if (currentHighlights.value?.length > 0) {
       idx.value = 0;
       drawMiddleCanvas();
       loadingScreen.value = true;
-      currentSrc.value = newHighlights?.[idx.value]?.videoUrl;
+      currentSrc.value = currentHighlights.value?.[idx.value]?.videoUrl;
     }
   },
   { immediate: true }
@@ -70,7 +83,27 @@ watch(
 watch(idx, (newIdx) => {
   drawMiddleCanvas();
   loadingScreen.value = true;
-  currentSrc.value = props.highlights?.[newIdx].videoUrl;
+  currentSrc.value = currentHighlights.value?.[newIdx].videoUrl;
+});
+
+watch(model, (newVal, oldVal) => {
+  if (newVal.value === "") {
+    currentHighlights.value = props.highlights;
+    return;
+  }
+  const filteredHighlights = props.highlights.filter((hl) => {
+    const _skill = hl.skill || "";
+    const areYouMainPlayer = hl.mainPlayer === props.selectedPlayer;
+    if (newVal.value === "ast") return !areYouMainPlayer;
+    return isSkillOk(_skill, newVal.value);
+  });
+  if (filteredHighlights.length === 0) {
+    Notify.create("기록이 존재하지 않습니다!");
+    model.value = oldVal;
+    loadingScreen.value = false;
+    return;
+  }
+  currentHighlights.value = filteredHighlights;
 });
 
 const prevVideo = () => {
@@ -175,7 +208,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
             class="max-width"
             style="aspect-ratio: 16/9"
           >
-            <q-spinner size="20vw" />
+            <q-spinner size="80px" />
           </q-inner-loading>
           <canvas
             ref="miniCanvas"
@@ -204,7 +237,7 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
       </div>
       <div class="row">
         <div
-          v-for="index in highlights.length"
+          v-for="index in currentHighlights.length"
           style="height: 3px; flex: 1; margin: 1px; border-radius: 4px"
           :style="{
             'background-color': idx + 1 === index ? 'orange' : 'white',
@@ -212,33 +245,26 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
         ></div>
       </div>
       <template v-if="selectedPlayer">
-        <div class="banner">
-          <div class="title">{{ selectedPlayer }}</div>
-          <div class="number">
-            {{ getTitleWithStat(selectedPlayerStat) }}
+        <div class="banner-wrap">
+          <div class="banner">
+            <div class="title">{{ selectedPlayer }}</div>
+            <div class="number">
+              {{ getTitleWithStat(selectedPlayerStat) }}
+            </div>
+          </div>
+          <div>
+            <q-select
+              class="select"
+              label-color="white"
+              bg-color="orange-5"
+              standout
+              stack-label
+              v-model="model"
+              :options="options"
+              label="기록 필터"
+            />
           </div>
         </div>
-      </template>
-
-      <template v-if="selectedPlayer">
-        <!-- <div class="bar">
-          <q-btn
-            push
-            round
-            color="white"
-            text-color="primary"
-            icon="skip_previous"
-            @click="prevVideo()"
-          />
-          <q-btn
-            push
-            round
-            color="white"
-            text-color="primary"
-            icon="skip_next"
-            @click="nextVideo()"
-          />
-        </div> -->
       </template>
     </div>
   </q-dialog>
@@ -250,14 +276,11 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
     padding: 0;
   }
 
-  .q-dialog__backdrop {
-    background-color: #010101;
-  }
-
   .wrap {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    background-color: black;
 
     .video-loading {
       width: 100vw;
@@ -280,19 +303,32 @@ const getTitleWithStat = (selectedPlayerStat: PlayerStat) => {
     aspect-ratio: 16/9;
     height: auto;
   }
-  .banner {
-    color: white;
-    margin: 16px;
-    .title {
-      font-size: 28px;
-      line-height: 28px;
-      font-weight: bold;
+  .banner-wrap {
+    display: flex;
+
+    & > div {
+      flex: 1;
     }
-    .number {
-      font-size: 16px;
-      color: #ccc;
+
+    .select {
+      margin: 12px;
+    }
+
+    .banner {
+      color: white;
+      margin: 16px;
+      .title {
+        font-size: 28px;
+        line-height: 28px;
+        font-weight: bold;
+      }
+      .number {
+        font-size: 16px;
+        color: #ccc;
+      }
     }
   }
+
   .bar {
     position: absolute;
     opacity: 0.8;
