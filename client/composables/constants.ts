@@ -68,6 +68,7 @@ export const isMyHighlight = (
 };
 
 export const isSkillOk = (skill: string, record: string) => {
+  skill = skill || "득점&어시";
   const stat = [...defaultSkill, pts].find((v) => v.name === skill);
   const isSubOk = Object.keys(stat?.sub || {}).find((k) => k === record);
   return Object.keys(stat?.main || {}).find((k) => k === record) || isSubOk;
