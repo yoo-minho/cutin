@@ -18,15 +18,15 @@ defineProps<{
             {{ team.name }}
           </div>
         </q-item-label>
-        <q-item-label
-          ><q-icon name="place" class="q-mr-xs" /> {{ team.place }}
+        <q-item-label class="teamInfo">
+          <q-icon name="place" class="q-mr-xs" /> {{ team.place }}
         </q-item-label>
-        <q-item-label
-          ><q-icon name="calendar_today" class="q-mr-xs" />
+        <q-item-label class="teamInfo">
+          <q-icon name="calendar_today" class="q-mr-xs" />
           {{ team.cycle }}
         </q-item-label>
-        <q-item-label
-          ><q-icon name="rule" class="q-mr-xs" />
+        <q-item-label class="teamInfo">
+          <q-icon name="rule" class="q-mr-xs" />
           {{ team.method }}
         </q-item-label>
       </q-item-section>
@@ -36,9 +36,13 @@ defineProps<{
 
 <style lang="scss" scoped>
 .teamName {
-  font-size: 28px;
-  line-height: 28px;
+  font-size: 24px;
+  line-height: 20px;
   letter-spacing: -3px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.teamInfo {
+  color: #999;
 }
 </style>
