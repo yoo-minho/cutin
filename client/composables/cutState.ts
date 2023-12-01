@@ -307,7 +307,7 @@ export const getCutsWithStat2 = async (playerArr: any[], props: any) => {
       totalPts: vsScore[teamName2],
       playerStat: getPlayerStatByTeam(teamName2),
     },
-  ];
+  ].sort((a, b) => a.teamName.localeCompare(b.teamName));
 };
 
 function kblEff(v: any) {

@@ -1,5 +1,8 @@
 import { compression } from "vite-plugin-compression2";
 
+const _title = "컷인 | 우리의 농구를 더욱 특별하게";
+const _desc = "농구 영상 편집 & 스탯 기록 & 배포를 쉽게 하는 플랫폼";
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   app: {
@@ -8,6 +11,18 @@ export default defineNuxtConfig({
       charset: "utf-8",
       viewport:
         "user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width",
+      title: _title,
+      meta: [
+        { hid: "description", name: "description", content: _desc },
+        { hid: "og:title", property: "og:title", content: _title },
+        { hid: "og:description", property: "og:description", content: _desc },
+        {
+          hid: "og:image",
+          property: "og:image",
+          content: "https://cutin.cc/og-image.png",
+        },
+        { hid: "og:url", property: "og:url", content: `https://cutin.cc` },
+      ],
       link: [
         { rel: "icon", type: "image/png", href: "/favicon.ico" },
         { rel: "apple-touch-icon", href: "/og-image.png" },
@@ -82,6 +97,16 @@ export default defineNuxtConfig({
       fontIcons: ["material-icons"],
     },
     sassVariables: "@/assets/global.scss",
+  },
+  runtimeConfig: {
+    public: {
+      siteUrl: "https://cutin.cc",
+      trailingSlash: true,
+      titleSeparator: "",
+      siteName: " ",
+      siteDescription: _desc,
+      language: "ko",
+    },
   },
   vite: {
     css: {
