@@ -9,8 +9,8 @@ export default defineNuxtConfig({
       viewport:
         "user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width",
       link: [
-        { rel: "icon", type: "image/png", href: "favicon.ico" },
-        { rel: "apple-touch-icon", href: "og-image.png" },
+        { rel: "icon", type: "image/png", href: "/favicon.ico" },
+        { rel: "apple-touch-icon", href: "/og-image.png" },
         {
           rel: "preload",
           as: "font",
