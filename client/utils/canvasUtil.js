@@ -130,7 +130,7 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
   if (vsScoreArr.length !== 2) throw "vsScore가 2개가 아니네";
   const [aName, aScore] = vsScoreArr[0];
   const [bName, bScore] = vsScoreArr[1];
-  const [hour, min, sec] = seekTime.split(":");
+  const [min, sec] = seekTime.split(":");
   const [mainExpression, subExpression] = skillExpression(
     skill,
     mainPlayer,
@@ -170,16 +170,18 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     padding,
   });
 
-  drawBanner(canvas, {
-    x: right3,
-    y: (canvas?.height || 0) - margin,
-    text: `${min}:${sec}`,
-    font: "Giants-Bold",
-    fontSize,
-    textColor: "white",
-    bgColor: "black",
-    padding,
-  });
+  if (sec) {
+    drawBanner(canvas, {
+      x: right3,
+      y: (canvas?.height || 0) - margin,
+      text: `${min}:${sec}`,
+      font: "Giants-Bold",
+      fontSize,
+      textColor: "white",
+      bgColor: "black",
+      padding,
+    });
+  }
 
   drawBanner(canvas, {
     x: margin,

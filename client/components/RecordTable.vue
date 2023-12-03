@@ -144,8 +144,7 @@ const makeAllVideo = async () => {
   });
 
   const { videoName } = videoProps.value;
-  const [clubCode, playDate, gameNo] = videoName.split(".")[0].split("_");
-  const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
+  const allGameCuts = await fetchHighlightsByVideoName(videoName);
 
   let message;
   for (const [idx, cut] of cutStore.value?.entries() || []) {

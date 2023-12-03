@@ -78,7 +78,7 @@ export async function createCaptureVideo(
     goal = false;
   canvasContext.font = `1px Giants-Bold`; // 원하는 폰트 및 크기로 설정
 
-  const quaterTotalSec = 10 * 60; //10분
+  const quaterTotalSec = 12 * 60; //12분
 
   const playListener = () => {
     const renderFrame = () => {
@@ -105,13 +105,12 @@ export async function createCaptureVideo(
       }
 
       let sec = currentSec + quaterTotalSec - lastQuaterSec;
-      sec = sec < 0 ? sec + 60 : sec;
 
       drawVideoBanners(
         canvasElem,
         {
           ...cut,
-          seekTime: formatTime(sec),
+          seekTime: sec < 0 ? "" : formatTime(sec),
           vsScore,
         },
         tick

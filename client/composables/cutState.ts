@@ -4,7 +4,7 @@ import type { CutType } from "@/types";
 export const useCutStore = async (videoName: string) => {
   const state = useState<CutType[]>(`${videoName}CutStore`, () => []);
   if (state.value.length === 0) {
-    state.value = await loadCutStore(videoName);
+    state.value = await fetchHighlightsByVideoName(videoName);
   }
   return state;
 };
@@ -142,7 +142,7 @@ export const moveNextCut = async (n: 1 | 0 | -1) => {
   );
 };
 
-async function loadCutStore(videoName: string) {
+export async function fetchHighlightsByVideoName(videoName: string) {
   const { data } = await useFetch<CutType[]>("/api/highlights", {
     params: { videoName },
   });
