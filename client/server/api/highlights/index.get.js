@@ -5,7 +5,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   const { videoName, multiVideo } = getQuery(event);
-  const [clubCode, playDate, gameNo] = videoName.split("_");
+  const [clubCode, playDate, gameNo] = videoName.split(".")[0].split("_");
   if (multiVideo) {
     return await getHighlightByVideoByGameNo(clubCode, playDate, gameNo);
   }

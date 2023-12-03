@@ -144,7 +144,7 @@ const makeAllVideo = async () => {
   });
 
   const { videoName } = videoProps.value;
-  const [clubCode, playDate, gameNo] = videoName.split("_");
+  const [clubCode, playDate, gameNo] = videoName.split(".")[0].split("_");
   const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
 
   let message;
@@ -186,7 +186,7 @@ const makeVideoWithLoading = async (cut: CutType) => {
     spinnerColor: "primary",
   });
   const { videoName } = videoProps.value;
-  const [clubCode, playDate, gameNo] = videoName.split("_");
+  const [clubCode, playDate, gameNo] = videoName.split(".")[0].split("_");
   const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo });
   await makeVideo(cut, allGameCuts);
   Loading.hide();
