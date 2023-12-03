@@ -5,6 +5,7 @@ const _desc = "농구 영상 편집 & 스탯 기록 & 배포를 쉽게 하는 �
 
 export default defineNuxtConfig({
   devtools: { enabled: false },
+  ssr: true,
   app: {
     head: {
       htmlAttrs: { lang: "ko" },

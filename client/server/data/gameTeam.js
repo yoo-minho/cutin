@@ -6,7 +6,14 @@ export async function getTeams(id) {
         name: "GBA",
         place: "영등포제2스포츠센터(영등포구)",
         cycle: "매주 토요일 10시~12시",
-        method: "8대8 2파전, 10분 4쿼터 2경기",
+        method: "[5vs5] 8대8 2파전, 10분 4쿼터 2경기",
+      },
+      {
+        id: "noname",
+        name: "이름없는농구팀",
+        place: "랜덤",
+        cycle: "매월1회 2시간",
+        method: "[3vs3]|[5vs5]",
       },
       {
         id: "xxx",

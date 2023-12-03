@@ -103,4 +103,11 @@ h3 {
   margin: 0;
   display: inline-block;
 }
+
+.max-width {
+  max-width: 460px;
+  min-width: 360px;
+  margin: 0 auto;
+  width: 100vw;
+}
 </style>

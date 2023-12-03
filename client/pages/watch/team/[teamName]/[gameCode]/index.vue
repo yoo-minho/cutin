@@ -45,7 +45,7 @@ if (currentVsState.value.length > 0) {
       <StatTable :player-stat="bTeam?.playerStat" />
     </div>
   </div>
-  <q-separator color="#ccc" style="padding: 60px" />
+  <q-separator color="white" style="padding: 60px" />
 </template>
 
 <style lang="scss" scoped>

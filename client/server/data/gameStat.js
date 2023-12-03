@@ -3,7 +3,7 @@ import prisma from "./prisma";
 export async function getMatchByClubCode(clubCode) {
   try {
     return await prisma.$queryRaw`
-        SELECT "playDate", "gameNo", json_agg(jsonb_build_object('teamName',"teamName",'score',"score")) as match FROM (
+        SELECT "playDate", "gameNo", json_agg(jsonb_build_object('teamName',"teamName",'score',"score") ORDER BY "teamName") as match FROM (
             SELECT 
                 hl."playDate", hl."gameNo", gp."teamName", 
                 SUM((CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN hl.skill in ('3점슛','앤드원') THEN 3 ELSE 2 END)) score

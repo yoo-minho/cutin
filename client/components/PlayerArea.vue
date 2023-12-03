@@ -4,10 +4,13 @@ const currVideoName = toRef(videoProps.value, "videoName");
 
 const teams = ref();
 
-watch(currVideoName, async () => {
-  const teamStore = await useTeamStore(currVideoName.value);
-  teams.value = teamStore.value;
-});
+watch(
+  () => currVideoName.value,
+  async () => {
+    const teamStore = await useTeamStore(currVideoName.value);
+    teams.value = teamStore.value;
+  }
+);
 
 const _addTeam = () => {
   if (!currVideoName.value) {

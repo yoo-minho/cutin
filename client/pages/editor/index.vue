@@ -189,72 +189,95 @@ function togglePlayPause() {
 }
 </script>
 <template>
-  <q-layout style="display: flex; align-items: center; justify-content: center">
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      background: #ddd;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+    "
+  >
     <div
       style="
         max-width: 1920px;
         min-width: 1280px;
-        width: 100vw;
         max-height: 1080px;
         min-height: 720px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 10px 10px 20px #888888;
+        border-radius: 20px;
       "
     >
-      <q-header style="position: relative" class="bg-green" elevated>
+      <div
+        style="
+          position: relative;
+          border-top-left-radius: 20px;
+          border-top-right-radius: 20px;
+          color: white;
+        "
+        class="bg-orange-5"
+        elevated
+      >
         <q-toolbar>
-          <q-toolbar-title>MYHL 영상편집기</q-toolbar-title>
+          <q-toolbar-title
+            style="font-size: 24px; letter-spacing: -1px; font-weight: bold"
+          >
+            cutin video editor
+          </q-toolbar-title>
           <StopWatch />
         </q-toolbar>
-      </q-header>
-      <q-page-container style="padding: 0">
-        <div class="row">
-          <div class="column col">
-            <div style="height: 540px">
-              <VideoList />
-            </div>
-            <q-separator color="grey-7" size="1px" />
-            <div class="col">
-              <SkillList />
-            </div>
-            <!-- <back-video @moveSeekPoint="moveSeekPoint" /> -->
+      </div>
+      <div style="padding: 0; flex: 1" class="row">
+        <div class="column col">
+          <div style="height: 540px">
+            <VideoList />
           </div>
-          <div style="width: 960px">
-            <div
-              class="column"
-              style="
-                height: 100vh;
-                max-height: calc(1080px - 50px);
-                min-height: calc(720px - 50px);
-              "
-            >
-              <div style="height: 540px; position: relative" class="column">
-                <drag-box :video="video" />
-                <video
-                  id="baseVideo"
-                  v-show="videoProps.videoUrl"
-                  ref="video"
-                  width="960"
-                  height="540"
-                  :src="videoProps.videoUrl"
-                  style="position: fixed"
-                />
-                <canvas id="baseCanvas" style="width: 960px; height: 540px" />
-                <ControlBar
-                  v-if="videoProps.videoUrl"
-                  :video="video"
-                  :playOn="videoPlayOn"
-                  @togglePlayPause="togglePlayPause()"
-                />
-              </div>
-              <PlayerArea />
-            </div>
-          </div>
+          <q-separator color="grey-7" size="1px" />
           <div class="col">
-            <RecordTable @moveSeekPoint="moveSeekPoint" />
+            <SkillList style="border-bottom-left-radius: 20px" />
+          </div>
+          <!-- <back-video @moveSeekPoint="moveSeekPoint" /> -->
+        </div>
+        <div style="width: 960px">
+          <div
+            class="column"
+            style="
+              height: 100vh;
+              max-height: calc(1080px - 50px);
+              min-height: calc(720px - 50px);
+            "
+          >
+            <div style="height: 540px; position: relative" class="column">
+              <drag-box :video="video" />
+              <video
+                id="baseVideo"
+                v-show="videoProps.videoUrl"
+                ref="video"
+                width="960"
+                height="540"
+                :src="videoProps.videoUrl"
+                style="position: fixed"
+              />
+              <canvas id="baseCanvas" style="width: 960px; height: 540px" />
+              <ControlBar
+                v-if="videoProps.videoUrl"
+                :video="video"
+                :playOn="videoPlayOn"
+                @togglePlayPause="togglePlayPause()"
+              />
+            </div>
+            <PlayerArea />
           </div>
         </div>
-      </q-page-container>
+        <div class="col" style="border-bottom-right-radius: 20px">
+          <RecordTable @moveSeekPoint="moveSeekPoint" />
+        </div>
+      </div>
     </div>
-  </q-layout>
+  </div>
 </template>
 
 <style lang="scss" scoped></style>

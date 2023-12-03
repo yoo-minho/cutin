@@ -23,6 +23,7 @@ export const useTeamStore = async (videoName: string) => {
     const [clubCode, playDate] = videoName.split("_");
     const players = await findPlayer({ clubCode, playDate });
     state.value = createTeams(players);
+    console.log({ videoName, state });
   }
   return state;
 };

@@ -245,134 +245,130 @@ const columns = [
 ] as any;
 </script>
 <template>
-  <div class="bg-dark" style="height: 100%; border-left: 0.5px solid grey">
-    <mini-video v-model="videoViewerOn" :highlights="highlights" />
-    <div class="row" style="gap: 12px; padding: 12px">
-      <q-btn
-        color="pink"
-        text-color="white"
-        icon-right="file_download"
-        @click="makeAllVideo"
-      >
-        일괄 업로드
-      </q-btn>
-      <q-btn
-        color="green"
-        text-color="white"
-        icon-right="file_download"
-        @click="downGameData"
-      >
-        JSON 내려받기
-        <q-file
-          ref="uploader"
-          v-model="file"
-          multiple
-          borderless
-          dense
-          @update:model-value="submit"
-          style="display: none"
-        />
-      </q-btn>
-      <q-btn
-        color="green"
-        text-color="white"
-        icon-right="file_upload"
-        @click="upGameData"
-      >
-        JSON 업로드
-      </q-btn>
-    </div>
-    <q-separator color="grey-7" size="0.5px" />
-    <q-tabs
-      v-model="gameTab"
-      dense
-      class="text-grey"
-      active-color="white"
-      align="left"
+  <mini-video v-model="videoViewerOn" :highlights="highlights" />
+  <div class="row bg-dark" style="gap: 12px; padding: 12px">
+    <q-btn
+      color="pink"
+      text-color="white"
+      icon-right="file_download"
+      @click="makeAllVideo"
     >
-      <q-tab name="1" label="1게임" />
-      <q-tab name="2" label="2게임" />
-      <q-tab name="3" label="3게임" />
-      <q-tab name="4" label="4게임" />
-    </q-tabs>
-    <q-tabs
-      v-model="quaterTab"
-      dense
-      class="text-grey"
-      active-color="white"
-      align="left"
+      일괄 업로드
+    </q-btn>
+    <q-btn
+      color="green"
+      text-color="white"
+      icon-right="file_download"
+      @click="downGameData"
     >
-      <q-tab name="1" label="1쿼터" />
-      <q-tab name="2" label="2쿼터" />
-      <q-tab name="3" label="3쿼터" />
-      <q-tab name="4" label="4쿼터" />
-    </q-tabs>
-    <q-separator color="grey-7" size="1px" />
-    <q-table
-      dark
-      flat
-      dense
-      class="my-sticky-header-table"
-      row-key="seekTime"
-      :columns="columns"
-      :rows="cutStore"
-      :filter="[gameTab, quaterTab]"
-      :filter-method="filterMethod"
-      :rows-per-page-options="[0]"
-      :hide-pagination="true"
+      JSON 내려받기
+      <q-file
+        ref="uploader"
+        v-model="file"
+        multiple
+        borderless
+        dense
+        @update:model-value="submit"
+        style="display: none"
+      />
+    </q-btn>
+    <q-btn
+      color="green"
+      text-color="white"
+      icon-right="file_upload"
+      @click="upGameData"
     >
-      <template #no-data>
-        <div>
-          <span> 'C' 단축키를 눌러 득점 순간을 기록하세요! </span>
-        </div>
-      </template>
-      <template #body="props">
-        <q-tr
-          :props="props"
-          :class="props.row.seekTime === currTime ? 'text-green' : ''"
-        >
-          <q-td key="seekTime" :props="props">
-            <div
-              class="text-pre-wrap cursor-pointer"
-              @click="emits('moveSeekPoint', String(props.row.seekTime))"
-            >
-              {{ props.row.seekTime }}
-            </div>
-          </q-td>
-          <q-td key="skill" :props="props">
-            {{ props.row.skill || "득점&어시" }}
-          </q-td>
-          <q-td key="mainPlayer" :props="props">
-            {{ props.row.mainPlayer }}
-          </q-td>
-          <q-td key="subPlayer" :props="props">
-            {{ props.row.subPlayer }}
-          </q-td>
-          <q-td key="videoUrl" :props="props">
-            <q-btn
-              :icon="'movie_edit'"
-              size="xs"
-              :style="{ padding: '4px 8px' }"
-              @click="makeVideoWithLoading(props.row)"
-            />
-            <q-btn
-              :icon="'smart_display'"
-              :disable="!props.row.videoUrl"
-              size="xs"
-              :style="{ padding: '4px 8px' }"
-              @click="openViewer(props.row.videoUrl, props.row)"
-            />
-          </q-td>
-        </q-tr>
-      </template>
-    </q-table>
-    <q-separator color="grey-7" size="0.5px" />
+      JSON 업로드
+    </q-btn>
   </div>
+  <q-separator color="grey-7" size="0.5px" />
+  <q-tabs
+    v-model="gameTab"
+    dense
+    class="text-grey bg-dark"
+    active-color="white"
+    align="left"
+  >
+    <q-tab name="1" label="1게임" />
+    <q-tab name="2" label="2게임" />
+    <q-tab name="3" label="3게임" />
+    <q-tab name="4" label="4게임" />
+  </q-tabs>
+  <q-tabs
+    v-model="quaterTab"
+    dense
+    class="text-grey bg-dark"
+    active-color="white"
+    align="left"
+  >
+    <q-tab name="1" label="1쿼터" />
+    <q-tab name="2" label="2쿼터" />
+    <q-tab name="3" label="3쿼터" />
+    <q-tab name="4" label="4쿼터" />
+  </q-tabs>
+  <q-separator color="grey-7" size="1px" />
+  <q-table
+    dark
+    flat
+    dense
+    class="my-sticky-header-table"
+    row-key="seekTime"
+    :columns="columns"
+    :rows="cutStore"
+    :filter="[gameTab, quaterTab]"
+    :filter-method="filterMethod"
+    :rows-per-page-options="[0]"
+    :hide-pagination="true"
+    style="max-height: 896px; height: 100%; border-left: 0.5px solid grey"
+  >
+    <template #no-data>
+      <div>
+        <span> 'C' 단축키를 눌러 득점 순간을 기록하세요! </span>
+      </div>
+    </template>
+    <template #body="props">
+      <q-tr
+        :props="props"
+        :class="props.row.seekTime === currTime ? 'text-green' : ''"
+      >
+        <q-td key="seekTime" :props="props">
+          <div
+            class="text-pre-wrap cursor-pointer"
+            @click="emits('moveSeekPoint', String(props.row.seekTime))"
+          >
+            {{ props.row.seekTime }}
+          </div>
+        </q-td>
+        <q-td key="skill" :props="props">
+          {{ props.row.skill || "득점&어시" }}
+        </q-td>
+        <q-td key="mainPlayer" :props="props">
+          {{ props.row.mainPlayer }}
+        </q-td>
+        <q-td key="subPlayer" :props="props">
+          {{ props.row.subPlayer }}
+        </q-td>
+        <q-td key="videoUrl" :props="props">
+          <q-btn
+            :icon="'movie_edit'"
+            size="xs"
+            :style="{ padding: '4px 8px' }"
+            @click="makeVideoWithLoading(props.row)"
+          />
+          <q-btn
+            :icon="'smart_display'"
+            :disable="!props.row.videoUrl"
+            size="xs"
+            :style="{ padding: '4px 8px' }"
+            @click="openViewer(props.row.videoUrl, props.row)"
+          />
+        </q-td>
+      </q-tr>
+    </template>
+  </q-table>
 </template>
 <style>
 .my-sticky-header-table {
-  height: calc(100vh - 185px);
-
   .q-table__top,
   .q-table__bottom,
   thead tr:first-child th {

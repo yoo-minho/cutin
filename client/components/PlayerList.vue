@@ -44,7 +44,7 @@ const _removeTeam = () => {
   <div class="row items-center q-mb-md">
     <q-btn-dropdown
       :label="`${teamName} 팀`"
-      color="green-9"
+      color="orange-9"
       padding="6px 0 6px 12px"
       style="width: 120px"
     >
