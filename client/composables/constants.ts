@@ -11,13 +11,13 @@ export const pts = {
 
 export const defaultSkill = [
   { key: "1", name: "풋백", main: { pts: 2, reb: 1, orb: 1 } },
-  { key: "2", name: "자유투", main: { pts: 2 } },
+  { key: "2", name: "자유투", main: { pts: 2 }, sub: { ast: 1 } },
   { key: "3", name: "3점슛", main: { pts: 3, tpm: 1 }, sub: { ast: 1 } },
   { key: "4", name: "속공", main: { pts: 2 }, sub: { ast: 1 } },
   { key: "5", name: "앤드원", main: { pts: 3 }, sub: { ast: 1 } },
-  { key: "6", name: "스핀무브", main: { pts: 2 }, sub: { ast: 1 } },
-  { key: "7", name: "킬패스득점", main: { pts: 2 }, sub: { ast: 1 } },
-  { key: "8", name: "픽앤롤", main: { pts: 2 }, sub: { ast: 1 } },
+  { key: "6", name: "풋백앤드원", main: { pts: 3, reb: 1, orb: 1 } },
+  { key: "7" },
+  { key: "8" },
   { key: "9" },
   { key: "0" },
   { key: "Q" },
@@ -109,6 +109,12 @@ export const skillExpression = (
       break;
     case "앤드원":
       mainExpression = `${mainPlayer}의 앤드원!!!`;
+      if (subPlayer) {
+        subExpression = `${subPlayer}의 어시!`;
+      }
+      break;
+    case "풋백앤드원":
+      mainExpression = `${mainPlayer}의 풋백 앤드원!!!`;
       if (subPlayer) {
         subExpression = `${subPlayer}의 어시!`;
       }

@@ -82,6 +82,7 @@ const makeVideo = async (cut: CutType, allGameCuts: CutType[]) => {
       .filter((c) => c.quaterNo === q)
       .map((c) => time2sec(c.seekTime))
       .sort((a, b) => b - a)[0];
+
   const cutsWithStat = await getCutsWithStat({ cuts: allGameCuts, seekTime });
   if (!cutsWithStat || !("seekTime" in cutsWithStat)) return;
 
