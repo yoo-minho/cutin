@@ -2,7 +2,6 @@
 const props = defineProps<{ playerStat: any }>();
 const getSelectedPlayerStat = (playerName: string) =>
   props.playerStat.find((v: { name: string }) => v.name === playerName) || {};
-
 const columns = [
   {
     label: "선수",
@@ -55,7 +54,7 @@ const columns = [
     align: "center",
   },
   //   {
-  //     label: "효율",
+  //     label: "공헌",
   //     name: "kbl",
   //     field: "kbl",
   //     align: "center",
@@ -63,42 +62,19 @@ const columns = [
 ] as any;
 
 const videoViewerOn = ref(false);
-const _highlights = ref();
+const _cuts = ref();
 const selectedPlayer = ref("");
-const selectedRecord = ref("");
 
-const openViewer = async (player: string, record?: string) => {
+const openViewer = async (player: string) => {
   if (player === "전체") return;
-
   const route = useRoute();
   const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
-  const params = {
-    clubCode,
-    playDate,
-    gameNo,
-    player,
-  };
-  const { data } = await useFetch<any>("/api/highlights/player", {
-    params,
-  });
-  const { highlights } = data.value || [];
-
-  if (highlights?.length > 0) {
-    selectedPlayer.value = player;
-    selectedRecord.value = record || "";
-    if (record) {
-      _highlights.value = highlights.filter((hl: any) =>
-        isMyHighlight(hl.mainPlayer === player, hl.skill || "득점&어시", record)
-      );
-    } else {
-      _highlights.value = highlights;
-    }
-    if (_highlights.value.length > 0) {
-      videoViewerOn.value = true;
-    } else {
-      Notify.create("영상 기록이 없습니다!");
-    }
-  }
+  const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo }); //매번 불러오는 비효율
+  _cuts.value = allGameCuts.filter(
+    (cut) => cut.mainPlayer === player || cut.subPlayer === player
+  );
+  selectedPlayer.value = player;
+  videoViewerOn.value = true;
 };
 </script>
 <template>
@@ -141,13 +117,13 @@ const openViewer = async (player: string, record?: string) => {
       </q-tr>
     </template>
   </q-table>
-  <mini-video
-    v-if="_highlights"
+  {{ _cuts?.length }}
+  <ViewerPlayerVideo
+    v-if="_cuts"
     v-model="videoViewerOn"
     :selectedPlayer="selectedPlayer"
     :selectedPlayerStat="getSelectedPlayerStat(selectedPlayer)"
-    :selectedRecord="selectedRecord"
-    :highlights="_highlights"
+    :cuts="_cuts"
   />
 </template>
 <style lang="scss">

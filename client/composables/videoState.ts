@@ -15,3 +15,21 @@ export const useVideoPropsStore = () => {
     currentTime: "",
   }));
 };
+
+export const getGameInfoByVideoName = (videoName: string) => {
+  const [clubCode, playDate, gameNo] = videoName.split("_");
+  return { clubCode, playDate, gameNo };
+};
+
+export const getCutVideoPath = (videoName: string, seekTime: string) => {
+  const [clubCode, playDate, _, ...rest] = videoName.split("_");
+  const currGame = useCurrGame();
+  return [
+    clubCode,
+    playDate,
+    currGame.value,
+    seekTime.replace(/:/g, "") +
+      "_" +
+      rest.join("_").replace(".mp4", "").replace(".MOV", ""),
+  ].join("/");
+};

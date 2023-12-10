@@ -9,7 +9,7 @@ const currTime = toRef(videoProps.value, "currentTime");
 const currVideoName = toRef(videoProps.value, "videoName");
 
 const videoViewerOn = ref(false);
-const highlights = ref();
+const seletedCut = ref();
 
 const gameTab = ref("1");
 const quaterTab = ref("1");
@@ -49,7 +49,6 @@ const downGameData = () => {
       ...cut,
       videoName: currVideoName.value,
     })) || [];
-  console.log({ data });
   if (data.length === 0) {
     Notify.create("데이터가 없습니다.");
     return;
@@ -73,51 +72,30 @@ const filterMethod = (rows: readonly any[]) => {
   );
 };
 
-const makeVideo = async (cut: CutType, allGameCuts: CutType[]) => {
-  const { seekTime } = cut;
+const makeVideo = async (cut: CutType) => {
+  const { seekTime, skill, subPlayer } = cut;
   emits("moveSeekPoint", seekTime);
 
-  const getLastQuaterSec = (q: number) =>
-    allGameCuts
-      .filter((c) => c.quaterNo === q)
-      .map((c) => time2sec(c.seekTime))
-      .sort((a, b) => b - a)[0];
-
-  const cutsWithStat = await getCutsWithStat({ cuts: allGameCuts, seekTime });
-  if (!cutsWithStat || !("seekTime" in cutsWithStat)) return;
-
   const { videoName, videoSize } = videoProps.value;
-  const [clubCode, playDate, _, ...rest] = videoName.split("_");
-
-  const path = [
-    clubCode,
-    playDate,
-    currGame.value,
-    seekTime.replace(/:/g, "") +
-      "_" +
-      rest.join("_").replace(".mp4", "").replace(".MOV", ""),
-  ].join("/");
-
-  const start = performance.now();
   const backboardPositionState = useBackboardPositionState();
-  const lastQuaterSec = getLastQuaterSec(+quaterTab.value);
+  const seekSec = time2sec(seekTime);
+  const segment = getSegment(skill, subPlayer);
+
   const { file } = await createCaptureVideo(
     videoSize,
-    cutsWithStat,
-    backboardPositionState.value,
-    lastQuaterSec
+    seekSec,
+    segment,
+    backboardPositionState.value
   );
-  const start2 = performance.now();
   if (file === null) return;
 
   const body = new FormData();
   body.append("file", file);
-  body.append("path", path);
+  body.append("path", getCutVideoPath(videoName, seekTime));
   body.append("videoName", videoName);
   body.append("seekTime", seekTime);
   const { data } = await useFetch("/api/upload", { method: "POST", body });
   if (!data.value) return;
-  console.log("ffmpeg", Math.round((performance.now() - start2) / 100) / 10);
 
   const { error, videoUrl } = data.value;
   if (error) {
@@ -144,9 +122,6 @@ const makeAllVideo = async () => {
     Notify.create("작업이 취소되었습니다.");
   });
 
-  const { videoName } = videoProps.value;
-  const allGameCuts = await fetchHighlightsByVideoName(videoName);
-
   let message;
   for (const [idx, cut] of cutStore.value?.entries() || []) {
     if (isCancel) break;
@@ -162,7 +137,7 @@ const makeAllVideo = async () => {
       `(${totalSize}건 중 ${idx + 1}건)<br/>` +
       `소요시간 : ${elapsedTime}`;
     dialog.update({ message });
-    await makeVideo(cut, allGameCuts);
+    await makeVideo(cut);
   }
 
   const elapsedTime = prettyElapsedTime(startTime, new Date());
@@ -185,14 +160,12 @@ const makeVideoWithLoading = async (cut: CutType) => {
     boxClass: "bg-grey-2 text-grey-9",
     spinnerColor: "primary",
   });
-  const { videoName } = videoProps.value;
-  const allGameCuts = await fetchHighlightsByVideoName(videoName);
-  await makeVideo(cut, allGameCuts);
+  await makeVideo(cut);
   Loading.hide();
 };
 
-const openViewer = async (videoUrl: string, cut: CutType) => {
-  const { seekTime } = cut;
+const openViewer = async (cut: CutType) => {
+  const { seekTime, videoUrl, clubCode, playDate, gameNo } = cut;
   if (!videoUrl) {
     await makeVideoWithLoading(cut);
   } else {
@@ -200,9 +173,8 @@ const openViewer = async (videoUrl: string, cut: CutType) => {
     await delay(0.3);
   }
   videoViewerOn.value = true;
-  highlights.value = [
-    { videoUrl, mainPlayer: cut.mainPlayer, skill: cut.skill },
-  ];
+  const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo }); //매번 불러오는 비효율
+  seletedCut.value = allGameCuts.find((cut) => cut.seekTime === seekTime);
 };
 
 const columns = [
@@ -244,7 +216,11 @@ const columns = [
 ] as any;
 </script>
 <template>
-  <mini-video v-model="videoViewerOn" :highlights="highlights" />
+  <ViewerSimpleVideo
+    v-if="seletedCut"
+    v-model="videoViewerOn"
+    :cut="seletedCut"
+  />
   <div class="row bg-dark" style="gap: 12px; padding: 12px">
     <q-btn
       color="pink"
@@ -359,7 +335,7 @@ const columns = [
             :disable="!props.row.videoUrl"
             size="xs"
             :style="{ padding: '4px 8px' }"
-            @click="openViewer(props.row.videoUrl, props.row)"
+            @click="openViewer(props.row)"
           />
         </q-td>
       </q-tr>

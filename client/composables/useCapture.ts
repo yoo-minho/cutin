@@ -1,5 +1,3 @@
-import type { CutType } from "@/types";
-
 const ratioSet = {
   "360p": [640, 360, 6],
   "540p": [960, 540, 4],
@@ -9,37 +7,6 @@ const ratioSet = {
 
 const fps = 60;
 
-const segmentSet = {
-  //8초 => 6초
-  deep: [
-    { sec: 3, speed: 1.5, zoom: 1 }, //0.5초
-    { sec: 3, speed: 0.8, zoom: 1 }, //3.5초
-    { sec: 2, speed: 1.5, zoom: 1 }, //1초
-  ],
-  //8초 => 5초
-  wide: [
-    { sec: 3, speed: 1.5, zoom: 1 },
-    { sec: 2, speed: 0.8, zoom: 1 },
-    { sec: 3, speed: 1.5, zoom: 1 },
-  ],
-  //5초 => 3초
-  short: [
-    { sec: 2, speed: 1.5, zoom: 1 }, //1
-    { sec: 1.5, speed: 1, zoom: 1 },
-    { sec: 1.5, speed: 1.5, zoom: 1 },
-  ],
-};
-
-const getSegment = (_skill: string, subPlayer?: string) => {
-  if (!!subPlayer) return segmentSet.deep;
-  if (["오펜스리바", "리바운드", "스틸", "자유투", "속공"].includes(_skill))
-    return segmentSet.short;
-  if (["득점&어시", "풋백", "스핀무브", "앤드원"].includes(_skill))
-    return segmentSet.deep;
-  if (["3점슛"].includes(_skill)) return segmentSet.wide;
-  return segmentSet.wide;
-};
-
 let chunks = [] as any;
 let _zoom = 1;
 let zoomTick = 0;
@@ -47,19 +14,19 @@ type PostionType = { top: number; left: number; width: number; height: number };
 
 export async function createCaptureVideo(
   size: number,
-  cut: CutType,
-  pos: PostionType,
-  lastQuaterSec: number
+  seekSec: number,
+  segment: any,
+  pos: PostionType
 ) {
   chunks = [];
   _zoom = 1;
 
-  const { team = "team", seekTime, skill, vsScore, subPlayer } = cut;
-  const _skill = skill || "득점&어시";
-  const { main } = getSkillPoints(_skill);
-  const seekSec = time2sec(seekTime);
-  const segment = getSegment(_skill, subPlayer);
-  const totalSec = segment.reduce((acc, seg) => acc + seg.sec, 0);
+  const totalSec = segment.reduce(
+    (acc: any, seg: { sec: any }) => acc + seg.sec,
+    0
+  );
+  const startSec = seekSec - totalSec + 2;
+
   const videoElem = document.getElementById("baseVideo") as HTMLVideoElement;
   const originBitrate = (size / videoElem.duration) * 8;
   const [width, height, bitrateRatio] = ratioSet["540p"];
@@ -70,15 +37,9 @@ export async function createCaptureVideo(
   const canvasContext = canvasElem.getContext("2d");
   if (!canvasContext) return { file: null };
 
-  const start = seekSec - totalSec + 2;
   const originSpeed = videoElem.playbackRate;
   const mimeType = "video/webm; codecs=vp9";
   const opt = { mimeType, videoBitsPerSecond };
-  let tick = 0,
-    goal = false;
-  canvasContext.font = `1px Giants-Bold`; // 원하는 폰트 및 크기로 설정
-
-  const quaterTotalSec = 12 * 60; //12분
 
   const playListener = () => {
     const renderFrame = () => {
@@ -96,25 +57,6 @@ export async function createCaptureVideo(
       );
       canvasContext.scale(baseZoom * _zoom, baseZoom * _zoom);
       canvasContext.drawImage(videoElem, 0, 0, width, height);
-
-      const currentSec = videoElem.currentTime;
-      if (currentSec > seekSec - 1) tick++;
-      if (currentSec > seekSec && !goal) {
-        vsScore[team] += main.pts || 0;
-        goal = true;
-      }
-
-      let sec = currentSec + quaterTotalSec - lastQuaterSec;
-
-      drawVideoBanners(
-        canvasElem,
-        {
-          ...cut,
-          seekTime: sec < 0 ? "" : formatTime(sec),
-          vsScore,
-        },
-        tick
-      );
       requestAnimationFrame(renderFrame);
     };
     renderFrame();
@@ -140,7 +82,7 @@ export async function createCaptureVideo(
       chunks = [];
       return res({ file });
     };
-    videoElem.currentTime = start;
+    videoElem.currentTime = startSec;
     videoElem.muted = true;
     await videoElem.play();
     mediaRecorder.start();

@@ -115,22 +115,14 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
   const margin = 32 * ratio;
   canvas?.getContext("2d").setTransform(1, 0, 0, 1, 0, 0);
 
-  const {
-    gameNo,
-    vsScore,
-    quaterNo,
-    seekTime,
-    skill,
-    mainPlayer,
-    subPlayer,
-    videoName,
-  } = cut;
+  const { gameNo, quaterNo, skill, mainPlayer, subPlayer, videoName } = cut;
+  const { vsScore } = cut;
+
   const [name, date] = videoName.split("_");
   const vsScoreArr = Object.entries(vsScore);
   if (vsScoreArr.length !== 2) throw "vsScore가 2개가 아니네";
   const [aName, aScore] = vsScoreArr[0];
   const [bName, bScore] = vsScoreArr[1];
-  const [min, sec] = seekTime.split(":");
   const [mainExpression, subExpression] = skillExpression(
     skill,
     mainPlayer,
@@ -159,7 +151,7 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     padding,
   });
 
-  const { right: right3 } = drawBanner(canvas, {
+  drawBanner(canvas, {
     x: right2,
     y: (canvas?.height || 0) - margin,
     text: `${bScore}     ${bName}`,
@@ -169,19 +161,6 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
     bgColor: "white",
     padding,
   });
-
-  if (sec) {
-    drawBanner(canvas, {
-      x: right3,
-      y: (canvas?.height || 0) - margin,
-      text: `${min}:${sec}`,
-      font: "Giants-Bold",
-      fontSize,
-      textColor: "white",
-      bgColor: "black",
-      padding,
-    });
-  }
 
   drawBanner(canvas, {
     x: margin,

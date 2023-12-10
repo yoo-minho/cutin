@@ -5,6 +5,7 @@ const video = ref();
 const videoPlayOn = ref(true);
 const currSpeed = ref(1.5);
 const videoProps = useVideoPropsStore();
+const innerHeight = ref("100vh");
 
 onMounted(() => {
   const pressedKeys = new Set<string>();
@@ -17,6 +18,11 @@ onMounted(() => {
     if (document.activeElement?.tagName === "INPUT") return true;
     pressedKeys.delete(event.code);
   });
+
+  innerHeight.value = `${window.innerHeight}px`;
+  // window.addEventListener("resize", () => {
+  //   innerHeight.value = `${window.innerHeight}px`;
+  // });
 });
 
 watch(
@@ -195,21 +201,21 @@ function togglePlayPause() {
       justify-content: center;
       background: #ddd;
       align-items: center;
-      height: 100vh;
       width: 100vw;
     "
+    :style="{ height: innerHeight }"
   >
     <div
       style="
         max-width: 1920px;
         min-width: 1280px;
-        max-height: 1080px;
-        min-height: 720px;
         display: flex;
         flex-direction: column;
         box-shadow: 10px 10px 20px #888888;
         border-radius: 20px;
+        overflow: hidden;
       "
+      :style="{ height: innerHeight }"
     >
       <div
         style="
@@ -280,4 +286,7 @@ function togglePlayPause() {
   </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+body {
+}
+</style>

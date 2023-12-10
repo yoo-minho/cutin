@@ -1,11 +1,14 @@
 export type CutType = {
-  gameNo: number;
+  clubCode: string;
+  playDate: string;
+  gameNo: string;
   quaterNo: number;
   seekTime: string;
   mainPlayer?: string;
   subPlayer?: string;
   skill?: string;
   videoName?: string;
+  videoUrl?: string;
   team?: string;
   vsScore?: any;
   playerStat?: any;
@@ -25,10 +28,20 @@ export type VsInfoType = {
 };
 
 export type TeamInfoType = {
-  id: string,
-  name: string,
-  place: string,
-  cycle: string,
-  method: string,
-  memberCount: string,
-},
+  id: string;
+  name: string;
+  place: string;
+  cycle: string;
+  method: string;
+  memberCount: string;
+};
+
+export type PlayerStatType = {
+  tpm: number;
+  ast: number;
+  reb: number;
+  orb: number;
+  blk: number;
+  stl: number;
+  [x: string]: number;
+};
