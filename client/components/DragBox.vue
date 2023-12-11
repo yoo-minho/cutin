@@ -56,8 +56,8 @@ watch(
       }
 
       Dialog.create({
-        title: "분석",
-        message: "선택한 영역을 기준으로 변화를 추적할까요?",
+        title: "영역 지정",
+        message: "선택한 영역을 기준으로 영상 편집할까요?",
         ok: "네!",
         cancel: "취소",
       })

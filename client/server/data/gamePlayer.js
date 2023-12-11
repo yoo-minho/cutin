@@ -2,7 +2,7 @@ import prisma from "./prisma";
 
 export async function getGamePlayer(clubCode, playDate) {
   const highlights = await prisma.gamePlayer.findMany({
-    where: { clubCode, playDate, player: { not: "" } },
+    where: { clubCode, playDate },
     orderBy: [{ player: "asc" }],
   });
   return highlights;

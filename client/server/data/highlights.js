@@ -8,7 +8,7 @@ export async function getHighlightByVideo(videoName) {
   });
   return highlights.map(({ mainTeam, ...rest }) => ({
     ...rest,
-    team: mainTeam.teamName,
+    team: mainTeam?.teamName,
     skill: rest.skill || "득점&어시",
   }));
 }

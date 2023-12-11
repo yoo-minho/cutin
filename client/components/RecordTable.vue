@@ -21,6 +21,12 @@ watch([gameTab, quaterTab], () => {
   currGame.value = gameTab.value + "g" + quaterTab.value + "q";
 });
 
+watch(currGame, () => {
+  const [gameNo, quaterNo] = currGame.value.split(/g|q/g, 2);
+  gameTab.value = gameNo;
+  quaterTab.value = quaterNo;
+});
+
 watch(currVideoName, async () => {
   cutStore = await useCutStore(currVideoName.value);
   const temp = gameTab.value;

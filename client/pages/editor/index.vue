@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Notify } from "quasar";
-
 const video = ref();
 const videoPlayOn = ref(true);
 const currSpeed = ref(1.5);
@@ -20,21 +18,19 @@ onMounted(() => {
   });
 
   innerHeight.value = `${window.innerHeight}px`;
-  // window.addEventListener("resize", () => {
-  //   innerHeight.value = `${window.innerHeight}px`;
-  // });
+  window.addEventListener("resize", () => {
+    innerHeight.value = `${window.innerHeight}px`;
+  });
+  videoProps.value.videoEl = video.value;
 });
 
-watch(
-  () => video.value,
-  () => {
-    video.value.addEventListener("loadedmetadata", function () {
-      video.value.playbackRate = currSpeed.value;
-      playPlayer();
-      setTimeout(() => stopPlayer(), 1);
-    });
-  }
-);
+watch(video, () => {
+  video.value.addEventListener("loadedmetadata", function () {
+    video.value.playbackRate = currSpeed.value;
+    playPlayer();
+    setTimeout(() => stopPlayer(), 1);
+  });
+});
 
 function moveSeekPoint(time: string) {
   video.value.currentTime = time2sec(time);
@@ -42,80 +38,59 @@ function moveSeekPoint(time: string) {
 }
 
 async function handleKeyPress(event: any, pressedKeys: any) {
-  event.preventDefault();
-
-  const videoProps = useVideoPropsStore();
-  const teamStore = await useTeamStore(videoProps.value.videoName);
-
-  const playerRow1 = teamStore.value[0];
-  const playerRow2 = teamStore.value[1];
-
-  const currCode = event.code;
-
   const isCommand = (_code: string) =>
     [...pressedKeys].filter((code) => _code === code).length > 0;
+
   const isCommandS = isCommand("KeyS");
   const isCommandA = isCommand("KeyA");
-
+  const isCommandC = "KeyC" === event.code;
+  const isCommandSpace = " " === event.key;
   const keyIdx1 = keySet.first.indexOf(event.key);
   const keyIdx2 = keySet.second.indexOf(event.key?.toUpperCase());
+  const isCommand123890 = keyIdx1 > -1;
+  const isCommanQWEIOP = keyIdx2 > -1;
+  const isCommandArrow = event.key.indexOf("Arrow") === 0;
 
+  if (
+    isCommandS ||
+    isCommandA ||
+    isCommandC ||
+    isCommandSpace ||
+    isCommandArrow ||
+    isCommand123890 ||
+    isCommanQWEIOP
+  ) {
+    event.preventDefault();
+
+    const teamStore = await useTeamStore(videoProps.value.videoName);
+    const row1 = teamStore.value[0]?.players || [];
+    const row2 = teamStore.value[1]?.players || [];
+
+    if (isCommandC) {
+      const cutTime = await addCut();
+      if (cutTime) moveSeekPoint(cutTime);
+      return;
+    }
+    if (isCommandA && isCommandSpace) return updateCut("subPlayer", "");
+    if (isCommandS && isCommandSpace) return updateCut("skill", "");
+    if (isCommandS && (isCommand123890 || isCommanQWEIOP)) {
+      const skillName = (i: number) => defaultSkill[i].name || "득점&어시";
+      if (isCommand123890) return updateCut("skill", skillName(keyIdx1));
+      if (isCommanQWEIOP) return updateCut("skill", skillName(keyIdx2 + 10));
+    }
+    if (isCommand123890 || isCommanQWEIOP) {
+      const type = isCommandA ? "subPlayer" : "mainPlayer";
+      if (row1[keyIdx1 + 1]) return updateCut(type, row1[keyIdx1 + 1].name);
+      if (row2[keyIdx2 + 1]) return updateCut(type, row2[keyIdx2 + 1].name);
+    }
+    if (isCommandSpace) return togglePlayPause();
+    if (isCommandArrow) return handleArrowKeyPress(event);
+  }
+}
+
+async function handleArrowKeyPress(event: any) {
   const currentTime = video.value.currentTime;
   const duration = video.value.duration;
-
-  const currentCommand = isCommandA
-    ? "subPlayer"
-    : isCommandS
-    ? "skill"
-    : "mainPlayer";
-
-  if (["subPlayer", "skill"].includes(currentCommand) && event.key === " ") {
-    updateCut(currentCommand, "");
-    return;
-  }
-
-  if ("skill" === currentCommand) {
-    if (keyIdx1 > -1) {
-      const name = defaultSkill[keyIdx1].name;
-      if (name) updateCut("skill", name);
-      return;
-    }
-    if (keyIdx2 > -1) {
-      const name = defaultSkill[keyIdx2 + 10].name;
-      if (name) updateCut("skill", name);
-      return;
-    }
-    return;
-  }
-
-  if (keyIdx1 > -1) {
-    if (!playerRow1.players[keyIdx1]) {
-      Notify.create(
-        `${playerRow1.name}팀 ${keyIdx1 + 1}번째 선수를 추가해주세요!`
-      );
-      return;
-    }
-    updateCut(currentCommand, playerRow1.players[keyIdx1].name);
-    return;
-  }
-
-  if (keyIdx2 > -1) {
-    if (!playerRow2.players[keyIdx2]) {
-      Notify.create(
-        `${playerRow2.name} 팀 ${keyIdx2 + 1}번째 선수를 추가해주세요!`
-      );
-      return;
-    }
-    updateCut(currentCommand, playerRow2.players[keyIdx2].name);
-    return;
-  }
-
-  if ("KeyC" === currCode) {
-    const cutTime = await addCut();
-    if (cutTime) moveSeekPoint(cutTime);
-    return;
-  }
-
   const controlState = useControlState();
   const { fastForwardSec, rewindSec } = controlState.value;
 
@@ -127,7 +102,6 @@ async function handleKeyPress(event: any, pressedKeys: any) {
       break;
 
     case "ArrowDown":
-      //다음시간대로
       video.value.currentTime = time2sec(await moveNextTime(1));
       break;
 
@@ -166,10 +140,6 @@ async function handleKeyPress(event: any, pressedKeys: any) {
       }
 
       video.value.playbackRate = currSpeed.value;
-      break;
-
-    case " ":
-      togglePlayPause();
       break;
     default:
       break;
@@ -231,7 +201,7 @@ function togglePlayPause() {
           <q-toolbar-title
             style="font-size: 24px; letter-spacing: -1px; font-weight: bold"
           >
-            cutin video editor
+            cutin video editor 🏀
           </q-toolbar-title>
           <StopWatch />
         </q-toolbar>
@@ -264,6 +234,7 @@ function togglePlayPause() {
                 ref="video"
                 width="960"
                 height="540"
+                tabindex="-1"
                 :src="videoProps.videoUrl"
                 style="position: fixed"
               />
@@ -287,6 +258,7 @@ function togglePlayPause() {
 </template>
 
 <style lang="scss" scoped>
-body {
+:focus-visible {
+  outline: 0;
 }
 </style>

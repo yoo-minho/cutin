@@ -4,6 +4,7 @@ type VideoPropsType = {
   videoUrl: string;
   videoSize: number;
   currentTime: string;
+  videoEl?: HTMLVideoElement;
 };
 
 export const useVideoPropsStore = () => {

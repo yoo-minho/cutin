@@ -3,8 +3,8 @@ import type { VsType } from "@/types";
 
 const props = defineProps<{ vs: VsType; type: "MATCH" | "TEAM" }>();
 
-const { score: aScore, teamName: aTeamName } = props.vs.match[0];
-const { score: bScore, teamName: bTeamName } = props.vs.match[1];
+const { score: aScore, teamName: aTeamName } = props.vs.match?.[0] || {};
+const { score: bScore, teamName: bTeamName } = props.vs.match?.[1] || {};
 
 const whoWin = bScore > aScore ? "b" : "a";
 </script>

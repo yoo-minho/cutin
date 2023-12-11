@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { PlayerType } from "~/composables/playerState";
+import type { PlayerType } from "@/composables/playerState";
+
+const videoProps = useVideoPropsStore();
 
 const props = defineProps<{
   videoName: string;
@@ -10,6 +12,7 @@ const props = defineProps<{
 const _addPlayer = () => {
   Dialog.create({
     title: "선수 추가",
+    message: "가나다 순으로 추가됩니다!",
     prompt: {
       type: "text",
     },
@@ -38,6 +41,14 @@ const _removeTeam = () => {
   }).onOk(() => {
     removeTeam(props.videoName, props.teamName);
   });
+};
+
+const _updateCut = async (
+  type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl" | "seekTime",
+  value: string
+) => {
+  await updateCut(type, value);
+  videoProps.value.videoEl?.focus();
 };
 </script>
 <template>
@@ -76,7 +87,7 @@ const _removeTeam = () => {
           <q-item
             clickable
             v-close-popup
-            @click="updateCut('mainPlayer', player.name)"
+            @click="_updateCut('mainPlayer', player.name)"
           >
             <q-item-section>메인플레이어로 기록</q-item-section>
             <q-item-section side>
@@ -86,7 +97,7 @@ const _removeTeam = () => {
           <q-item
             clickable
             v-close-popup
-            @click="updateCut('subPlayer', player.name)"
+            @click="_updateCut('subPlayer', player.name)"
           >
             <q-item-section>서브플레이어로 기록</q-item-section>
             <q-item-section side>

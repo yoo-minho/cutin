@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CutType } from "~/types";
+import type { CutType } from "@/types";
 
 const props = defineProps<{ cut: CutType; isWidthLimit?: boolean }>();
 const emits = defineEmits();
@@ -17,10 +17,12 @@ const loadVideoCallback = () => {
   loadingScreen.value = false;
   let tick = 0;
   let goal = false;
+  const _vsScore = { ...props.cut.vsScore };
 
   const playListener = () => {
-    const convertCut = JSON.parse(JSON.stringify(props.cut));
-    const { subPlayer, team = "team", skill } = convertCut;
+    const convertCut = { ...props.cut };
+    const { subPlayer, team = "team", skill, vsScore } = convertCut;
+    vsScore[team] = _vsScore[team];
     const { main } = getSkillPoints(skill);
 
     const videoEl = video.value;
@@ -32,13 +34,15 @@ const loadVideoCallback = () => {
       }
 
       const canvasCtx = canvasEl.getContext("2d");
-      canvasCtx?.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+      if (canvasCtx) {
+        canvasCtx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+      }
 
       const currentSec = videoEl.currentTime;
       const shortsSeekSec = findShortsSeekSec(skill, subPlayer);
-      if (currentSec > shortsSeekSec - 1) tick++;
+      if (currentSec > shortsSeekSec) tick++;
       if (currentSec > shortsSeekSec && !goal) {
-        convertCut.vsScore[team] += main.pts || 0;
+        vsScore[team] = _vsScore[team] + main.pts || 0;
         goal = true;
       }
 
@@ -51,8 +55,11 @@ const loadVideoCallback = () => {
   video.value?.addEventListener("ended", () => {
     tick = 0;
     goal = false;
-    video.value?.play();
+    if (video.value) {
+      video.value.play();
+    }
   });
+  video.value?.play();
 };
 </script>
 <template>
@@ -63,8 +70,8 @@ const loadVideoCallback = () => {
       :class="{ 'max-width': isWidthLimit }"
       width="960"
       height="540"
-      autoplay
       tabindex="-1"
+      autoplay
       webkit-playsinline
       playsinline
       controlslist="nodownload"
@@ -76,7 +83,7 @@ const loadVideoCallback = () => {
       ref="canvas"
       width="960"
       height="540"
-      class="miniVideo max-width"
+      class="miniVideo"
       :class="{ 'max-width': isWidthLimit }"
       style="position: absolute; overflow: hidden; left: 0; z-index: 1"
     ></canvas>

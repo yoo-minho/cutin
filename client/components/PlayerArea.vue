@@ -4,13 +4,10 @@ const currVideoName = toRef(videoProps.value, "videoName");
 
 const teams = ref();
 
-watch(
-  () => currVideoName.value,
-  async () => {
-    const teamStore = await useTeamStore(currVideoName.value);
-    teams.value = teamStore.value;
-  }
-);
+watch(currVideoName, async () => {
+  const teamStore = await useTeamStore(currVideoName.value);
+  teams.value = teamStore.value;
+});
 
 const _addTeam = () => {
   if (!currVideoName.value) {
@@ -43,8 +40,7 @@ const _addTeam = () => {
       style="min-height: 8px"
       @click="_addTeam()"
     >
-      {{ videoProps.videoCode ? `'${videoProps.videoCode}'` : "" }} 이 날의 팀
-      추가
+      {{ `'${videoProps.videoCode || ""}'` }} 이 날의 팀 추가
     </q-btn>
     <template v-for="team in teams">
       <PlayerList

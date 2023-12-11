@@ -17,13 +17,17 @@ export type PlayerType = {
   height?: string;
 };
 
+export const getGameInfo = (videoName: string) => {
+  const [clubCode, playDate] = videoName.split("_");
+  return { clubCode, playDate, gameCode: clubCode + playDate };
+};
+
 export const useTeamStore = async (videoName: string) => {
-  const state = useState<TeamType[]>(`${videoName}TeamStore`, () => []);
+  const { clubCode, playDate, gameCode } = getGameInfo(videoName);
+  const state = useState<TeamType[]>(`${gameCode}TeamStore`, () => []);
   if (state.value.length === 0) {
-    const [clubCode, playDate] = videoName.split("_");
     const players = await findPlayer({ clubCode, playDate });
     state.value = createTeams(players);
-    console.log({ videoName, state });
   }
   return state;
 };
@@ -67,8 +71,10 @@ export async function addPlayerOnTeam(
   const videoCode = videoProps.value.videoCode;
   const teamStore = await useTeamStore(videoName);
   teamStore.value = teamStore.value.map((v) => {
-    if (v.name == teamName) {
-      v.players?.push({ name: playerName });
+    if (v.name === teamName) {
+      v.players = [...new Set([...v.players.map((p) => p.name), playerName])]
+        .sort((a, b) => a.localeCompare(b))
+        .map((name) => ({ name }));
     }
     return v;
   });
@@ -76,7 +82,7 @@ export async function addPlayerOnTeam(
     method: "post",
     body: {
       videoCode,
-      playerArr: [{ teamName: teamName, player: playerName }],
+      playerArr: [{ teamName, player: playerName }],
     },
   });
 }

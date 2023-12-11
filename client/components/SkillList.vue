@@ -1,5 +1,22 @@
 <script setup lang="ts">
-import { defaultSkill } from "../composables/constants";
+import { defaultSkill } from "@/composables/constants";
+
+const videoProps = useVideoPropsStore();
+
+const _updateCut = async (
+  type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl" | "seekTime",
+  value?: string
+) => {
+  if (!value) {
+    Notify.create({
+      type: "negative",
+      message: "스킬이 지정되어 있지 않습니다.",
+    });
+  } else {
+    await updateCut(type, value);
+  }
+  videoProps.value.videoEl?.focus();
+};
 </script>
 
 <template>
@@ -9,10 +26,9 @@ import { defaultSkill } from "../composables/constants";
       color="yellow"
       text-color="black"
       class="q-ma-md"
-      icon-right="sports_basketball"
       style="min-height: 8px"
     >
-      스킬　
+      스킬 🏀
     </q-btn>
     <div class="row justify-center" style="gap: 12px">
       <q-btn
@@ -22,6 +38,7 @@ import { defaultSkill } from "../composables/constants";
         color="black"
         class="col-2"
         padding="0px 4px"
+        @click="_updateCut('skill', skill.name)"
       >
         <div>
           <div style="font-weight: 600; color: yellow">S + {{ skill.key }}</div>

@@ -33,11 +33,18 @@ const submit = async (files: File[]) => {
   }
   const firstFile = videoList.value[0];
   selectFile(firstFile.name, firstFile.url, firstFile.size);
-  uploader.value.blur();
+  videoProps.value.videoEl?.focus();
 };
 
 const selectFile = async (videoName: string, url: string, size: number) => {
-  const [name, date] = videoName.split("_");
+  const [name, date, gameNum] = videoName.split("_");
+  const currGame = useCurrGame();
+  const [gameNo, quaterNo] = currGame.value.split(/g|q/g, 2);
+
+  if (gameNum !== gameNo) {
+    currGame.value = `${gameNum}g${quaterNo}q`;
+  }
+
   videoProps.value.videoCode = name + "_" + date;
   videoProps.value.videoName = videoName;
   videoProps.value.videoUrl = url;
