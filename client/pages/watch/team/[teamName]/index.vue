@@ -9,37 +9,38 @@ definePageMeta({
 });
 
 const route = useRoute();
-const teamName = route.params.teamName as string;
-
-const { data } = await useFetch<VsType[]>("/api/gameStat/match", {
-  params: { clubCode: teamName },
-});
+const { teamName: clubCode } = route.params;
 
 const currentTeam = ref();
 const currentTeamState = useState<TeamInfoType[]>("currentTeamState", () => []);
 if (currentTeamState.value.length > 0) {
   currentTeam.value = currentTeamState.value.find(
-    (team) => team.id === teamName
+    (team) => team.id === clubCode
   );
 } else {
-  const { data } = await getTeams(teamName);
-  currentTeam.value = data;
+  const { data: team } = await getTeams(clubCode);
+  currentTeam.value = team;
 }
 
+const { data: games } = await useFetch<VsType[]>(`/api/club/${clubCode}/game`);
 const currentVsState = useState<VsType[]>("currentVsState", () => []);
 watch(
-  data,
+  games,
   (newData) => {
     if (!newData) return;
     currentVsState.value = newData.map((vs) => {
       return {
         ...vs,
         dateInfo: formatGameDate(vs.playDate, vs.gameNo),
-        gameCode: `${teamName}_${vs.playDate}_${vs.gameNo}`,
+        gameCode: `${clubCode}_${vs.playDate}_${vs.gameNo}`,
       };
     });
   },
   { immediate: true }
+);
+
+const { data: players } = await useFetch<VsType[]>(
+  `/api/club/${clubCode}/player`
 );
 
 const moveGame = (gameCode: string) => {
@@ -77,7 +78,9 @@ const tab2 = ref("match");
         </template>
       </q-list>
     </q-tab-panel>
-    <q-tab-panel name="player" class="q-pa-none"> 준비중... </q-tab-panel>
+    <q-tab-panel name="player" class="q-pa-none">
+      <TablePlayerByClub :player-stat="players" />
+    </q-tab-panel>
   </q-tab-panels>
 </template>
 

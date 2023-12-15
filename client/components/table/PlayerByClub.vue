@@ -6,7 +6,19 @@ const columns = [
   {
     label: "선수",
     name: "name",
-    field: "name",
+    align: "center",
+    field: (row) => row.name,
+  },
+  {
+    label: "경기",
+    name: "play",
+    field: "play",
+    align: "center",
+  },
+  {
+    label: "최근경기일자",
+    name: "playDate",
+    field: "playDate",
     align: "center",
   },
   {
@@ -15,7 +27,6 @@ const columns = [
     field: "pts",
     align: "center",
   },
-
   {
     label: "리바",
     name: "reb",
@@ -53,12 +64,6 @@ const columns = [
     field: "blk",
     align: "center",
   },
-  //   {
-  //     label: "공헌",
-  //     name: "kbl",
-  //     field: "kbl",
-  //     align: "center",
-  //   },
 ] as any;
 
 const videoViewerOn = ref(false);
@@ -78,34 +83,26 @@ const openViewer = async (player: string) => {
 };
 </script>
 <template>
+  <div class="text-center q-mt-md">
+    * 정렬조건 : 경기수 내림차순, 최근경기일 내림차순, 이름순
+  </div>
   <q-table
-    class="stat-table"
+    title="평균 기록"
+    class="my-sticky-header-column-table max-width"
     flat
-    dense
     bordered
+    dense
     :columns="columns"
     :rows="playerStat"
     :rows-per-page-options="[0]"
     :hide-pagination="true"
+    row-key="name"
   >
     <template #body="props">
       <q-tr :props="props">
-        <q-td key="name" :props="props">
-          <template v-if="props.row.name === '전체'">
-            {{ props.row.name }}
-          </template>
-          <template v-else>
-            <q-btn
-              dense
-              icon-right="smart_display"
-              class="q-ma-xs q-py-none text-pre-wrap"
-              style="font-size: 13px"
-              @click="openViewer(props.row.name)"
-            >
-              {{ props.row.name }}
-            </q-btn>
-          </template>
-        </q-td>
+        <q-td key="name" :props="props">{{ props.row.name }}</q-td>
+        <q-td key="play" :props="props"> {{ props.row.play }} </q-td>
+        <q-td key="playDate" :props="props"> {{ props.row.playDate }} </q-td>
         <q-td key="pts" :props="props"> {{ props.row.pts }} </q-td>
         <q-td key="reb" :props="props"> {{ props.row.reb }} </q-td>
         <q-td key="ast" :props="props"> {{ props.row.ast }} </q-td>
@@ -117,26 +114,37 @@ const openViewer = async (player: string) => {
       </q-tr>
     </template>
   </q-table>
-  <ViewerPlayerVideo
-    v-if="_cuts"
-    v-model="videoViewerOn"
-    :selectedPlayer="selectedPlayer"
-    :selectedPlayerStat="getSelectedPlayerStat(selectedPlayer)"
-    :cuts="_cuts"
-  />
 </template>
-<style lang="scss" scoped>
-.stat-table {
-  td {
-    padding: 0 !important;
-  }
+<style lang="sass">
+.my-sticky-header-column-table
+  height: 600px
 
-  .q-btn__content {
-    gap: 4px;
+  td:first-child
+    background-color: $orange-5
 
-    .q-icon {
-      font-size: 1.2em;
-    }
-  }
-}
+  tr th
+    position: sticky
+    z-index: 2
+    background: $orange-5
+
+  thead tr:last-child th
+    top: 48px
+    z-index: 3
+  thead tr:first-child th
+    top: 0
+    z-index: 1
+  tr:first-child th:first-child
+    z-index: 3
+
+  td:first-child
+    z-index: 1
+    padding: 0 12px !important
+    border-bottom-width : 0 !important
+
+  td:first-child, th:first-child
+    position: sticky
+    left: 0
+
+  tbody
+    scroll-margin-top: 48px
 </style>

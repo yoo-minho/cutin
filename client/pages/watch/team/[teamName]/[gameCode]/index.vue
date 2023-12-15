@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VsType } from "@/types";
+import type { VsType, RecordType } from "@/types";
 import GameItem from "../../components/GameItem.vue";
 
 definePageMeta({
@@ -7,20 +7,20 @@ definePageMeta({
 });
 
 const route = useRoute();
-const gameCode = route.params.gameCode as string;
-const [clubCode, playDate, gameNo] = gameCode.split("_");
-const props = { clubCode, playDate, gameNo: +gameNo };
-const playerArr = await findPlayer(props);
-const [aTeam, bTeam] = await getCutsWithStat2(playerArr, props);
+const { teamName: clubCode, gameCode } = route.params;
+const { data: record } = await useFetch<[RecordType, RecordType]>(
+  `/api/club/${clubCode}/game/${gameCode}/record`
+);
+const [aTeam, bTeam] = record.value || [];
 
 const currentVsState = useState<VsType[]>("currentVsState", () => []);
 const currentVs = ref();
 if (currentVsState.value.length > 0) {
   currentVs.value = currentVsState.value.find((vs) => vs.gameCode === gameCode);
 } else {
-  const { data } = await useFetch<VsType[]>("/api/gameStat/match", {
-    params: { gameCode },
-  });
+  const { data } = await useFetch<VsType[]>(
+    `/api/club/${clubCode}/game/${gameCode}`
+  );
   if (data.value) {
     currentVs.value = data.value.map((vs) => {
       return {
@@ -36,13 +36,13 @@ if (currentVsState.value.length > 0) {
   <GameItem :vs="currentVs" type="MATCH" />
   <q-separator color="#ccc" class="q-py-xs" />
   <div class="column items-center align-center q-my-md">
-    <div>
-      <div class="text-h6">{{ aTeam?.teamName }}</div>
-      <StatTable :player-stat="aTeam?.playerStat" />
+    <div v-if="aTeam">
+      <div class="text-h6">{{ aTeam.teamName }}</div>
+      <StatTable :player-stat="aTeam.playerStat" />
     </div>
-    <div class="q-mt-md">
-      <div class="text-h6">{{ bTeam?.teamName }}</div>
-      <StatTable :player-stat="bTeam?.playerStat" />
+    <div v-if="bTeam" class="q-mt-md">
+      <div class="text-h6">{{ bTeam.teamName }}</div>
+      <StatTable :player-stat="bTeam.playerStat" />
     </div>
   </div>
   <q-separator color="white" style="padding: 60px" />

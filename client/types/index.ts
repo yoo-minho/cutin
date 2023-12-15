@@ -1,3 +1,8 @@
+export type RecordType = {
+  teamName: string;
+  playerStat: PlayerStatType;
+};
+
 export type CutType = {
   clubCode: string;
   playDate: string;
