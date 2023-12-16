@@ -34,17 +34,21 @@ if (currentVsState.value.length > 0) {
 </script>
 <template>
   <GameItem :vs="currentVs" type="MATCH" />
-  <q-separator color="#ccc" class="q-py-xs" />
+  <q-separator color="#ccc" />
+  <div class="text-center q-mt-md text-orange-5">
+    * 정렬조건 : KBL 선수공헌도 공식활용<br />
+    (득점+스틸+블록+수비리바)x1.0 + (공격리바+어시)x1.5
+  </div>
   <div
-    class="column items-center align-center q-my-md"
+    class="column items-center align-center"
     style="flex: 1; overflow-y: auto; flex-wrap: nowrap"
   >
     <template v-if="aTeam">
-      <div class="text-h6">{{ aTeam.teamName }}</div>
+      <div class="text-h6 q-mt-md">{{ aTeam.teamName }}</div>
       <StatTable :player-stat="aTeam.playerStat" />
     </template>
     <template v-if="bTeam" class="q-mt-md">
-      <div class="text-h6">{{ bTeam.teamName }}</div>
+      <div class="text-h6 q-mt-md">{{ bTeam.teamName }}</div>
       <StatTable :player-stat="bTeam.playerStat" />
     </template>
   </div>

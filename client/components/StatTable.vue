@@ -53,12 +53,12 @@ const columns = [
     field: "blk",
     align: "center",
   },
-  //   {
-  //     label: "공헌",
-  //     name: "kbl",
-  //     field: "kbl",
-  //     align: "center",
-  //   },
+  // {
+  //   label: "공헌",
+  //   name: "kbl",
+  //   field: "kbl",
+  //   align: "center",
+  // },
 ] as any;
 
 const videoViewerOn = ref(false);
@@ -73,6 +73,12 @@ const openViewer = async (player: string) => {
   _cuts.value = allGameCuts.filter(
     (cut) => cut.mainPlayer === player || cut.subPlayer === player
   );
+  const isNotReadyVideo =
+    _cuts.value.filter((cut: any) => !cut.videoUrl).length > 0;
+  if (isNotReadyVideo) {
+    Notify.create("영상을 준비중입니다!");
+    return;
+  }
   selectedPlayer.value = player;
   videoViewerOn.value = true;
 };
@@ -87,7 +93,6 @@ const openViewer = async (player: string) => {
     :rows="playerStat"
     :rows-per-page-options="[0]"
     :hide-pagination="true"
-    style="height: 100%"
   >
     <template #body="props">
       <q-tr :props="props">

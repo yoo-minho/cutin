@@ -179,6 +179,8 @@ function togglePlayPause() {
       style="
         max-width: 1920px;
         min-width: 1280px;
+        max-height: 1080px;
+        min-height: 720px;
         display: flex;
         flex-direction: column;
         box-shadow: 10px 10px 20px #888888;

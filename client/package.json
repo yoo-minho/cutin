@@ -13,7 +13,7 @@
     "@quasar/extras": "^1.16.6",
     "@types/fluent-ffmpeg": "^2.1.24",
     "npm": "^10.1.0",
-    "nuxt": "^3.8.1",
+    "nuxt": "^3.8.2",
     "nuxt-quasar-ui": "^2.0.5",
     "prisma": "^5.4.1",
     "quasar": "^2.12.7",
