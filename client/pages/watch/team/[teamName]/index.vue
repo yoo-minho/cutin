@@ -61,12 +61,16 @@ const tab2 = ref("match");
     :active-color="`orange-5`"
     :indicator-color="`orange-5`"
   >
-    <q-tab name="match" label="경기" />
-    <q-tab name="player" label="플레이어" />
+    <q-tab name="match" :label="`경기 (${currentVsState.length}게임)`" />
+    <q-tab name="player" :label="`플레이어 (${players?.length}명)`" />
   </q-tabs>
-  <q-tab-panels v-model="tab2" animated>
+  <q-tab-panels v-model="tab2" style="flex: 1; width: 100%">
     <q-tab-panel name="match" class="q-pa-none">
+      <div class="text-center q-mt-md text-orange-5">
+        * 정렬조건 : 최근경기일 내림차순
+      </div>
       <q-list>
+        <q-separator />
         <template v-for="vs in currentVsState">
           <GameItem
             v-if="vs.gameCode"
@@ -79,12 +83,24 @@ const tab2 = ref("match");
       </q-list>
     </q-tab-panel>
     <q-tab-panel name="player" class="q-pa-none">
+      <div class="text-center q-mt-md text-orange-5">
+        * 정렬조건 : 경기수 내림차순, 최근경기일 내림차순, 이름순
+      </div>
       <TablePlayerByClub :player-stat="players" />
     </q-tab-panel>
   </q-tab-panels>
 </template>
+<style lang="scss">
+.q-panel.scroll {
+  overflow: hidden !important;
+}
+</style>
 
 <style lang="scss" scoped>
+.scroll {
+  overflow: hidden !important;
+}
+
 .teamName {
   font-size: 24px;
   font-weight: bold;

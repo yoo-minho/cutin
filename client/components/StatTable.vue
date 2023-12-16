@@ -87,6 +87,7 @@ const openViewer = async (player: string) => {
     :rows="playerStat"
     :rows-per-page-options="[0]"
     :hide-pagination="true"
+    style="height: 100%"
   >
     <template #body="props">
       <q-tr :props="props">

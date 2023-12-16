@@ -35,17 +35,19 @@ if (currentVsState.value.length > 0) {
 <template>
   <GameItem :vs="currentVs" type="MATCH" />
   <q-separator color="#ccc" class="q-py-xs" />
-  <div class="column items-center align-center q-my-md">
-    <div v-if="aTeam">
+  <div
+    class="column items-center align-center q-my-md"
+    style="flex: 1; overflow-y: auto; flex-wrap: nowrap"
+  >
+    <template v-if="aTeam">
       <div class="text-h6">{{ aTeam.teamName }}</div>
       <StatTable :player-stat="aTeam.playerStat" />
-    </div>
-    <div v-if="bTeam" class="q-mt-md">
+    </template>
+    <template v-if="bTeam" class="q-mt-md">
       <div class="text-h6">{{ bTeam.teamName }}</div>
       <StatTable :player-stat="bTeam.playerStat" />
-    </div>
+    </template>
   </div>
-  <q-separator color="white" style="padding: 60px" />
 </template>
 
 <style lang="scss" scoped>

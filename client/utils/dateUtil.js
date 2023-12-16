@@ -7,3 +7,8 @@ export function formatGameDate(playDate, gameNo) {
   const parsedDate = dayjs(playDate, { strict: false });
   return parsedDate.format(`YYYY. M. D.(ddd) ${gameNo}게임`);
 }
+
+export function formatSimpletGameDate(playDate) {
+  const parsedDate = dayjs(playDate, { strict: false });
+  return parsedDate.format(`YY.M.D`);
+}

@@ -15,16 +15,17 @@ const backEvent = () => {
 };
 </script>
 <template>
-  <q-layout class="column" style="height: 100vh">
+  <q-layout
+    class="column bg-white"
+    style="display: flex; flex-direction: column; height: 100vh"
+  >
     <WatchHeader
       type="DETAIL"
       title=""
       @back-event="backEvent()"
       style="position: relative"
     />
-    <div class="bg-white" style="overflow: auto; flex: 1">
-      <slot />
-    </div>
+    <slot />
   </q-layout>
 </template>
 
