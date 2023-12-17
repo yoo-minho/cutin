@@ -1,13 +1,11 @@
 <script setup lang="ts">
-const props = defineProps<{ playerStat: any }>();
-const getSelectedPlayerStat = (playerName: string) =>
-  props.playerStat.find((v: { name: string }) => v.name === playerName) || {};
+defineProps<{ playerStat: any }>();
 const columns = [
   {
     label: "선수",
     name: "name",
     align: "center",
-    field: (row) => row.name,
+    field: (row: { name: any }) => row.name,
   },
   {
     label: "경기",
@@ -59,25 +57,40 @@ const columns = [
     align: "center",
   },
 ] as any;
-
-const videoViewerOn = ref(false);
-const _cuts = ref();
-const selectedPlayer = ref("");
-
 const getPlayerGroupByGame = async (player: string) => {
   Notify.create("경기별 스탯을 준비중입니다!!");
 };
+const filter = ref("");
 </script>
 <template>
   <q-table
-    class="table"
+    class="player-table"
     flat
     bordered
     dense
     :columns="columns"
     :rows="playerStat"
+    row-key="name"
+    :filter="filter"
     :rows-per-page-options="[10]"
   >
+    <template #top>
+      <div class="text-center text-orange-5" style="flex: 1">
+        * 정렬조건:경기많은순,경기일최근순,이름순
+      </div>
+      <q-input
+        outlined
+        dense
+        debounce="300"
+        v-model="filter"
+        placeholder="선수 검색"
+        style="width: 120px"
+      >
+        <template #append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+    </template>
     <template #body="props">
       <q-tr :props="props">
         <q-td
@@ -88,7 +101,7 @@ const getPlayerGroupByGame = async (player: string) => {
         >
           <q-btn
             dense
-            class="q-py-none"
+            class="q-py-none q-my-xs text-bold"
             @click="getPlayerGroupByGame(props.row.name)"
           >
             {{ props.row.name }}📋
@@ -114,8 +127,22 @@ const getPlayerGroupByGame = async (player: string) => {
     </template>
   </q-table>
 </template>
+<style lang="scss">
+.player-table {
+  .q-btn .q-icon,
+  .q-btn .q-spinner {
+    font-size: 2em;
+  }
+  .q-table__bottom {
+    font-size: 16px;
+  }
+}
+</style>
+
+table
+
 <style lang="scss" scoped>
-.table {
+.player-table {
   td {
     padding: 0;
   }

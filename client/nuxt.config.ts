@@ -55,9 +55,17 @@ export default defineNuxtConfig({
     },
   },
   extends: ["nuxt-seo-kit"],
-  modules: ["nuxt-quasar-ui", "@vite-pwa/nuxt", "nuxt-gtag"],
+  modules: [
+    "nuxt-quasar-ui",
+    "@vite-pwa/nuxt",
+    "nuxt-gtag",
+    "@nuxtjs/google-adsense",
+  ],
   gtag: {
     id: "G-J9Z1XZREM2",
+  },
+  googleAdsense: {
+    id: "ca-pub-7259356170238927",
   },
   pwa: {
     registerType: "autoUpdate",

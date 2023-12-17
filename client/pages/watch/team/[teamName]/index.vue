@@ -67,7 +67,7 @@ const tab2 = ref("match");
   <q-tab-panels v-model="tab2" style="flex: 1; width: 100%">
     <q-tab-panel name="match" class="q-pa-none">
       <div class="text-center q-mt-md text-orange-5">
-        * 정렬조건 : 최근경기일 내림차순
+        * 정렬조건 : 경기일자 최근순
       </div>
       <q-list>
         <q-separator />
@@ -83,9 +83,6 @@ const tab2 = ref("match");
       </q-list>
     </q-tab-panel>
     <q-tab-panel name="player" class="q-pa-none">
-      <div class="text-center q-mt-md text-orange-5">
-        * 정렬조건 : 경기수 내림차순, 최근경기일 내림차순, 이름순
-      </div>
       <TablePlayerByClub :player-stat="players" />
     </q-tab-panel>
   </q-tab-panels>

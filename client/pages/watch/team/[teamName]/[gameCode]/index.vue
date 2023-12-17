@@ -36,7 +36,7 @@ if (currentVsState.value.length > 0) {
   <GameItem :vs="currentVs" type="MATCH" />
   <q-separator color="#ccc" />
   <div class="text-center q-mt-md text-orange-5">
-    * 정렬조건 : KBL 선수공헌도 공식활용<br />
+    * 정렬조건 : KBL 선수공헌도 높은순<br />
     (득점+스틸+블록+수비리바)x1.0 + (공격리바+어시)x1.5
   </div>
   <div
