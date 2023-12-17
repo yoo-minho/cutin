@@ -51,11 +51,14 @@ export async function createCaptureVideo(
       const left2 = (_zoom - 1) * pos.width;
       const top2 = ((_zoom - 1) * pos.height) / 2;
       canvasContext.clearRect(0, 0, width, height);
-      canvasContext.translate(
-        (-pos.left - left2) * (width / pos.width) || 0,
-        (-pos.top - top2) * (height / pos.height) || 0
+      canvasContext.setTransform(
+        baseZoom * _zoom,
+        0,
+        0,
+        baseZoom * _zoom,
+        (-pos.left - left2) * (width / pos.width),
+        (-pos.top - top2) * (height / pos.height)
       );
-      canvasContext.scale(baseZoom * _zoom, baseZoom * _zoom);
       canvasContext.drawImage(videoElem, 0, 0, width, height);
       requestAnimationFrame(renderFrame);
     };
