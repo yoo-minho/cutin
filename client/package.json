@@ -24,7 +24,9 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.2",
+    "@nuxt/content": "^2.9.0",
     "@nuxtjs/google-adsense": "^3.0.0",
+    "@primer/css": "^21.1.1",
     "@prisma/client": "^5.4.1",
     "@vite-pwa/nuxt": "^0.3.2",
     "dayjs": "^1.11.10",

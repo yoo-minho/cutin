@@ -60,6 +60,7 @@ export default defineNuxtConfig({
     "@vite-pwa/nuxt",
     "nuxt-gtag",
     "@nuxtjs/google-adsense",
+    "@nuxt/content",
   ],
   gtag: {
     id: "G-J9Z1XZREM2",
