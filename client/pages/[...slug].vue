@@ -48,6 +48,14 @@ main {
     font-weight: 600;
   }
 
+  h4 {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 12px;
+    margin: 0;
+    display: inline-block;
+  }
+
   p {
     margin: 8px 0 16px 0;
     letter-spacing: -0.5px;
