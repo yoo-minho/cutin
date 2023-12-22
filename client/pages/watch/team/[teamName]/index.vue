@@ -61,8 +61,8 @@ const tab2 = ref("match");
     :active-color="`orange-5`"
     :indicator-color="`orange-5`"
   >
-    <q-tab name="match" :label="`경기 (${currentVsState.length}게임)`" />
-    <q-tab name="player" :label="`플레이어 (${players?.length}명)`" />
+    <q-tab name="match" :label="`최근경기 (${currentVsState.length}게임)`" />
+    <q-tab name="player" :label="`선수 (${players?.length}명)`" />
   </q-tabs>
   <q-tab-panels v-model="tab2" style="flex: 1; width: 100%">
     <q-tab-panel name="match" class="q-pa-none">

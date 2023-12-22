@@ -1,6 +1,20 @@
 <template>
-  <main class="max-width bg-white q-pa-md">
-    <ContentDoc />
+  <main class="max-width bg-white">
+    <q-layout class="column">
+      <q-header bordered style="position: sticky">
+        <q-toolbar>
+          <q-btn
+            outline
+            dense
+            @click="navigateTo('/', { replace: true })"
+            class="q-px-md"
+            >🏀 농구영상 연계 기록플랫폼
+            <span class="text-orange-5 q-mx-sm">'컷인'</span>으로 이동하기
+          </q-btn>
+        </q-toolbar>
+      </q-header>
+      <ContentDoc class="q-pa-md" style="flex: 1" />
+    </q-layout>
   </main>
 </template>
 <style lang="scss">
@@ -36,6 +50,7 @@ main {
 
   p {
     margin: 8px 0 16px 0;
+    letter-spacing: -0.5px;
   }
 
   ul,
@@ -73,8 +88,8 @@ main {
 
   blockquote {
     border-left: 4px solid $orange-5;
-    padding: 0 20px;
-    margin: 15px 0;
+    padding: 0 12px;
+    margin: 8px 0;
     color: #555;
   }
 
@@ -125,6 +140,13 @@ main {
     border-radius: 5px;
     margin-right: 8px;
     letter-spacing: -1px;
+  }
+
+  .hl {
+    background-color: $orange-6;
+    color: white;
+    padding: 2px 4px;
+    line-height: 24px;
   }
 
   /* 블로그 포스트 예시에서 사용할 태그 스타일 */
