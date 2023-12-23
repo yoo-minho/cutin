@@ -42,7 +42,7 @@ const loadVideoCallback = () => {
       const shortsSeekSec = findShortsSeekSec(skill, subPlayer);
       if (currentSec > shortsSeekSec) tick++;
       if (currentSec > shortsSeekSec && !goal) {
-        vsScore[team] = _vsScore[team] + main.pts || 0;
+        vsScore[team] = _vsScore[team] + (main.pts || 0);
         goal = true;
       }
 

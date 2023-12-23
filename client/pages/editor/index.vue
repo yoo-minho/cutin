@@ -99,10 +99,12 @@ async function handleArrowKeyPress(event: any) {
   switch (event.key) {
     case "ArrowUp":
       video.value.currentTime = time2sec(await moveNextTime(-1));
+      video.value.pause();
       break;
 
     case "ArrowDown":
       video.value.currentTime = time2sec(await moveNextTime(1));
+      video.value.pause();
       break;
 
     case "ArrowLeft":

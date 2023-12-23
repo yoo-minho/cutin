@@ -1,17 +1,12 @@
 <script setup lang="ts">
-import { serviceName } from "@/composables/constants";
 import WatchHeader from "./components/WatchHeader.vue";
 
-const getTeamName = () => {
+const backEvent = async () => {
   const route = useRoute();
-  return route.params.teamName || "";
-};
-
-const backEvent = () => {
-  const route = useRoute();
-  const router = useRouter();
   const routePath = String(route.path);
-  router.replace(routePath.split("/").slice(0, -1).join("/"));
+  await navigateTo(routePath.split("/").slice(0, -1).join("/"), {
+    replace: true,
+  });
 };
 </script>
 <template>

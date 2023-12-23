@@ -97,6 +97,15 @@ export const updateCut = async (
     return;
   }
 
+  if ("seekTime" === type) {
+    const alreadyRecordedTime =
+      cutStore.value.filter((c) => c.seekTime === value).length > 0;
+    if (alreadyRecordedTime) {
+      Notify.create(`이미 기록된 시간입니다!`);
+      return;
+    }
+  }
+
   if ("mainPlayer" === type) {
     if (cut.subPlayer === value) {
       Notify.create(`서브 선수와 다른 메인 선수를 입력해주세요`);
