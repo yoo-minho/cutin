@@ -2,11 +2,16 @@
 import WatchHeader from "./components/WatchHeader.vue";
 
 const backEvent = async () => {
-  const route = useRoute();
-  const routePath = String(route.path);
-  await navigateTo(routePath.split("/").slice(0, -1).join("/"), {
-    replace: true,
-  });
+  if (history.state.back) {
+    const router = useRouter();
+    router.back();
+  } else {
+    const route = useRoute();
+    const routePath = String(route.path);
+    await navigateTo(routePath.split("/").slice(0, -1).join("/"), {
+      replace: true,
+    });
+  }
 };
 </script>
 <template>

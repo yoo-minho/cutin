@@ -10,6 +10,7 @@ definePageMeta({
 
 const route = useRoute();
 const { teamName: clubCode } = route.params;
+const { tab = "" } = route.query;
 
 const currentTeam = ref();
 const currentTeamState = useState<TeamInfoType[]>("currentTeamState", () => []);
@@ -49,13 +50,17 @@ const moveGame = (gameCode: string) => {
   router.push(route.path + "/" + gameCode);
 };
 
-const tab2 = ref("match");
+const refTab = ref(String(tab) || "match");
+watch(refTab, () => {
+  const router = useRouter();
+  router.replace({ query: { tab: refTab.value } });
+});
 </script>
 <template>
   <TeamItem :team="currentTeam" />
   <q-separator color="#ccc" class="q-mt-sm" />
   <q-tabs
-    v-model="tab2"
+    v-model="refTab"
     dense
     :class="`text-grey js-tab bg-white`"
     :active-color="`orange-5`"
@@ -64,7 +69,7 @@ const tab2 = ref("match");
     <q-tab name="match" :label="`최근경기 (${currentVsState.length}게임)`" />
     <q-tab name="player" :label="`선수 (${players?.length}명)`" />
   </q-tabs>
-  <q-tab-panels v-model="tab2" style="flex: 1; width: 100%">
+  <q-tab-panels v-model="refTab" style="flex: 1; width: 100%">
     <q-tab-panel name="match" class="q-pa-none">
       <div class="text-center q-mt-md text-orange-5">
         * 정렬조건 : 경기일자 최근순
@@ -83,7 +88,7 @@ const tab2 = ref("match");
       </q-list>
     </q-tab-panel>
     <q-tab-panel name="player" class="q-pa-none">
-      <TablePlayerByClub :player-stat="players" />
+      <TableAllPlayerByClub :player-stat="players" />
     </q-tab-panel>
   </q-tab-panels>
 </template>

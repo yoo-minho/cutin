@@ -4,8 +4,8 @@ const columns = [
   {
     label: "선수",
     name: "name",
+    field: "name",
     align: "center",
-    field: (row: { name: any }) => row.name,
   },
   {
     label: "경기",
@@ -61,47 +61,66 @@ const columns = [
 const filter = ref("");
 const options = [
   {
-    label: "경기 순위 (전체)",
+    label: "경기순 (전체)",
     value: "play",
   },
   {
-    label: "득점 순위 (3경기 이상)",
+    label: "평균득점순 (3경기 이상)",
     value: "pts",
+    type: "avg",
   },
   {
-    label: "리바운드 순위 (3경기 이상)",
+    label: "평균리바운드순 (3경기 이상)",
     value: "reb",
+    type: "avg",
   },
   {
-    label: "어시스트 순위 (3경기 이상)",
+    label: "평균어시스트순 (3경기 이상)",
     value: "ast",
+    type: "avg",
   },
   {
-    label: "3점슛 순위 (3경기 이상)",
+    label: "평균3점순 (3경기 이상)",
     value: "tpm",
+    type: "avg",
   },
   {
-    label: "공격 리바운드 순위 (3경기 이상)",
+    label: "평균공격리바운드순 (3경기 이상)",
     value: "orb",
+    type: "avg",
   },
   {
-    label: "스틸 순위 (3경기 이상)",
+    label: "평균스틸순 (3경기 이상)",
     value: "stl",
+    type: "avg",
   },
   {
-    label: "블록 순위 (3경기 이상)",
+    label: "평균블록순 (3경기 이상)",
     value: "blk",
+    type: "avg",
   },
 ];
 const sort = ref(options[0]); //pts, reb, ast, tpm, orb, stl, blk
+const getAvgRecord = (row: any, type: string) => {
+  return String(Math.round((row[type] * 10) / row.play) / 10);
+};
 const getSortPlayerStat = () => {
   if (sort.value.value === "play") return props.playerStat;
+  const { type, value } = sort.value;
   return [...props.playerStat]
     .filter((v) => v.play > 2)
-    .sort((a: any, b: any) => b[sort.value.value] - a[sort.value.value]);
+    .sort((a: any, b: any) => {
+      if (type === "avg") return +b[value] / b.play - +a[value] / a.play;
+      return +b[value] - +a[value];
+    });
 };
 const getPlayerGroupByGame = async (player: string) => {
-  Notify.create("경기별 스탯을 준비중입니다!!");
+  const route = useRoute();
+  const { teamName } = route.params;
+  navigateTo({
+    path: `/watch/player/${player}`,
+    query: { clubCode: teamName },
+  });
 };
 </script>
 <template>
@@ -135,6 +154,7 @@ const getPlayerGroupByGame = async (player: string) => {
         :options="options"
         outlined
         dense
+        options-dense
         stack-label
         label="정렬필터"
       />
@@ -155,23 +175,23 @@ const getPlayerGroupByGame = async (player: string) => {
             {{ props.row.name }}📋
           </q-btn>
         </q-td>
-        <q-td key="play" :props="props">
-          <div class="column justify-center">
-            <span class="play" style="margin-bottom: -4px">
-              {{ props.row.play }}
-            </span>
-            <span style="color: #aaa; font-size: 11px">
-              ({{ formatSimpletGameDate(props.row.playDate) }})
-            </span>
-          </div>
+        <q-td key="play" :props="props" class="play">
+          <TablePlayerRecordItem
+            :contents1="props.row.play"
+            :contents2="`(${formatSimpletGameDate(props.row.playDate)})`"
+          />
         </q-td>
-        <q-td key="pts" :props="props" class="pts"> {{ props.row.pts }} </q-td>
-        <q-td key="reb" :props="props" class="reb"> {{ props.row.reb }} </q-td>
-        <q-td key="ast" :props="props" class="ast"> {{ props.row.ast }} </q-td>
-        <q-td key="tpm" :props="props" class="tpm"> {{ props.row.tpm }} </q-td>
-        <q-td key="orb" :props="props" class="orb"> {{ props.row.orb }} </q-td>
-        <q-td key="stl" :props="props" class="stl"> {{ props.row.stl }} </q-td>
-        <q-td key="blk" :props="props" class="blk"> {{ props.row.blk }} </q-td>
+        <template
+          v-for="stat in ['pts', 'reb', 'ast', 'tpm', 'orb', 'stl', 'blk']"
+          :key="stat"
+        >
+          <q-td :props="props" :class="stat">
+            <TablePlayerRecordItem
+              :contents1="getAvgRecord(props.row, stat)"
+              :contents2="props.row[stat]"
+            />
+          </q-td>
+        </template>
       </q-tr>
     </template>
   </q-table>
