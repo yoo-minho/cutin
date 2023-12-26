@@ -1,4 +1,4 @@
-export async function getTeams(id) {
+export function getTeams(id) {
   const dummy = {
     data: [
       {

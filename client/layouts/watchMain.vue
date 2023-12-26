@@ -2,13 +2,13 @@
 import { serviceName } from "@/composables/constants";
 import WatchHeader from "./components/WatchHeader.vue";
 
-const tab2 = ref("");
+const routeTabVal = ref("");
 </script>
 <template>
   <q-layout>
     <WatchHeader type="MAIN" :title="serviceName" style="position: relative" />
     <q-tabs
-      v-model="tab2"
+      v-model="routeTabVal"
       dense
       :class="`text-grey bg-dark`"
       :active-color="`orange-5`"
@@ -31,11 +31,8 @@ const tab2 = ref("");
         style="flex: 1"
       />
     </q-tabs>
-    <q-tab-panels v-model="tab2" animated class="my-panels">
-      <q-tab-panel name="team" class="q-pa-none">
-        <slot />
-      </q-tab-panel>
-      <q-tab-panel name="player" class="q-pa-none">
+    <q-tab-panels v-model="routeTabVal" class="my-panels">
+      <q-tab-panel :name="routeTabVal" class="q-pa-none">
         <slot />
       </q-tab-panel>
     </q-tab-panels>

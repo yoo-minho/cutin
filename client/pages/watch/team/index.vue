@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TeamInfoType } from "@/types";
 import TeamItem from "./components/TeamItem.vue";
-import { getTeams } from "~/server/data/gameTeam";
+import { getTeams } from "@/server/data/gameTeam";
 
 definePageMeta({
   layout: "watch-main",

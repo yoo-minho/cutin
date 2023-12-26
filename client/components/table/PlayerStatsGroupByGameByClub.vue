@@ -1,17 +1,29 @@
 <script setup lang="ts">
-const props = defineProps<{ playerStat: any[] }>();
+const route = useRoute();
+const { playerName: _playerName } = route.params;
+const playerName = String(_playerName);
+const { clubCode: _clubCode } = route.query;
+const clubCode = String(_clubCode);
+
+const _stats = ref([]);
+const { data: stats } = await useFetch<any>(
+  `/api/club/${clubCode}/player/${playerName}`
+);
+watch(
+  stats,
+  (newData) => {
+    if (!newData) return;
+    _stats.value = newData;
+  },
+  { immediate: true }
+);
+
 const columns = [
   {
-    label: "게임",
-    name: "gameNo",
-    field: "gameNo",
-    align: "center",
-  },
-  {
-    label: "영상",
-    name: "video",
-    field: "video",
-    align: "center",
+    label: "경기",
+    name: "game",
+    field: "game",
+    align: "left",
   },
   {
     label: "득점",
@@ -58,7 +70,7 @@ const columns = [
 ] as any;
 
 let tempDate = "";
-const playerStat = props.playerStat.map((v) => {
+const playerStat = _stats.value.map((v: any) => {
   if (tempDate === v.playDate) {
     tempDate = v.playDate;
     return { ...v, label: false };
@@ -70,6 +82,8 @@ const playerStat = props.playerStat.map((v) => {
 
 const _cuts = ref();
 const videoViewerOn = ref(false);
+const selectedPlayDate = ref("");
+const selectedGameNo = ref("");
 const openViewer = async (props: {
   clubCode: string;
   playDate: string;
@@ -87,16 +101,12 @@ const openViewer = async (props: {
     Notify.create("영상을 준비중입니다!");
     return;
   }
+  selectedPlayDate.value = playDate;
+  selectedGameNo.value = gameNo;
   videoViewerOn.value = true;
 };
-const getSelectedPlayerStat = (playerName: string) =>
-  props.playerStat.find((v: { name: string }) => v.name === playerName) || {};
-
-const route = useRoute();
-const { playerName: _playerName } = route.params;
-const playerName = String(_playerName);
-const { clubCode: _clubCode } = route.query;
-const clubCode = String(_clubCode);
+const getSelectedStat = (playDate: string, gameNo: string) =>
+  _stats.value.find((v: any) => v.playDate === playDate && v.gameNo === gameNo);
 </script>
 <template>
   <q-table
@@ -111,18 +121,18 @@ const clubCode = String(_clubCode);
   >
     <template #body="props">
       <q-tr v-if="props.row.label" :props="props">
-        <q-td colspan="100%" style="background-color: #eee">
+        <q-td
+          colspan="100%"
+          style="background-color: #eee; padding: 0 12px !important"
+        >
           📅 {{ formatGameDate(props.row.playDate) }}
         </q-td>
       </q-tr>
       <q-tr :props="props">
-        <q-td key="gameNo" :props="props" class="gameNo">
-          {{ props.row.gameNo }}게임
-        </q-td>
-        <q-td key="video" :props="props" class="video">
-          <q-btn
-            dense
-            class="q-my-none q-mx-xs q-py-none q-px-xs"
+        <q-td key="game" :props="props" class="game">
+          <TableItemConnectHBtn
+            :contents1="`${props.row.gameNo}게임`"
+            contents2="영상보기"
             @click="
               openViewer({
                 clubCode,
@@ -131,16 +141,14 @@ const clubCode = String(_clubCode);
                 playerName,
               })
             "
-          >
-            🏀영상
-          </q-btn>
+          />
         </q-td>
         <template
           v-for="stat in ['pts', 'reb', 'ast', 'tpm', 'orb', 'stl', 'blk']"
           :key="stat"
         >
           <q-td :props="props" :class="stat">
-            {{ props.row[stat] }}
+            <TableItemStatCell :contents1="props.row[stat]" />
           </q-td>
         </template>
       </q-tr>
@@ -150,24 +158,18 @@ const clubCode = String(_clubCode);
     v-if="_cuts"
     v-model="videoViewerOn"
     :selectedPlayer="playerName"
-    :selectedPlayerStat="getSelectedPlayerStat(playerName)"
+    :selectedPlayerStat="getSelectedStat(selectedPlayDate, selectedGameNo)"
     :cuts="_cuts"
   />
 </template>
-<style>
-dd {
+<style lang="scss" scoped>
+td {
+  padding: 0 !important;
 }
-</style>
-<style lang="scss">
-.q-table__container {
-  td {
-    padding: 0;
-  }
-  td:first-child {
-    padding: 0 12px;
-  }
-  td:last-child {
-    padding: 0;
-  }
+td:first-child {
+  padding: 0 12px !important;
+}
+td:last-child {
+  padding: 0 !important;
 }
 </style>

@@ -101,9 +101,6 @@ const options = [
   },
 ];
 const sort = ref(options[0]); //pts, reb, ast, tpm, orb, stl, blk
-const getAvgRecord = (row: any, type: string) => {
-  return String(Math.round((row[type] * 10) / row.play) / 10);
-};
 const getSortPlayerStat = () => {
   if (sort.value.value === "play") return props.playerStat;
   const { type, value } = sort.value;
@@ -176,7 +173,7 @@ const getPlayerGroupByGame = async (player: string) => {
           </q-btn>
         </q-td>
         <q-td key="play" :props="props" class="play">
-          <TablePlayerRecordItem
+          <TableItemStatCell
             :contents1="props.row.play"
             :contents2="`(${formatSimpletGameDate(props.row.playDate)})`"
           />
@@ -186,8 +183,8 @@ const getPlayerGroupByGame = async (player: string) => {
           :key="stat"
         >
           <q-td :props="props" :class="stat">
-            <TablePlayerRecordItem
-              :contents1="getAvgRecord(props.row, stat)"
+            <TableItemStatCell
+              :contents1="getAvgStat(props.row, stat)"
               :contents2="props.row[stat]"
             />
           </q-td>
