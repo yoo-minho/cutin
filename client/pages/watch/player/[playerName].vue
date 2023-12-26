@@ -10,8 +10,6 @@ const playerName = String(_playerName);
 const { clubCode: _clubCode } = route.query;
 const clubCode = String(_clubCode);
 const { data: clubInfo } = getTeams(clubCode);
-
-const selectVal = ref();
 </script>
 <template>
   <q-item-label class="q-mx-sm q-mt-sm">
@@ -29,7 +27,6 @@ const selectVal = ref();
   </q-item-label>
   <q-item-label v-if="clubInfo && 'name' in clubInfo" class="q-px-md q-pb-md">
     <q-item-label class="subtitle q-pb-sm">
-      <q-select filled v-model="model" :options="options" label="Standard" />
       {{ clubInfo.name }} 경기 스탯
     </q-item-label>
     <TablePlayerStatsGroupByGameByClub />

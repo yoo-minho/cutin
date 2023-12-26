@@ -164,13 +164,11 @@ const getPlayerGroupByGame = async (player: string) => {
           class="text-bold"
           style="font-size: 16px"
         >
-          <q-btn
-            dense
-            class="q-py-none q-my-xs text-bold"
+          <TableItemConnectVBtn
+            :contents1="props.row.name"
+            contents2="선수 상세보기"
             @click="getPlayerGroupByGame(props.row.name)"
-          >
-            {{ props.row.name }}📋
-          </q-btn>
+          />
         </q-td>
         <q-td key="play" :props="props" class="play">
           <TableItemStatCell

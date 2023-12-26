@@ -92,12 +92,6 @@ watch(refTab, () => {
     </q-tab-panel>
   </q-tab-panels>
 </template>
-<style lang="scss">
-.q-panel.scroll {
-  overflow: hidden !important;
-}
-</style>
-
 <style lang="scss" scoped>
 .scroll {
   overflow: hidden !important;
