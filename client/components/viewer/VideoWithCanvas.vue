@@ -9,11 +9,27 @@ const canvas = ref<HTMLCanvasElement>();
 const loadingScreen = ref(true);
 
 const loadedMetadataCallback = () => {
-  console.log("loadedMetadataCallback");
   loadingScreen.value = true;
 };
 
+const loadReplaceUrl = () => {
+  loadingScreen.value = false;
+  if (video.value) {
+    if (video.value.src.indexOf("https://cutin.cc") === 0) return;
+    const newUrl = video.value.src.replace(
+      "http://localhost:3000/",
+      "https://cutin.cc/"
+    );
+    video.value.src = newUrl;
+  }
+};
+
 const loadVideoCallback = () => {
+  if (video.value && video.value?.duration < 1) {
+    loadReplaceUrl();
+    return;
+  }
+
   loadingScreen.value = false;
   let tick = 0;
   let goal = false;
@@ -65,6 +81,7 @@ const loadVideoCallback = () => {
 <template>
   <div style="max-width: 100%; position: relative">
     <video
+      v-if="cut.videoUrl"
       ref="video"
       class="miniVideo"
       :class="{ 'max-width': isWidthLimit }"
@@ -78,6 +95,7 @@ const loadVideoCallback = () => {
       :src="cut.videoUrl"
       @loadstart="loadedMetadataCallback"
       @loadeddata="loadVideoCallback"
+      @error="loadReplaceUrl"
     />
     <canvas
       ref="canvas"

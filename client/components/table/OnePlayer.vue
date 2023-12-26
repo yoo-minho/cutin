@@ -67,6 +67,36 @@ const playerStat = props.playerStat.map((v) => {
     return { ...v, label: true };
   }
 });
+
+const _cuts = ref();
+const videoViewerOn = ref(false);
+const openViewer = async (props: {
+  clubCode: string;
+  playDate: string;
+  gameNo: string;
+  playerName: string;
+}) => {
+  const { clubCode, playDate, gameNo, playerName } = props;
+  const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo }); //매번 불러오는 비효율
+  _cuts.value = allGameCuts.filter(
+    (cut) => cut.mainPlayer === playerName || cut.subPlayer === playerName
+  );
+  const isNotReadyVideo =
+    _cuts.value.filter((cut: any) => !cut.videoUrl).length > 0;
+  if (isNotReadyVideo) {
+    Notify.create("영상을 준비중입니다!");
+    return;
+  }
+  videoViewerOn.value = true;
+};
+const getSelectedPlayerStat = (playerName: string) =>
+  props.playerStat.find((v: { name: string }) => v.name === playerName) || {};
+
+const route = useRoute();
+const { playerName: _playerName } = route.params;
+const playerName = String(_playerName);
+const { clubCode: _clubCode } = route.query;
+const clubCode = String(_clubCode);
 </script>
 <template>
   <q-table
@@ -90,7 +120,18 @@ const playerStat = props.playerStat.map((v) => {
           {{ props.row.gameNo }}게임
         </q-td>
         <q-td key="video" :props="props" class="video">
-          <q-btn dense class="q-my-none q-mx-xs q-py-none q-px-xs">
+          <q-btn
+            dense
+            class="q-my-none q-mx-xs q-py-none q-px-xs"
+            @click="
+              openViewer({
+                clubCode,
+                playDate: props.row.playDate,
+                gameNo: props.row.gameNo,
+                playerName,
+              })
+            "
+          >
             🏀영상
           </q-btn>
         </q-td>
@@ -105,6 +146,13 @@ const playerStat = props.playerStat.map((v) => {
       </q-tr>
     </template>
   </q-table>
+  <ViewerPlayerVideo
+    v-if="_cuts"
+    v-model="videoViewerOn"
+    :selectedPlayer="playerName"
+    :selectedPlayerStat="getSelectedPlayerStat(playerName)"
+    :cuts="_cuts"
+  />
 </template>
 <style>
 dd {
