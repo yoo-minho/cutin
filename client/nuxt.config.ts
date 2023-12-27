@@ -127,6 +127,7 @@ export default defineNuxtConfig({
       },
     },
     plugins: [compression()],
+    server: { hmr: { overlay: false } },
   },
   watch: ["server/api/upload.js"],
 });

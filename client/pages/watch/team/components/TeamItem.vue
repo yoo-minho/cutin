@@ -19,15 +19,19 @@ defineProps<{
           </div>
         </q-item-label>
         <q-item-label class="teamInfo">
-          <q-icon name="place" class="q-mr-xs" /> {{ team.place }}
-        </q-item-label>
-        <q-item-label class="teamInfo">
-          <q-icon name="calendar_today" class="q-mr-xs" />
-          {{ team.cycle }}
+          <q-icon name="place" class="q-mr-xs" /> 장소 : {{ team.place }}
         </q-item-label>
         <q-item-label class="teamInfo">
           <q-icon name="rule" class="q-mr-xs" />
-          {{ team.method }}
+          방식 : {{ team.method }}
+        </q-item-label>
+        <q-item-label class="teamInfo">
+          <q-icon name="calendar_today" class="q-mr-xs" />
+          주기 : {{ team.cycle }}
+        </q-item-label>
+        <q-item-label class="teamInfo">
+          <q-icon name="sports_basketball" class="q-mr-xs" />
+          최근 : 2023.12.16 (토)
         </q-item-label>
       </q-item-section>
     </q-item>

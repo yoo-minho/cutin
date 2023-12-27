@@ -50,7 +50,7 @@ const moveGame = (gameCode: string) => {
   router.push(route.path + "/" + gameCode);
 };
 
-const refTab = ref(String(tab) || "match");
+const refTab = ref(String(tab) || "player");
 watch(refTab, () => {
   const router = useRouter();
   router.replace({ query: { tab: refTab.value } });
@@ -66,10 +66,13 @@ watch(refTab, () => {
     :active-color="`orange-5`"
     :indicator-color="`orange-5`"
   >
-    <q-tab name="match" :label="`최근경기 (${currentVsState.length}게임)`" />
     <q-tab name="player" :label="`선수 (${players?.length}명)`" />
+    <q-tab name="match" :label="`최근경기 (${currentVsState.length}게임)`" />
   </q-tabs>
   <q-tab-panels v-model="refTab" style="flex: 1; width: 100%">
+    <q-tab-panel name="player" class="q-pa-none">
+      <TableAllPlayerByClub :player-stat="players" />
+    </q-tab-panel>
     <q-tab-panel name="match" class="q-pa-none">
       <div class="text-center q-mt-md text-orange-5">
         * 정렬조건 : 경기일자 최근순
@@ -86,9 +89,6 @@ watch(refTab, () => {
           <q-separator />
         </template>
       </q-list>
-    </q-tab-panel>
-    <q-tab-panel name="player" class="q-pa-none">
-      <TableAllPlayerByClub :player-stat="players" />
     </q-tab-panel>
   </q-tab-panels>
 </template>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+{
+}
 import { getTeams } from "@/server/data/gameTeam";
 
 const route = useRoute();

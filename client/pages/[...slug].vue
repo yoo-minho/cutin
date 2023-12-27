@@ -33,6 +33,14 @@ main {
     color: #555;
   }
 
+  * + h2,
+  * + h3,
+  * + h4,
+  * + h5,
+  * + h6 {
+    margin-top: 16px;
+  }
+
   h1 {
     font-size: 24px;
     border-bottom: 3px solid $orange-5;
@@ -57,14 +65,19 @@ main {
   }
 
   p {
-    margin: 8px 0 16px 0;
+    margin: 8px 0;
     letter-spacing: -0.5px;
   }
 
   ul,
   ol {
-    margin: 8px 0 16px 0;
+    margin: 8px 0;
     padding: 0 0 0 20px;
+  }
+
+  li > ol > li::marker {
+    content: "* "; /* 원하는 마커 디자인으로 변경 */
+    font-size: 14px; /* 마커 폰트 크기 지정 */
   }
 
   a {
@@ -121,6 +134,10 @@ main {
     color: #fff;
   }
 
+  hr {
+    margin: 16px 0;
+  }
+
   /* 이미지 스타일 */
 
   img {
@@ -157,18 +174,27 @@ main {
     line-height: 24px;
   }
 
-  /* 블로그 포스트 예시에서 사용할 태그 스타일 */
-
-  .post-tags {
-    margin-top: 20px;
+  details {
+    margin: 8px 0;
+    background-color: #eee;
+    padding: 4px 8px;
   }
 
-  /* 미디어 쿼리를 사용하여 모바일 환경에 대응 */
+  summary {
+    cursor: pointer;
+    font-weight: bold;
+  }
 
-  @media screen and (max-width: 600px) {
-    body {
-      margin: 15px;
-    }
+  summary::before {
+    content: "\25B6"; /* Unicode 화살표 */
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.3s ease-out;
+    color: $orange-7;
+  }
+
+  details[open] summary::before {
+    transform: rotate(90deg);
   }
 }
 </style>
