@@ -129,7 +129,7 @@ const getSelectedStat = (playDate: string, gameNo: string) =>
         </q-td>
       </q-tr>
       <q-tr :props="props">
-        <q-td key="game" :props="props" class="game">
+        <q-td key="game" :props="props" class="game" style="width: 140px">
           <TableItemConnectHBtn
             :contents1="`${props.row.gameNo}게임`"
             contents2="영상보기"
@@ -162,14 +162,3 @@ const getSelectedStat = (playDate: string, gameNo: string) =>
     :cuts="_cuts"
   />
 </template>
-<style lang="scss" scoped>
-td {
-  padding: 0 !important;
-}
-td:first-child {
-  padding: 0 12px !important;
-}
-td:last-child {
-  padding: 0 !important;
-}
-</style>

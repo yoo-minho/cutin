@@ -120,14 +120,3 @@ const columns = [
     </template>
   </q-table>
 </template>
-<style lang="scss" scoped>
-td {
-  padding: 0 !important;
-}
-td:first-child {
-  padding: 0 12px !important;
-}
-td:last-child {
-  padding: 0 !important;
-}
-</style>
