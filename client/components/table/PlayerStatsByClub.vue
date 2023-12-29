@@ -67,7 +67,9 @@ const columns = [
       <q-tr :props="props">
         <q-td key="play" :props="props" class="play" style="width: 140px">
           <TableItemStatCell contents1="평균기록" />
-          <div class="rank highlight">팀내랭킹👑</div>
+          <div v-if="props.row[`pts_rank`]" class="rank highlight">
+            팀내랭킹👑
+          </div>
         </q-td>
         <template
           v-for="stat in ['pts', 'reb', 'ast', 'tpm', 'orb', 'stl', 'blk']"
@@ -76,6 +78,7 @@ const columns = [
           <q-td :props="props" :class="stat">
             <TableItemStatCell :contents1="getAvgStat(props.row, stat)" />
             <div
+              v-if="props.row[`${stat}_rank`]"
               class="rank"
               :class="{ highlight: props.row[`${stat}_rank`] <= 5 }"
             >

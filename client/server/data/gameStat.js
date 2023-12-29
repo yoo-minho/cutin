@@ -54,6 +54,7 @@ export async function getStatGroupByPlayerByClub(clubCode) {
     return await prisma.$queryRaw`
           select 
             "player" "name",  
+            "guest",
             "경기수" play,
             "최근경기일" "playDate",
             "득점"::numeric pts,
@@ -66,6 +67,7 @@ export async function getStatGroupByPlayerByClub(clubCode) {
           from (
             select 
               "player",
+              "guest",
               count(distinct (hl."playDate", hl."gameNo"))::int as "경기수", 
               sum(CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN hl.skill in ('3점슛','앤드원','풋백앤드원') THEN 3 ELSE 2 END) filter (WHERE gp."player" = hl."mainPlayer") "득점", 
               count(1) filter (where hl.skill in ('오펜스리바','리바운드','풋백','블락&리바','득점&OREB','3점슛&OREB','풋백앤드원')) "리바", 
@@ -78,7 +80,7 @@ export async function getStatGroupByPlayerByClub(clubCode) {
             from "GamePlayer" AS gp
             Inner join "Highlight" as hl ON gp."clubCode" = hl."clubCode" AND gp."playDate" = hl."playDate" AND (gp."player" = hl."mainPlayer" OR gp."player" = hl."subPlayer")
             WHERE gp."clubCode" = ${clubCode}  AND "player" != ''
-            GROUP BY "player"
+            GROUP BY "player", "guest"
           ) t
           ORDER BY play desc, "playDate" desc, "name" asc
       `;
@@ -175,6 +177,7 @@ export async function getStatByClubNPlayer(playerName, clubCode) {
           with stat_t as (
             select 
               "player",
+              "guest",
               count(distinct (hl."playDate", hl."gameNo"))::int as "경기수",
               coalesce(sum(CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN hl.skill in ('3점슛','앤드원','풋백앤드원') THEN 3 ELSE 2 END) filter (WHERE gp."player" = hl."mainPlayer"), 0) "득점",
               count(1) filter (where hl.skill in ('오펜스리바','리바운드','풋백','블락&리바','득점&OREB','3점슛&OREB','풋백앤드원')) "리바",
@@ -187,7 +190,7 @@ export async function getStatByClubNPlayer(playerName, clubCode) {
             from "GamePlayer" AS gp
             Inner join "Highlight" as hl ON gp."clubCode" = hl."clubCode" AND gp."playDate" = hl."playDate" AND (gp."player" = hl."mainPlayer" OR gp."player" = hl."subPlayer")
             WHERE gp."clubCode" = ${clubCode}
-            GROUP BY gp."clubCode", "player"
+            GROUP BY gp."clubCode", "player", "guest"
           ), rank_t as (
             SELECT 
               "player",
@@ -199,7 +202,7 @@ export async function getStatByClubNPlayer(playerName, clubCode) {
               RANK() OVER (ORDER BY "스틸"::numeric/"경기수" DESC)::numeric AS stl_rank,
               RANK() OVER (ORDER BY "블락"::numeric/"경기수" DESC)::numeric AS blk_rank
             FROM stat_t
-            WHERE "경기수" > 2
+            WHERE "경기수" > 2 AND NOT "guest"
           )
           select
             "경기수" play,
@@ -211,9 +214,10 @@ export async function getStatByClubNPlayer(playerName, clubCode) {
             "공리"::numeric orb,
             "스틸"::numeric stl,
             "블락"::numeric blk,
+            "guest",
             rank_t.*
           from stat_t 
-          inner join rank_t ON stat_t."player" = rank_t."player"
+          left outer join rank_t ON stat_t."player" = rank_t."player"
           where stat_t."player" = ${playerName}
       `;
   } catch (error) {

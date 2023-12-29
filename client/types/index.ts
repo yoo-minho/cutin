@@ -24,6 +24,7 @@ export type VsType = {
   gameNo: number;
   gameCode?: string;
   dateInfo?: string;
+  guest?: boolean;
   match: [VsInfoType, VsInfoType];
 };
 

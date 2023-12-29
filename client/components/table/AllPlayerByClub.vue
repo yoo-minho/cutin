@@ -25,7 +25,6 @@ const columns = [
     field: "reb",
     align: "center",
   },
-
   {
     label: "어시",
     name: "ast",
@@ -65,37 +64,37 @@ const options = [
     value: "play",
   },
   {
-    label: "평균득점순 (3경기 이상)",
+    label: "평균득점순 (게스트 제외)",
     value: "pts",
     type: "avg",
   },
   {
-    label: "평균리바운드순 (3경기 이상)",
+    label: "평균리바운드순 (게스트 제외)",
     value: "reb",
     type: "avg",
   },
   {
-    label: "평균어시스트순 (3경기 이상)",
+    label: "평균어시스트순 (게스트 제외)",
     value: "ast",
     type: "avg",
   },
   {
-    label: "평균3점순 (3경기 이상)",
+    label: "평균3점순 (게스트 제외)",
     value: "tpm",
     type: "avg",
   },
   {
-    label: "평균공격리바운드순 (3경기 이상)",
+    label: "평균공격리바운드순 (게스트 제외)",
     value: "orb",
     type: "avg",
   },
   {
-    label: "평균스틸순 (3경기 이상)",
+    label: "평균스틸순 (게스트 제외)",
     value: "stl",
     type: "avg",
   },
   {
-    label: "평균블록순 (3경기 이상)",
+    label: "평균블록순 (게스트 제외)",
     value: "blk",
     type: "avg",
   },
@@ -105,7 +104,7 @@ const getSortPlayerStat = () => {
   if (sort.value.value === "play") return props.playerStat;
   const { type, value } = sort.value;
   return [...props.playerStat]
-    .filter((v) => v.play > 2)
+    .filter((v) => !v.guest)
     .sort((a: any, b: any) => {
       if (type === "avg") return +b[value] / b.play - +a[value] / a.play;
       return +b[value] - +a[value];
@@ -164,6 +163,14 @@ const getPlayerGroupByGame = async (player: string) => {
           class="text-bold"
           style="font-size: 16px"
         >
+          <q-badge
+            v-if="props.row.guest"
+            color="yellow"
+            text-color="black"
+            label="guest"
+            transparent
+            floating
+          />
           <TableItemConnectVBtn
             :contents1="props.row.name"
             contents2="선수 상세보기"

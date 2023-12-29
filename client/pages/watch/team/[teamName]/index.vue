@@ -44,6 +44,9 @@ const { data: players } = await useFetch<VsType[]>(
   `/api/club/${clubCode}/player`
 );
 
+const memberCount = players.value?.filter((p) => !p.guest).length;
+const guestCount = players.value?.filter((p) => p.guest).length;
+
 const moveGame = (gameCode: string) => {
   const route = useRoute();
   const router = useRouter();
@@ -66,8 +69,16 @@ watch(refTab, () => {
     :active-color="`orange-5`"
     :indicator-color="`orange-5`"
   >
-    <q-tab name="player" :label="`선수 (${players?.length}명)`" />
-    <q-tab name="match" :label="`최근경기 (${currentVsState.length}게임)`" />
+    <q-tab
+      name="player"
+      :label="`멤버(${memberCount}명) + 게스트(${guestCount}명)`"
+      style="flex: 1"
+    />
+    <q-tab
+      name="match"
+      :label="`최근경기 (${currentVsState.length}게임)`"
+      style="flex: 1"
+    />
   </q-tabs>
   <q-tab-panels v-model="refTab" style="flex: 1; width: 100%">
     <q-tab-panel name="player" class="q-pa-none">

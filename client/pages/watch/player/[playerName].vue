@@ -38,7 +38,7 @@ const goTeamPage = () => {
       <q-item-section>
         <q-item-label class="row items-center q-mb-xs">
           <div class="playerName">
-            <span>{{ playerName }}</span>
+            <span class="column">{{ playerName }}</span>
             <span class="in"> in </span>
             <span v-if="clubInfo && 'name' in clubInfo">
               <TableItemConnectVBtn
@@ -52,7 +52,12 @@ const goTeamPage = () => {
       </q-item-section>
     </q-item>
   </q-item-label>
-  <q-item-label class="q-px-md q-pb-md" style="overflow-y: scroll">
+  <q-item-label v-if="_stats[0]['guest']" class="q-px-md q-pb-md">
+    <q-item-label>
+      <q-badge color="yellow" text-color="black" label="guest" />
+    </q-item-label>
+  </q-item-label>
+  <q-item-label v-if="_stats.length > 0" class="q-px-md q-pb-md">
     <q-item-label class="subtitle q-pb-sm"> 플레이한 총 게임 수</q-item-label>
     {{ _stats[0]["play"] }}게임
     <div style="color: #aaa">
@@ -60,7 +65,7 @@ const goTeamPage = () => {
     </div>
   </q-item-label>
   <q-item-label class="q-px-md q-pb-md" style="overflow-y: scroll">
-    <q-item-label class="subtitle q-pb-sm"> 평균 스탯 </q-item-label>
+    <q-item-label class="subtitle q-pb-sm"> 게임 평균 스탯 </q-item-label>
     <TablePlayerStatsByClub :stats="_stats" />
   </q-item-label>
   <q-item-label
@@ -68,7 +73,7 @@ const goTeamPage = () => {
     class="q-px-md q-pb-md"
     style="flex: 3; overflow-y: scroll"
   >
-    <q-item-label class="subtitle q-pb-sm"> 게임 스탯 </q-item-label>
+    <q-item-label class="subtitle q-pb-sm"> 게임별 스탯 + 영상 </q-item-label>
     <TablePlayerStatsGroupByGameByClub />
   </q-item-label>
 </template>

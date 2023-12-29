@@ -28,6 +28,7 @@ model GamePlayer {
   playDate   String      @db.VarChar(8)
   teamName   String      @db.VarChar(20)
   player     String      @db.VarChar(6)
+  guest      Boolean     @db.Boolean @default(false)
   highlights Highlight[]
 
   @@id([clubCode, playDate, player])
