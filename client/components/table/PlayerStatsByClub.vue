@@ -68,7 +68,7 @@ const columns = [
         <q-td key="play" :props="props" class="play" style="width: 140px">
           <TableItemStatCell contents1="평균기록" />
           <div v-if="props.row[`pts_rank`]" class="rank highlight">
-            팀내랭킹👑
+            👑팀내랭킹
           </div>
         </q-td>
         <template

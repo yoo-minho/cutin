@@ -60,9 +60,6 @@ const goTeamPage = () => {
   <q-item-label v-if="_stats.length > 0" class="q-px-md q-pb-md">
     <q-item-label class="subtitle q-pb-sm"> 플레이한 총 게임 수</q-item-label>
     {{ _stats[0]["play"] }}게임
-    <div style="color: #aaa">
-      (최근 플레이한 날짜 : {{ formatGameDate(_stats[0]["playDate"]) }})
-    </div>
   </q-item-label>
   <q-item-label class="q-px-md q-pb-md" style="overflow-y: scroll">
     <q-item-label class="subtitle q-pb-sm"> 게임 평균 스탯 </q-item-label>

@@ -69,7 +69,7 @@ const options = [
     type: "avg",
   },
   {
-    label: "평균리바운드순 (게스트 제외)",
+    label: "평균리바순 (게스트 제외)",
     value: "reb",
     type: "avg",
   },
@@ -84,7 +84,7 @@ const options = [
     type: "avg",
   },
   {
-    label: "평균공격리바운드순 (게스트 제외)",
+    label: "평균공격리바순 (게스트 제외)",
     value: "orb",
     type: "avg",
   },
