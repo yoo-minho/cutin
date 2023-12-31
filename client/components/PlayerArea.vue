@@ -6,7 +6,7 @@ const teams = ref();
 
 watch(currVideoName, async () => {
   const teamStore = await useTeamStore(currVideoName.value);
-  teams.value = teamStore.value;
+  watch(teamStore, () => (teams.value = teamStore.value), { immediate: true });
 });
 
 const _addTeam = () => {
@@ -17,16 +17,12 @@ const _addTeam = () => {
 
   Dialog.create({
     title: "팀 추가",
-    prompt: {
-      type: "text", // optional
-    },
+    prompt: { type: "text" },
     ok: "추가",
     cancel: "취소",
-  }).onOk(async (val: string) => {
-    const { error, message } = await addTeam(currVideoName.value, val);
-    if (error) {
-      Notify.create({ type: "negative", message });
-    }
+  }).onOk(async (teamName: string) => {
+    const { error, message } = await addTeam(currVideoName.value, teamName);
+    if (error) Notify.create({ type: "negative", message });
   });
 };
 </script>
@@ -40,13 +36,15 @@ const _addTeam = () => {
       style="min-height: 8px"
       @click="_addTeam()"
     >
-      {{ `'${videoProps.videoCode || ""}'` }} 이 날의 팀 추가
+      {{ `'${videoProps.videoCode || ""}'` }}
+      이 날의 팀 추가
     </q-btn>
     <template v-for="team in teams">
       <PlayerList
+        v-if="team.name"
         :videoName="videoProps.videoName"
         :teamName="team.name"
-        :players="team.players.filter((v:any) => !!v.name)"
+        :players="team.players?.filter((v:any) => !!v.name) || []"
       />
     </template>
   </div>

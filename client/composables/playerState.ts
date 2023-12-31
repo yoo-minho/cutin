@@ -60,6 +60,14 @@ export async function addTeam(videoName: string, teamName: string) {
 export async function removeTeam(videoName: string, teamName: string) {
   const teamStore = await useTeamStore(videoName);
   teamStore.value = teamStore.value.filter((v) => v.name !== teamName);
+  if (teamStore.value.length === 0) {
+    const videoProps = useVideoPropsStore();
+    const videoCode = videoProps.value.videoCode;
+    useFetch("/api/gamePlayer", {
+      method: "delete",
+      body: { videoCode, teamName, player: "" },
+    });
+  }
 }
 
 export async function addPlayerOnTeam(
@@ -103,7 +111,7 @@ export async function removePlayerOnTeam(
   });
   useFetch("/api/gamePlayer", {
     method: "delete",
-    body: { videoCode, player: playerName },
+    body: { videoCode, teamName, player: playerName },
   });
 }
 

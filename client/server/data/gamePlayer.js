@@ -21,8 +21,8 @@ export async function createManyGamePlayer(dataArr) {
   return gamePlayer;
 }
 
-export async function deleteGamePlayer(clubCode, playDate, player) {
+export async function deleteGamePlayer(clubCode, playDate, teamName, player) {
   await prisma.gamePlayer.deleteMany({
-    where: { clubCode, playDate, player },
+    where: { clubCode, playDate, teamName, player },
   });
 }
