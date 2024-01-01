@@ -5,8 +5,6 @@ ffmpeg.setFfmpegPath(ffmpegI.path);
 ffmpeg.setFfprobePath(ffprobeI.path);
 console.log({ ffmpeg: ffmpegI.path, ffprobe: ffprobeI.path });
 
-import fs from "node:fs";
-
 export const ffmpegPromise = ({ inputPath, outputPath }) => {
   return new Promise((resolve, reject) => {
     ffmpeg()
@@ -35,20 +33,39 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
   });
 };
 
-export const mergePromise = ({ inputPaths, outputPath, isDelete }) => {
+export const convertH265 = ({ inputPath, outputPath }) => {
   return new Promise((resolve, reject) => {
-    const ff = ffmpeg();
-    inputPaths.forEach((path) => ff.input(path));
-    ff.on("end", () => {
-      if (isDelete) inputPaths.forEach(fs.unlinkSync);
-      resolve();
-    })
-      .on("error", (a, b, c) => {
-        console.log(a, b, c);
+    ffmpeg()
+      .input(inputPath)
+      .fps(24)
+      // .videoCodec("libx264") //압축 낮고 속도 높음
+      .videoCodec("libx265") //압축 높이고 속도 낮음
+      // .outputOptions(["-c:v h264_nvenc", "-preset fast"]) // NVENC 설정
+      .output(outputPath)
+      .on("start", function (commandLine) {
+        // console.log("FFmpeg process started with command: " + commandLine);
+      })
+      .on("data", function (data) {
+        // console.log("stdout: " + data);
+      })
+      .on("end", () => {
+        // console.log("ffmpegPromise end");
+        resolve();
+      })
+      .on("error", (x, y, z) => {
+        console.log("uuu", x, y, z);
         reject();
       })
-      .outputOptions(["-c:v h264_nvenc", "-preset fast"]) // NVENC 설정
-      .mergeToFile(outputPath, "./temp");
+      .run();
+  });
+};
+
+export const ffprobePromise = (inputPath) => {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(inputPath, (err, metadata) => {
+      if (err) reject();
+      else resolve(metadata);
+    });
   });
 };
 

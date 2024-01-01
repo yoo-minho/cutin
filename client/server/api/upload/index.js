@@ -1,5 +1,5 @@
 import { mkdirSync, writeFileSync, unlinkSync, existsSync } from "fs";
-import { updateVideoUrl } from "../data/highlights";
+import { updateVideoUrl } from "../../data/highlights";
 
 export default defineEventHandler(async (event) => {
   const form = await readMultipartFormData(event);

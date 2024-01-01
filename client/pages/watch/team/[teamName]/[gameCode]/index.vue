@@ -6,6 +6,16 @@ definePageMeta({
   layout: "watch-detail",
 });
 
+const getAllGameCuts = async () => {
+  const route = useRoute();
+  const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
+  const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo }); //매번 불러오는 비효율
+  console.log({ allGameCuts });
+  return allGameCuts;
+};
+
+const cuts = ref(await getAllGameCuts());
+
 const route = useRoute();
 const { teamName: clubCode, gameCode } = route.params;
 const { data: record } = await useFetch<[RecordType, RecordType]>(
@@ -31,8 +41,12 @@ if (currentVsState.value.length > 0) {
     })[0];
   }
 }
+
+const videoViewerOn = ref(false);
 </script>
 <template>
+  <q-btn @click="videoViewerOn = true">전체영상</q-btn>
+  <ViewerGameVideo :model-value="videoViewerOn" :cuts="cuts" />
   <GameItem :vs="currentVs" type="MATCH" />
   <q-separator color="#ccc" />
   <div class="text-center q-mt-md text-orange-5">

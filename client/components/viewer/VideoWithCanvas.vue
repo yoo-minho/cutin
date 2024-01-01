@@ -1,27 +1,37 @@
 <script setup lang="ts">
 import type { CutType } from "@/types";
 
-const props = defineProps<{ cut: CutType; isWidthLimit?: boolean }>();
-const emits = defineEmits();
+const props = defineProps<{
+  cut: CutType;
+  widthLimit?: boolean;
+  routine?: boolean;
+}>();
+const emits = defineEmits<{
+  (e: "loadedVideoUrl", elem: HTMLVideoElement): void;
+  (e: "endedVideoUrl", elem: HTMLVideoElement): void;
+}>();
 
 const video = ref<HTMLVideoElement>();
 const canvas = ref<HTMLCanvasElement>();
 const loadingScreen = ref(true);
 
-const loadedMetadataCallback = () => {
+const loadedVideoUrl = () => {
   loadingScreen.value = true;
+  if (video.value) {
+    emits("loadedVideoUrl", video.value);
+  }
 };
 
 const loadReplaceUrl = () => {
   loadingScreen.value = false;
-  if (video.value) {
-    if (video.value.src.indexOf("https://cutin.cc") === 0) return;
-    const newUrl = video.value.src.replace(
-      "http://localhost:3000/",
-      "https://cutin.cc/"
-    );
-    video.value.src = newUrl;
-  }
+  // if (video.value) {
+  //   if (video.value.src.indexOf("https://cutin.cc") === 0) return;
+  //   const newUrl = video.value.src.replace(
+  //     "http://localhost:3000/",
+  //     "https://cutin.cc/"
+  //   );
+  //   video.value.src = newUrl;
+  // }
 };
 
 const loadVideoCallback = () => {
@@ -72,7 +82,8 @@ const loadVideoCallback = () => {
     tick = 0;
     goal = false;
     if (video.value) {
-      video.value.play();
+      emits("endedVideoUrl", video.value);
+      if (props.routine) video.value.play();
     }
   });
   video.value?.play();
@@ -84,7 +95,7 @@ const loadVideoCallback = () => {
       v-if="cut.videoUrl"
       ref="video"
       class="miniVideo"
-      :class="{ 'max-width': isWidthLimit }"
+      :class="{ 'max-width': widthLimit }"
       width="960"
       height="540"
       tabindex="-1"
@@ -93,7 +104,7 @@ const loadVideoCallback = () => {
       playsinline
       controlslist="nodownload"
       :src="cut.videoUrl"
-      @loadstart="loadedMetadataCallback"
+      @loadstart="loadedVideoUrl"
       @loadeddata="loadVideoCallback"
       @error="loadReplaceUrl"
     />
@@ -102,7 +113,7 @@ const loadVideoCallback = () => {
       width="960"
       height="540"
       class="miniVideo"
-      :class="{ 'max-width': isWidthLimit }"
+      :class="{ 'max-width': widthLimit }"
       style="position: absolute; overflow: hidden; left: 0; z-index: 1"
     ></canvas>
     <div

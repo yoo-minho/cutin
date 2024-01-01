@@ -94,7 +94,11 @@ const nextVideo = () => {
           />
         </q-toolbar>
       </q-header>
-      <VideoWithCanvas :cut="currentCuts[idx]" :isWidthLimit="true">
+      <VideoWithCanvas
+        :cut="currentCuts[idx]"
+        :width-limit="true"
+        :routine="true"
+      >
         <template #buttons>
           <q-btn
             text-color="white"
