@@ -250,60 +250,28 @@ export const convertCutsWithMomentStat = (allGameCuts: CutType[]) => {
   const uniqueTeam = (cuts: CutType[]) =>
     Array.from(new Set(cuts.map((v) => v.team)));
 
-  const uniquePlayer = (cuts: CutType[]) =>
-    Array.from(
-      new Set([
-        ...cuts.map((v) => v.mainPlayer),
-        ...cuts.map((v) => v.subPlayer),
-      ])
-    );
-
   const vsScore = {} as { [key: string]: number };
   uniqueTeam(allGameCuts).forEach((name) => {
     if (!name || vsScore[name]) return;
     vsScore[name] = 0;
   });
 
-  const playerStat = {} as { [key: string]: any };
-  uniquePlayer(allGameCuts).forEach((name) => {
-    if (!name || playerStat[name]) return;
-    playerStat[name] = {
-      pts: 0,
-      tpm: 0,
-      reb: 0,
-      orb: 0,
-      ast: 0,
-      blk: 0,
-      stl: 0,
-    };
-  });
-
-  const setPlayerStat = (playerName: string, playerSkill: any) => {
-    if (!playerName) return;
-    const { pts, tpm, reb, orb, blk, stl, ast } = playerStat[playerName];
-    playerStat[playerName] = {
-      pts: pts + (playerSkill.pts || 0),
-      tpm: tpm + (playerSkill.tpm || 0),
-      reb: reb + (playerSkill.reb || 0),
-      orb: orb + (playerSkill.orb || 0),
-      blk: blk + (playerSkill.blk || 0),
-      stl: stl + (playerSkill.stl || 0),
-      ast: ast + (playerSkill.ast || 0),
-    };
-  };
+  console.log("convertCutsWithMomentStat");
 
   return allGameCuts.map((cut: any) => {
     const preCut = {
       ...cut,
       vsScore: { ...vsScore },
-      playerStat: { ...playerStat },
     };
-    const { team = "team", skill = "", mainPlayer = "", subPlayer = "" } = cut;
-    const { main, sub } = getSkillPoints(skill);
-
-    vsScore[team] += main.pts || 0;
-    setPlayerStat(mainPlayer, main);
-    setPlayerStat(subPlayer, sub);
+    const { team = "team", skill = "" } = cut;
+    const { main } = getSkillPoints(skill);
+    const pts = main.pts || 0;
+    if (pts > 0) {
+      vsScore[team] += pts;
+      preCut.score = true;
+    } else {
+      preCut.score = false;
+    }
     return preCut;
   });
 };

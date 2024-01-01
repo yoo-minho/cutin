@@ -39,7 +39,9 @@ export type TeamInfoType = {
   place: string;
   cycle: string;
   method: string;
+  lastPlayDate: string;
   memberCount: string;
+  guestCount: string;
 };
 
 export type PlayerStatType = {

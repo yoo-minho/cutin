@@ -1,37 +1,29 @@
 <script setup lang="ts">
-defineProps<{
-  team: {
-    name: string;
-    place: string;
-    cycle: string;
-    method: string;
-    memberCount: string;
-  };
-}>();
+import type { TeamInfoType } from "@/types";
+
+defineProps<{ team: TeamInfoType }>();
 </script>
 <template>
   <q-item-label class="q-mx-sm cursor-pointer q-mt-sm">
     <q-item class="q-px-sm q-pt-sm">
       <q-item-section>
         <q-item-label class="text-weight-bold row items-center q-mb-xs">
-          <div class="teamName">
-            {{ team.name }}
-          </div>
+          <div class="teamName">{{ team.name }}</div>
         </q-item-label>
         <q-item-label class="teamInfo">
-          <q-icon name="place" class="q-mr-xs" /> 장소 : {{ team.place }}
+          🏟️ 장소 : {{ team.place }}
         </q-item-label>
         <q-item-label class="teamInfo">
-          <q-icon name="rule" class="q-mr-xs" />
-          방식 : {{ team.method }}
+          🏆 방식 : {{ team.method }}
         </q-item-label>
         <q-item-label class="teamInfo">
-          <q-icon name="calendar_today" class="q-mr-xs" />
-          주기 : {{ team.cycle }}
+          🔄 주기 : {{ team.cycle }}
         </q-item-label>
         <q-item-label class="teamInfo">
-          <q-icon name="sports_basketball" class="q-mr-xs" />
-          최근 : 2023.12.16 (토)
+          📅 최근 : {{ formatGameDate(team.lastPlayDate) }}
+        </q-item-label>
+        <q-item-label class="teamInfo">
+          👤 멤버 : {{ team.memberCount }}명 (게스트 : {{ team.guestCount }}명)
         </q-item-label>
       </q-item-section>
     </q-item>

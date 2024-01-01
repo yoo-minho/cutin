@@ -1,3 +1,5 @@
+import prisma from "./prisma";
+
 export function getTeams(id) {
   const dummy = {
     data: [
@@ -15,17 +17,29 @@ export function getTeams(id) {
         cycle: "매월1회 2시간",
         method: "[3vs3]|[5vs5]",
       },
-      {
-        id: "xxx",
-        name: "함께 하고 싶은 농구 동호회 모집",
-        place: "어디서 하는지",
-        cycle: "언제 하는지",
-        method: "경기방식은 어떻게 되는지",
-      },
     ],
   };
   if (id) {
     return { data: dummy.data.find((v) => v.id === id) };
   }
   return dummy;
+}
+
+export async function getInfoByClubCode() {
+  try {
+    return await prisma.$queryRaw`
+          select 
+            "clubCode", 
+            max("playDate") as "lastPlayDate",
+            (count(distinct "player") filter(where not guest))::numeric as "memberCount",
+            (count(distinct "player") filter(where guest))::numeric as "guestCount"
+          from "GamePlayer" 
+          where "player" != ''
+          group by "clubCode"
+      `;
+  } catch (error) {
+    console.error("Error executing raw query:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
 }

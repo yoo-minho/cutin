@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getTeams } from "@/server/data/gameTeam";
+import type { TeamInfoType } from "~/types";
 
 definePageMeta({
   layout: "watch-detail",
@@ -9,7 +9,9 @@ const { playerName: _playerName } = route.params;
 const playerName = String(_playerName);
 const { clubCode: _clubCode } = route.query;
 const clubCode = String(_clubCode);
-const { data: clubInfo } = getTeams(clubCode);
+
+const { data: clubs } = await useFetch<TeamInfoType[]>(`/api/club`);
+const clubInfo = clubs.value?.find((club) => club.id === clubCode);
 
 const _stats = ref([]);
 const { data: stats } = await useFetch<any>(
@@ -52,7 +54,7 @@ const goTeamPage = () => {
       </q-item-section>
     </q-item>
   </q-item-label>
-  <q-item-label v-if="_stats[0]['guest']" class="q-px-md q-pb-md">
+  <q-item-label v-if="_stats[0]?.['guest']" class="q-px-md q-pb-md">
     <q-item-label>
       <q-badge color="yellow" text-color="black" label="guest" />
     </q-item-label>

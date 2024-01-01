@@ -2,6 +2,7 @@
 import type { VsType } from "@/types";
 
 const props = defineProps<{ vs: VsType; type: "MATCH" | "TEAM" }>();
+const emits = defineEmits<{ (e: "clickBtn"): void }>();
 
 const { score: aScore, teamName: aTeamName } = props.vs.match?.[0] || {};
 const { score: bScore, teamName: bTeamName } = props.vs.match?.[1] || {};
@@ -22,10 +23,9 @@ const whoWin = bScore > aScore ? "b" : "a";
           <div class="score flex-center">{{ aScore }}</div>
           <div class="center-wrap flex-center" style="flex: 2">
             <div class="dateInfo">{{ vs.dateInfo }}</div>
-            <q-btn v-if="type === 'TEAM'" text-color="orange-5" class="btn">
-              기록 & 영상 보기
+            <q-btn text-color="orange-5" class="btn" @click="emits('clickBtn')">
+              {{ `${type === "TEAM" ? "기록 & 영상 보기" : "영상 보기"}` }}
             </q-btn>
-            <div v-else class="vs">VS</div>
           </div>
           <div class="score flex-center">{{ bScore }}</div>
           <div class="teamName flex-center">

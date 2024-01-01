@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { TeamInfoType } from "@/types";
 import TeamItem from "./components/TeamItem.vue";
-import { getTeams } from "@/server/data/gameTeam";
 
 definePageMeta({
   layout: "watch-main",
@@ -23,10 +22,11 @@ useHead({
   ],
 });
 
-const { data } = await getTeams();
-
+const { data: clubs } = await useFetch<TeamInfoType[]>(`/api/club`);
 const currentTeamState = useState<TeamInfoType[]>("currentTeamState", () => []);
-currentTeamState.value = data as TeamInfoType[];
+watch(clubs, (newData) => newData && (currentTeamState.value = newData), {
+  immediate: true,
+});
 
 const showTeamGame = (teamId: string) => {
   const route = useRoute();
@@ -35,7 +35,7 @@ const showTeamGame = (teamId: string) => {
 };
 </script>
 <template>
-  <BannerMainBanner />
+  <BannerCampaignBanner />
   <q-separator class="q-mb-sm" />
   <div v-for="team in currentTeamState" @click="showTeamGame(team.id)">
     <TeamItem :team="team" />

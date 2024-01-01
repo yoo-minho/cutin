@@ -1,16 +1,11 @@
 <script setup lang="ts">
-{
-}
-import { getTeams } from "@/server/data/gameTeam";
+import type { TeamInfoType } from "~/types";
 
 const route = useRoute();
 const { playerName: _playerName } = route.params;
 const playerName = String(_playerName);
-const getClubName = (clubCode: string) => {
-  const { data: clubInfo } = getTeams(clubCode);
-  if (clubInfo && "name" in clubInfo) return clubInfo.name;
-  return clubCode;
-};
+
+const { data: clubs } = await useFetch<TeamInfoType[]>(`/api/club`);
 
 const _stats = ref([]);
 const { data: stats } = await useFetch<any>(`/api/player/${playerName}/club`);
@@ -95,7 +90,7 @@ const columns = [
       <q-tr :props="props">
         <q-td key="clubCode" :props="props" class="clubCode">
           <TableItemConnectVBtn
-            :contents1="getClubName(props.row.clubCode)"
+            :contents1="String(clubs)"
             contents2="팀 상세보기"
           />
         </q-td>

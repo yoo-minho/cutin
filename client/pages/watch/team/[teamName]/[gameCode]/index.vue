@@ -45,9 +45,11 @@ if (currentVsState.value.length > 0) {
 const videoViewerOn = ref(false);
 </script>
 <template>
-  <q-btn @click="videoViewerOn = true">전체영상</q-btn>
-  <ViewerGameVideo :model-value="videoViewerOn" :cuts="cuts" />
-  <GameItem :vs="currentVs" type="MATCH" />
+  <ViewerGameVideo
+    v-model="videoViewerOn"
+    :cuts="cuts.filter((c) => c.score)"
+  />
+  <GameItem :vs="currentVs" type="MATCH" @click-btn="videoViewerOn = true" />
   <q-separator color="#ccc" />
   <div class="text-center q-mt-md text-orange-5">
     * 정렬조건 : KBL 선수공헌도 높은순<br />

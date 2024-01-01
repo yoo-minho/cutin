@@ -14,6 +14,28 @@ const emits = defineEmits<{
 const video = ref<HTMLVideoElement>();
 const canvas = ref<HTMLCanvasElement>();
 const loadingScreen = ref(true);
+const tick = ref(0);
+const goal = ref(false);
+
+const videoUrl = ref(props.cut.videoUrl);
+watch(
+  () => props.cut.videoUrl,
+  (url) => {
+    videoUrl.value = url;
+  }
+);
+
+onMounted(() => {
+  video.value?.addEventListener("play", playListener);
+  video.value?.addEventListener("ended", () => {
+    tick.value = 0;
+    goal.value = false;
+    if (video.value) {
+      emits("endedVideoUrl", video.value);
+      if (props.routine) video.value.play();
+    }
+  });
+});
 
 const loadedVideoUrl = () => {
   loadingScreen.value = true;
@@ -22,77 +44,51 @@ const loadedVideoUrl = () => {
   }
 };
 
-const loadReplaceUrl = () => {
-  loadingScreen.value = false;
-  // if (video.value) {
-  //   if (video.value.src.indexOf("https://cutin.cc") === 0) return;
-  //   const newUrl = video.value.src.replace(
-  //     "http://localhost:3000/",
-  //     "https://cutin.cc/"
-  //   );
-  //   video.value.src = newUrl;
-  // }
+const playListener = () => {
+  const _vsScore = { ...props.cut.vsScore };
+  const convertCut = JSON.parse(JSON.stringify(props.cut));
+  const { subPlayer, team = "team", skill, vsScore } = convertCut;
+  vsScore[team] = _vsScore[team];
+
+  const videoEl = video.value;
+  const canvasEl = canvas.value;
+
+  const renderFrame = () => {
+    if (!videoEl || videoEl.paused || videoEl.ended || !canvasEl) {
+      return;
+    }
+
+    const canvasCtx = canvasEl.getContext("2d");
+    if (canvasCtx) {
+      canvasCtx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+    }
+
+    const currentSec = videoEl.currentTime;
+    const shortsSeekSec = findShortsSeekSec(skill, subPlayer);
+    if (currentSec > shortsSeekSec) tick.value++;
+    if (currentSec > shortsSeekSec && !goal.value) {
+      const { main } = getSkillPoints(skill);
+      vsScore[team] = _vsScore[team] + (main.pts || 0);
+      goal.value = true;
+    }
+
+    drawVideoBanners(canvasEl, convertCut, tick.value);
+    requestAnimationFrame(renderFrame);
+  };
+  renderFrame();
 };
 
 const loadVideoCallback = () => {
-  if (video.value && video.value?.duration < 1) {
-    loadReplaceUrl();
-    return;
-  }
-
   loadingScreen.value = false;
-  let tick = 0;
-  let goal = false;
-  const _vsScore = { ...props.cut.vsScore };
-
-  const playListener = () => {
-    const convertCut = { ...props.cut };
-    const { subPlayer, team = "team", skill, vsScore } = convertCut;
-    vsScore[team] = _vsScore[team];
-    const { main } = getSkillPoints(skill);
-
-    const videoEl = video.value;
-    const canvasEl = canvas.value;
-
-    const renderFrame = () => {
-      if (!videoEl || videoEl.paused || videoEl.ended || !canvasEl) {
-        return;
-      }
-
-      const canvasCtx = canvasEl.getContext("2d");
-      if (canvasCtx) {
-        canvasCtx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
-      }
-
-      const currentSec = videoEl.currentTime;
-      const shortsSeekSec = findShortsSeekSec(skill, subPlayer);
-      if (currentSec > shortsSeekSec) tick++;
-      if (currentSec > shortsSeekSec && !goal) {
-        vsScore[team] = _vsScore[team] + (main.pts || 0);
-        goal = true;
-      }
-
-      drawVideoBanners(canvasEl, convertCut, tick);
-      requestAnimationFrame(renderFrame);
-    };
-    renderFrame();
-  };
-  video.value?.addEventListener("play", playListener);
-  video.value?.addEventListener("ended", () => {
-    tick = 0;
-    goal = false;
-    if (video.value) {
-      emits("endedVideoUrl", video.value);
-      if (props.routine) video.value.play();
-    }
-  });
+  tick.value = 0;
+  goal.value = false;
   video.value?.play();
 };
 </script>
 <template>
   <div style="max-width: 100%; position: relative">
     <video
-      v-if="cut.videoUrl"
+      v-if="videoUrl"
       ref="video"
       class="miniVideo"
       :class="{ 'max-width': widthLimit }"
@@ -103,10 +99,9 @@ const loadVideoCallback = () => {
       webkit-playsinline
       playsinline
       controlslist="nodownload"
-      :src="cut.videoUrl"
+      :src="videoUrl"
       @loadstart="loadedVideoUrl"
-      @loadeddata="loadVideoCallback"
-      @error="loadReplaceUrl"
+      @loadedmetadata="loadVideoCallback"
     />
     <canvas
       ref="canvas"

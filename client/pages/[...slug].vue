@@ -1,14 +1,20 @@
+<script setup lang="ts">
+const moveHome = async () => {
+  if (history.state.back) {
+    const router = useRouter();
+    router.back();
+  } else {
+    await navigateTo("/", { replace: true });
+  }
+};
+</script>
 <template>
   <main class="max-width bg-white">
     <q-layout class="column">
       <q-header bordered style="position: sticky">
         <q-toolbar>
-          <q-btn
-            outline
-            dense
-            @click="navigateTo('/', { replace: true })"
-            class="q-px-md"
-            >🏀 농구영상 연계 기록플랫폼
+          <q-btn outline dense @click="moveHome" class="q-px-md">
+            🏀 농구영상 연계 기록플랫폼
             <span class="text-orange-5 q-mx-sm">'컷인'</span>으로 이동하기
           </q-btn>
         </q-toolbar>

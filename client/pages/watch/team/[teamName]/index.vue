@@ -2,7 +2,6 @@
 import type { TeamInfoType, VsType } from "@/types";
 import GameItem from "../components/GameItem.vue";
 import TeamItem from "../components/TeamItem.vue";
-import { getTeams } from "@/server/data/gameTeam";
 
 definePageMeta({
   layout: "watch-detail",
@@ -19,8 +18,19 @@ if (currentTeamState.value.length > 0) {
     (team) => team.id === clubCode
   );
 } else {
-  const { data: team } = await getTeams(clubCode);
-  currentTeam.value = team;
+  const { data: clubs } = await useFetch<TeamInfoType[]>(`/api/club`);
+  watch(
+    clubs,
+    (newData) => {
+      if (newData) {
+        currentTeamState.value = newData;
+        currentTeam.value = currentTeamState.value.find(
+          (team) => team.id === clubCode
+        );
+      }
+    },
+    { immediate: true }
+  );
 }
 
 const { data: games } = await useFetch<VsType[]>(`/api/club/${clubCode}/game`);
@@ -44,9 +54,6 @@ const { data: players } = await useFetch<VsType[]>(
   `/api/club/${clubCode}/player`
 );
 
-const memberCount = players.value?.filter((p) => !p.guest).length;
-const guestCount = players.value?.filter((p) => p.guest).length;
-
 const moveGame = (gameCode: string) => {
   const route = useRoute();
   const router = useRouter();
@@ -69,11 +76,7 @@ watch(refTab, () => {
     :active-color="`orange-5`"
     :indicator-color="`orange-5`"
   >
-    <q-tab
-      name="player"
-      :label="`멤버(${memberCount}명) + 게스트(${guestCount}명)`"
-      style="flex: 1"
-    />
+    <q-tab name="player" :label="`경기기록 (멤버+게스트)`" style="flex: 1" />
     <q-tab
       name="match"
       :label="`최근경기 (${currentVsState.length}게임)`"
@@ -95,7 +98,7 @@ watch(refTab, () => {
             v-if="vs.gameCode"
             :vs="vs"
             type="TEAM"
-            @click="moveGame(vs.gameCode)"
+            @click-btn="moveGame(vs.gameCode)"
           />
           <q-separator />
         </template>

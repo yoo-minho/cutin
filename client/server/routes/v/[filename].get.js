@@ -4,6 +4,9 @@ import { ffmpegPromise, ffprobePromise, convertH265 } from "@/utils/videoUtil";
 
 const DOMAIN = "https://cutin.cc";
 
+const TEMP_INPUT_PATH = "./upload/temp/input_temp.mp4";
+const TEMP_OUTPUT_PATH = "./upload/temp/ouput_temp.mp4";
+
 export default defineEventHandler(async (event) => {
   const { filename } = event.context.params; //ex) filename = gba-20231007-1g1q-00136_1_A
   const { compile } = getQuery(event); //ex) no
@@ -25,30 +28,26 @@ export default defineEventHandler(async (event) => {
     if (isLocal) {
       const response = await fetch(`${DOMAIN}/v/${filename}?compile=no`);
       if (response.ok) {
-        const inputTempPath = "./upload/temp/input_temp.mp4";
-        const outputTempPath = "./upload/temp/ouput_temp.mp4";
+        writeFileSync(
+          TEMP_INPUT_PATH,
+          Buffer.from(await response.arrayBuffer())
+        );
 
-        writeFileSync(inputTempPath, Buffer.from(await response.arrayBuffer()));
-
-        const codecName = await getCodecName(inputTempPath);
-        const covertInfo = {
-          inputPath: inputTempPath,
-          outputPath: outputTempPath,
-          filename,
-        };
-
-        switch (codecName) {
-          case "hevc":
-            buffer = readFileSync(outputPath);
-            break;
-          case "h264":
-            buffer = await convertH265NUpdate({ ...covertInfo, speed: 1 });
-            break;
-          case "vp9":
-            buffer = await convertH265NUpdate({ ...covertInfo, speed: 2.5 });
-            break;
-          default:
-            break;
+        const codecName = await getCodecName(TEMP_INPUT_PATH);
+        if ("hevc" === codecName) {
+          buffer = readFileSync(TEMP_INPUT_PATH);
+        } else {
+          const path = TEMP_INPUT_PATH;
+          switch (codecName) {
+            case "h264":
+              buffer = await convertH265NUdt({ path, filename, speed: 1 });
+              break;
+            case "vp9":
+              buffer = await convertH265NUdt({ path, filename, speed: 2.5 });
+              break;
+            default:
+              break;
+          }
         }
 
         if (!buffer) return "No File";
@@ -90,8 +89,9 @@ async function getCodecName(path) {
   return metadata.streams[0].codec_name;
 }
 
-async function convertH265NUpdate({ inputPath, outputPath, speed, filename }) {
-  await convertH265({ inputPath, outputPath, speed });
+async function convertH265NUdt({ path, speed, filename }) {
+  const outputPath = TEMP_OUTPUT_PATH;
+  await convertH265({ inputPath: path, outputPath, speed });
   const buffer = readFileSync(outputPath);
   const blob = new Blob([buffer], { type: "application/octet-stream" });
   const body = new FormData();
