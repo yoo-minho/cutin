@@ -33,10 +33,11 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
   });
 };
 
-export const convertH265 = ({ inputPath, outputPath }) => {
+export const convertH265 = ({ inputPath, outputPath, speed = 1 }) => {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
+      .videoFilters(`setpts=${speed}*PTS`)
       .fps(24)
       // .videoCodec("libx264") //압축 낮고 속도 높음
       .videoCodec("libx265") //압축 높이고 속도 낮음

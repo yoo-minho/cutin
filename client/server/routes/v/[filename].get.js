@@ -22,29 +22,38 @@ export default defineEventHandler(async (event) => {
     const reqUrl = String(getRequestURL(event)); //ex) http://localhost:3000/v/gba-20231230-2g2q-00450_B_2.mp4
 
     if (reqUrl.indexOf("http://localhost:3000/") === 0) {
-      const fileUrl = `https://cutin.cc/v/${filename}?complie=no`;
+      const fileUrl = `https://cutin.cc/v/${filename}?compile=no`;
       const response = await fetch(fileUrl);
       if (response.ok) {
-        const fileBuffer = await response.arrayBuffer();
         const inputTempPath = "./upload/temp/input_temp.mp4";
         const outputTempPath = "./upload/temp/ouput_temp.mp4";
-        writeFileSync(inputTempPath, Buffer.from(fileBuffer));
+
+        writeFileSync(inputTempPath, Buffer.from(await response.arrayBuffer()));
+
         const codecName = await getCodecName(inputTempPath);
         console.log("codec_name", codecName);
-        if ("h264" === codecName) {
-          buffer = await convertH265NUpdate({
-            inputPath: inputTempPath,
-            outputPath: outputTempPath,
-            filename,
-          });
-        } else {
-          console.log("xxxx");
-          await ffmpegPromise({
-            inputPath: "./upload/temp/input_temp.mp4",
-            outputPath: "./upload/temp/ouput_temp.mp4",
-          });
-          buffer = Buffer.from(fileBuffer);
+
+        const covertInfo = {
+          inputPath: inputTempPath,
+          outputPath: outputTempPath,
+          filename,
+        };
+
+        switch (codecName) {
+          case "hevc":
+            buffer = readFileSync(outputPath);
+            break;
+          case "h264":
+            buffer = await convertH265NUpdate({ ...covertInfo, speed: 1 });
+            break;
+          case "vp9":
+            buffer = await convertH265NUpdate({ ...covertInfo, speed: 2.5 });
+            break;
+          default:
+            break;
         }
+
+        if (!buffer) return "No File";
       } else {
         return "No File";
       }
@@ -52,7 +61,7 @@ export default defineEventHandler(async (event) => {
       return "No File";
     }
   } else {
-    console.log("xxxx22");
+    console.log("xxxx22", { compile });
 
     if (existsOld && compile !== "no") {
       const codecName = await getCodecName(oldFilePath);
@@ -85,8 +94,8 @@ async function getCodecName(path) {
   return metadata.streams[0].codec_name;
 }
 
-async function convertH265NUpdate({ inputPath, outputPath, filename }) {
-  await convertH265({ inputPath, outputPath });
+async function convertH265NUpdate({ inputPath, outputPath, speed, filename }) {
+  await convertH265({ inputPath, outputPath, speed });
   const buffer = readFileSync(outputPath);
   const blob = new Blob([buffer], { type: "application/octet-stream" });
   const body = new FormData();
