@@ -2,7 +2,7 @@
 import type { CutType } from "@/types";
 
 const props = defineProps<{ cut: CutType }>();
-const { team, vsScore, skill } = props.cut;
+const { team, vsScore, skill, score } = props.cut;
 const { main } = getSkillPoints(skill);
 
 const teams = Object.keys(vsScore);
@@ -19,16 +19,23 @@ const getSkillContents = (skill: string) => {
   <div class="row text-white q-gutter-md">
     <div style="flex: 1; text-align: right">
       <span v-if="team === teams[0]">
-        {{ getSkillContents(cut.skill) }} - {{ cut.mainPlayer }}
+        {{ score ? "🏀" : "" }}{{ getSkillContents(cut.skill) }} -
+        {{ cut.mainPlayer }}
       </span>
     </div>
     <div style="width: 60px; text-align: center">
-      <span :class="{ b: team === teams[0] }">{{ aScore }}</span> :
-      <span :class="{ b: team === teams[1] }">{{ bScore }}</span>
+      <template v-if="score">
+        <span :class="{ b: team === teams[0] }">{{ aScore }}</span> :
+        <span :class="{ b: team === teams[1] }">{{ bScore }}</span>
+      </template>
+      <template v-else>
+        <div>_</div>
+      </template>
     </div>
     <div style="flex: 1">
       <span v-if="team === teams[1]">
-        {{ cut.mainPlayer }} - {{ getSkillContents(cut.skill) }}
+        {{ cut.mainPlayer }} - {{ getSkillContents(cut.skill)
+        }}{{ score ? "🏀" : "" }}
       </span>
     </div>
   </div>

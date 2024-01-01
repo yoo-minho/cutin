@@ -45,10 +45,7 @@ if (currentVsState.value.length > 0) {
 const videoViewerOn = ref(false);
 </script>
 <template>
-  <ViewerGameVideo
-    v-model="videoViewerOn"
-    :cuts="cuts.filter((c) => c.score)"
-  />
+  <ViewerGameVideo v-model="videoViewerOn" :cuts="cuts" />
   <GameItem :vs="currentVs" type="MATCH" @click-btn="videoViewerOn = true" />
   <q-separator color="#ccc" />
   <div class="text-center q-mt-md text-orange-5">

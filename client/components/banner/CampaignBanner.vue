@@ -18,6 +18,14 @@
           <q-item-label caption class="text-orange-6">Click</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item @click="navigateTo('/blog/update')" clickable>
+        <q-item-section>
+          <div><b>[공지]</b> 🚀 업데이트 완료! (23.01.01)</div>
+        </q-item-section>
+        <q-item-section side>
+          <q-item-label caption class="text-orange-6">Click</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-list>
   </div>
 </template>

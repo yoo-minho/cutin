@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { fetch } from "node-fetch";
-import { ffmpegPromise, ffprobePromise, convertH265 } from "@/utils/videoUtil";
+import { ffmpegPromise, ffprobePromise, convertLocal } from "@/utils/videoUtil";
 
 const DOMAIN = "https://cutin.cc";
 
@@ -34,16 +34,16 @@ export default defineEventHandler(async (event) => {
         );
 
         const codecName = await getCodecName(TEMP_INPUT_PATH);
-        if ("hevc" === codecName) {
+        if ("h264" === codecName) {
           buffer = readFileSync(TEMP_INPUT_PATH);
         } else {
           const path = TEMP_INPUT_PATH;
           switch (codecName) {
-            case "h264":
-              buffer = await convertH265NUdt({ path, filename, speed: 1 });
+            case "hevc":
+              buffer = await convertLocalNUdt({ path, filename, speed: 1 });
               break;
             case "vp9":
-              buffer = await convertH265NUdt({ path, filename, speed: 2.5 });
+              buffer = await convertLocalNUdt({ path, filename, speed: 2.5 });
               break;
             default:
               break;
@@ -89,9 +89,9 @@ async function getCodecName(path) {
   return metadata.streams[0].codec_name;
 }
 
-async function convertH265NUdt({ path, speed, filename }) {
+async function convertLocalNUdt({ path, speed, filename }) {
   const outputPath = TEMP_OUTPUT_PATH;
-  await convertH265({ inputPath: path, outputPath, speed });
+  await convertLocal({ inputPath: path, outputPath, speed });
   const buffer = readFileSync(outputPath);
   const blob = new Blob([buffer], { type: "application/octet-stream" });
   const body = new FormData();

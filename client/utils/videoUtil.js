@@ -33,15 +33,15 @@ export const ffmpegPromise = ({ inputPath, outputPath }) => {
   });
 };
 
-export const convertH265 = ({ inputPath, outputPath, speed = 1 }) => {
+export const convertLocal = ({ inputPath, outputPath, speed = 1 }) => {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(inputPath)
       .videoFilters(`setpts=${speed}*PTS`)
       .fps(24)
-      // .videoCodec("libx264") //압축 낮고 속도 높음
-      .videoCodec("libx265") //압축 높이고 속도 낮음
-      // .outputOptions(["-c:v h264_nvenc", "-preset fast"]) // NVENC 설정
+      .videoCodec("libx264") //압축 낮고 속도 높음
+      // .videoCodec("libx265") //압축 높이고 속도 낮음
+      .outputOptions(["-c:v h264_nvenc", "-preset fast"]) // NVENC 설정
       .output(outputPath)
       .on("start", function (commandLine) {
         // console.log("FFmpeg process started with command: " + commandLine);

@@ -9,9 +9,6 @@ const videoViewerOn = ref(props.modelValue);
 const video = ref<HTMLVideoElement>();
 const idx = ref(0);
 const quater = ref(1);
-const quaterCuts = ref(
-  props.cuts.filter((cut) => cut.quaterNo === quater.value)
-);
 
 watch(
   () => props.modelValue,
@@ -29,7 +26,7 @@ watch(idx, () => {
 const loadedVideoElem = (elem: HTMLVideoElement) => {
   video.value = elem;
   video.value.autoplay = false;
-  video.value.playbackRate = 1.5;
+  video.value.playbackRate = 1;
 };
 
 const endedVideoElem = (elem: HTMLVideoElement) => {
@@ -47,7 +44,7 @@ const endedVideoElem = (elem: HTMLVideoElement) => {
             @click="videoViewerOn = false"
           />
           <q-toolbar-title>
-            Highlight [#{{ idx }}/{{ cuts.length }}]
+            모든 영상 [#{{ idx + 1 }}/{{ cuts.length }}]
           </q-toolbar-title>
           <q-btn
             side
@@ -76,13 +73,13 @@ const endedVideoElem = (elem: HTMLVideoElement) => {
           v-for="index in cuts.length"
           style="height: 3px"
           :style="{
-            flex: idx + 1 === index ? '2' : '1',
+            flex: idx + 1 === index ? '12px' : '1',
             'background-color': idx + 1 === index ? 'orange' : 'white',
           }"
         ></div>
       </div>
-      <div style="flex: 3; overflow-y: scroll">
-        <div class="text-orange-5 text-center">{{ quater }}쿼터</div>
+      <div style="flex: 3; overflow-y: scroll; overflow-x: hidden">
+        <div class="text-orange-5 text-center text-h6">{{ quater }}쿼터</div>
         <template v-for="(cut, i) in cuts">
           <ViewerItemBroadcastLine
             v-if="cut.quaterNo === 1 && quater === 1"
