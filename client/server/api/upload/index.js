@@ -11,7 +11,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const file = form[0];
   const path = Buffer.from(form[1].data).toString();
   const videoName = Buffer.from(form[2].data).toString();
   const seekTime = Buffer.from(form[3].data).toString();
@@ -19,9 +18,11 @@ export default defineEventHandler(async (event) => {
   const realPath = pathArr.splice(0, [pathArr.length - 1]).join("/");
   const inputPath = "./upload/" + path + ".webm";
   const oldPath = "./upload/" + path + ".mp4";
+
   mkdirSync("./upload/" + realPath, { recursive: true });
-  writeFileSync(inputPath, file.data);
+  writeFileSync(inputPath, form[0].data);
   if (existsSync(oldPath)) unlinkSync(oldPath);
+
   const videoUrl = `/v/${path.replace(/\//g, "-")}.mp4`;
   await updateVideoUrl(videoUrl, videoName, seekTime);
   return { error: false, videoUrl };

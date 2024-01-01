@@ -2,11 +2,11 @@ import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { fetch } from "node-fetch";
 import { ffmpegPromise, ffprobePromise, convertH265 } from "@/utils/videoUtil";
 
+const DOMAIN = "https://cutin.cc";
+
 export default defineEventHandler(async (event) => {
-  const { filename } = event.context.params;
-  //ex) filename = gba-20231007-1g1q-00136_1_A
-  const { compile } = getQuery(event);
-  //ex) no
+  const { filename } = event.context.params; //ex) filename = gba-20231007-1g1q-00136_1_A
+  const { compile } = getQuery(event); //ex) no
 
   // 파일 경로 및 이름 설정
   const filePathArr = filename.replace(".mp4", "").split("-");
@@ -20,10 +20,10 @@ export default defineEventHandler(async (event) => {
   let buffer;
   if (!existsNew && !existsOld) {
     const reqUrl = String(getRequestURL(event)); //ex) http://localhost:3000/v/gba-20231230-2g2q-00450_B_2.mp4
+    const isLocal = reqUrl.indexOf("http://localhost:3000/") === 0;
 
-    if (reqUrl.indexOf("http://localhost:3000/") === 0) {
-      const fileUrl = `https://cutin.cc/v/${filename}?compile=no`;
-      const response = await fetch(fileUrl);
+    if (isLocal) {
+      const response = await fetch(`${DOMAIN}/v/${filename}?compile=no`);
       if (response.ok) {
         const inputTempPath = "./upload/temp/input_temp.mp4";
         const outputTempPath = "./upload/temp/ouput_temp.mp4";
@@ -31,8 +31,6 @@ export default defineEventHandler(async (event) => {
         writeFileSync(inputTempPath, Buffer.from(await response.arrayBuffer()));
 
         const codecName = await getCodecName(inputTempPath);
-        console.log("codec_name", codecName);
-
         const covertInfo = {
           inputPath: inputTempPath,
           outputPath: outputTempPath,
@@ -61,8 +59,6 @@ export default defineEventHandler(async (event) => {
       return "No File";
     }
   } else {
-    console.log("xxxx22", { compile });
-
     if (compile === "no") {
       buffer = readFileSync(existsOld ? oldFilePath : newFilePath);
     } else {
@@ -73,12 +69,10 @@ export default defineEventHandler(async (event) => {
         });
         unlinkSync(oldFilePath);
       }
-
       buffer = readFileSync(newFilePath);
     }
   }
 
-  // 응답 헤더 설정
   setHeader(event, "cache-control", "no-cache");
   setHeader(event, "connection", "keep-alive");
   setHeader(
@@ -103,7 +97,7 @@ async function convertH265NUpdate({ inputPath, outputPath, speed, filename }) {
   const body = new FormData();
   body.append("file", blob);
   body.append("filename", filename);
-  const fileUpdateUrl = `http://localhost:3000/api/upload/update`;
+  const fileUpdateUrl = `${DOMAIN}/api/upload/update`;
   await fetch(fileUpdateUrl, { method: "POST", body });
   return buffer;
 }
