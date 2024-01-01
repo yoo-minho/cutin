@@ -63,17 +63,19 @@ export default defineEventHandler(async (event) => {
   } else {
     console.log("xxxx22", { compile });
 
-    if (existsOld && compile !== "no") {
-      const codecName = await getCodecName(oldFilePath);
-      console.log("codec_name 11", codecName);
+    if (compile === "no") {
+      buffer = readFileSync(existsOld ? oldFilePath : newFilePath);
+    } else {
+      if (existsOld) {
+        await ffmpegPromise({
+          inputPath: oldFilePath,
+          outputPath: newFilePath,
+        });
+        unlinkSync(oldFilePath);
+      }
 
-      await ffmpegPromise({ inputPath: oldFilePath, outputPath: newFilePath });
-      unlinkSync(oldFilePath);
+      buffer = readFileSync(newFilePath);
     }
-
-    const codecName2 = await getCodecName(newFilePath);
-    console.log("codec_name 22", codecName2);
-    buffer = readFileSync(newFilePath);
   }
 
   // 응답 헤더 설정
