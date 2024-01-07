@@ -34,3 +34,20 @@ export const getCutVideoPath = (videoName: string, seekTime: string) => {
       rest.join("_").replace(".mp4", "").replace(".MOV", ""),
   ].join("/");
 };
+
+export const useVideoStore = () => {
+  return useState<any>(`VideoStore`, () => ({
+    videoElems: [],
+    currSpeed: 1.5,
+    syncTime: 0,
+  }));
+};
+
+export const getSyncTime = () => {
+  const videoStore = useVideoStore();
+  const videoElems = videoStore.value.videoElems;
+  if (videoElems.length < 2) return 0;
+  return Math.round(
+    videoElems[1].video.currentTime - videoElems[0].video.currentTime
+  );
+};

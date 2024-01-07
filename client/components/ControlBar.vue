@@ -31,7 +31,7 @@ const boxState = calculateBackboardPosition();
         color="white"
         :min="0"
         :max="100"
-        :step="(3 / video.duration) * 100"
+        :step="(3 / video.duration) * 100 || 0"
         thumb-size="12px"
         @update:model-value="seek"
       />

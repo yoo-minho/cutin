@@ -19,7 +19,7 @@ export type PlayerType = {
 
 export const getGameInfo = (videoName: string) => {
   const [clubCode, playDate] = videoName.split("_");
-  return { clubCode, playDate, gameCode: clubCode + playDate };
+  return { clubCode, playDate, gameCode: clubCode + "_" + playDate };
 };
 
 export const useTeamStore = async (videoName: string) => {
@@ -59,15 +59,25 @@ export async function addTeam(videoName: string, teamName: string) {
 
 export async function removeTeam(videoName: string, teamName: string) {
   const teamStore = await useTeamStore(videoName);
+  const isExistsPlayer =
+    (teamStore.value
+      .find((v) => v.name === teamName)
+      ?.players.filter((p) => !!p.name).length || 0) > 0;
+
+  if (isExistsPlayer) {
+    return { error: true, message: "모든 선수를 삭제 후 팀 삭제 가능합니다." };
+  }
+
   teamStore.value = teamStore.value.filter((v) => v.name !== teamName);
+  /* 여기 이상하게 되있긴함 */
   if (teamStore.value.length === 0) {
-    const videoProps = useVideoPropsStore();
-    const videoCode = videoProps.value.videoCode;
-    useFetch("/api/gamePlayer", {
+    const { gameCode: videoCode } = getGameInfo(videoName);
+    await useFetch("/api/gamePlayer", {
       method: "delete",
       body: { videoCode, teamName, player: "" },
     });
   }
+  return { error: false };
 }
 
 export async function addPlayerOnTeam(
@@ -75,8 +85,7 @@ export async function addPlayerOnTeam(
   teamName: string,
   playerName: string
 ) {
-  const videoProps = useVideoPropsStore();
-  const videoCode = videoProps.value.videoCode;
+  const { gameCode: videoCode } = getGameInfo(videoName);
   const teamStore = await useTeamStore(videoName);
   teamStore.value = teamStore.value.map((v) => {
     if (v.name === teamName) {
@@ -100,8 +109,7 @@ export async function removePlayerOnTeam(
   teamName: string,
   playerName: string
 ) {
-  const videoProps = useVideoPropsStore();
-  const videoCode = videoProps.value.videoCode;
+  const { gameCode: videoCode } = getGameInfo(videoName);
   const teamStore = await useTeamStore(videoName);
   teamStore.value = teamStore.value.map((v) => {
     if (v.name == teamName) {
