@@ -22,11 +22,11 @@ export default defineEventHandler(async (event) => {
   const playerStatsMap = new Map();
 
   playerArr
-    .filter((player) => !!player.player)
-    .forEach((player) => {
-      playerStatsMap.set(player.player, {
-        name: player.player,
-        team: player.teamName,
+    .filter((p) => !!p.player)
+    .forEach((p) => {
+      playerStatsMap.set(p.player, {
+        name: p.player,
+        team: p.teamName,
         ...initializePlayerStats(),
       });
     });
@@ -77,8 +77,8 @@ function sumRecord(teamPlayerStats, stat) {
   return teamPlayerStats.reduce((total, player) => total + player[stat], 0);
 }
 
-function getUniqueTeamNames(data) {
-  return [...new Set(data.map((item) => item.teamName))];
+function getUniqueTeamNames(playArr) {
+  return [...new Set(playArr.filter((p) => !!p.player).map((p) => p.teamName))];
 }
 
 function getKblEff(v) {
