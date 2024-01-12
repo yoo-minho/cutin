@@ -95,12 +95,15 @@ export async function addPlayerOnTeam(
     }
     return v;
   });
+  let playerArr;
+  if (playerName.includes(",")) {
+    playerArr = playerName.split(",").map((player) => ({ teamName, player }));
+  } else {
+    playerArr = [{ teamName, player: playerName }];
+  }
   await useFetch("/api/gamePlayer", {
     method: "post",
-    body: {
-      videoCode,
-      playerArr: [{ teamName, player: playerName }],
-    },
+    body: { videoCode, playerArr },
   });
 }
 

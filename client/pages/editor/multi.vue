@@ -11,19 +11,28 @@ const KeyPressArrow = (e: any) => execPlayers("KeyPressArrow", e);
 
 const innerHeight = ref("100vh");
 
+const pressedCodes = new Set<string>();
+const pressedKeys = new Set<string>();
+const isCommand = (_code: string) =>
+  [...pressedCodes].filter((code) => _code === code).length > 0;
+
 onMounted(() => {
-  const pressedKeys = new Set<string>();
   document.addEventListener("keydown", (event) => {
     const focusedElement = document.activeElement;
-    console.log({ focusedElement });
+    if (focusedElement?.tagName.toLowerCase() !== "body") {
+      console.log({ focusedElement });
+    }
 
     if (document.activeElement?.tagName === "INPUT") return true;
-    pressedKeys.add(event.code);
-    handleKeyPress(event, pressedKeys);
+    pressedCodes.add(event.code);
+    pressedKeys.add(event.key);
+
+    handleKeyPress(event);
   });
   document.addEventListener("keyup", (event) => {
     if (document.activeElement?.tagName === "INPUT") return true;
-    pressedKeys.delete(event.code);
+    pressedCodes.delete(event.code);
+    pressedKeys.delete(event.key);
   });
   innerHeight.value = `${window.innerHeight}px`;
   window.addEventListener("resize", () => {
@@ -31,10 +40,7 @@ onMounted(() => {
   });
 });
 
-async function handleKeyPress(event: any, pressedKeys: any) {
-  const isCommand = (_code: string) =>
-    [...pressedKeys].filter((code) => _code === code).length > 0;
-
+async function handleKeyPress(event: any) {
   const isCommandS = isCommand("KeyS");
   const isCommandA = isCommand("KeyA");
   const isCommandC = "KeyC" === event.code;
@@ -68,6 +74,29 @@ async function handleKeyPress(event: any, pressedKeys: any) {
     const row1 = teamStore.value[0]?.players || [];
     const row2 = teamStore.value[1]?.players || [];
 
+    const replaceSet = (key: string) =>
+      ({
+        Control: "Ctrl",
+        ArrowLeft: "←",
+        ArrowRight: "→",
+      }[key] || key);
+
+    if ((isCommandS || isCommandA) && pressedKeys.size === 1) {
+    } else {
+      const message =
+        pressedKeys.size === 1
+          ? replaceSet(event.key)
+          : [...pressedKeys]
+              .map((key: string) => (key === " " ? "Space" : replaceSet(key)))
+              .join(" + ");
+      Notify.create({
+        timeout: 1000,
+        position: "bottom-right",
+        icon: "keyboard",
+        message,
+      });
+    }
+
     if (isCommandC) return await addCutV2(0);
     if (isCommandV) return await addCutV2(1);
 
@@ -89,6 +118,10 @@ async function handleKeyPress(event: any, pressedKeys: any) {
 }
 
 const syncTime = (sec: number, type: "앞으로" | "뒤로") => {
+  if (videoStore.value.videoElems.length !== 2) {
+    Notify.create("두 개의 영상이 필요합니다!");
+    return;
+  }
   const video2 = videoStore.value.videoElems[1].video;
   video2.currentTime = video2.currentTime + (type === "앞으로" ? -1 : 1) * sec;
   video2.focus();

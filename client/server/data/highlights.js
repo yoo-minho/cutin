@@ -1,5 +1,11 @@
 import prisma from "./prisma";
 
+export async function getHighlightBySeekTime(videoName, seekTime) {
+  return await prisma.highlight.findMany({
+    where: { videoName, seekTime },
+  });
+}
+
 export async function getHighlightByVideo(videoName) {
   const highlights = await prisma.highlight.findMany({
     include: { mainTeam: { select: { teamName: true } } },

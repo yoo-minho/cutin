@@ -1,4 +1,8 @@
-import { createManyHighlight, deleteByVideo } from "../../data/highlights";
+import {
+  createManyHighlight,
+  deleteByVideo,
+  getHighlightBySeekTime,
+} from "../../data/highlights";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -13,7 +17,17 @@ export default defineEventHandler(async (event) => {
       ...{ mainPlayer, subPlayer, skill, videoUrl },
     };
   });
-  if (seekArr.length === 1) {
+  if (seekArrForCreate.length === 1) {
+    const newTime = seekArrForCreate[0].seekTime;
+    if (seekTime !== newTime) {
+      const highlight = await getHighlightBySeekTime(videoName, newTime);
+      if (highlight.length > 0) {
+        throw createError({
+          statusCode: 409,
+          statusMessage: "이미 기록된 시간입니다",
+        });
+      }
+    }
     await deleteByVideo(videoName, seekTime);
   } else {
     await deleteByVideo(videoName);

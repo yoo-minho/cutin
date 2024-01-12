@@ -36,7 +36,14 @@ const KeyPressArrow = async (event: any) => {
   const currentTime = video.value.currentTime;
   const duration = video.value.duration;
 
-  const { fastForwardSec, rewindSec } = controlState.value;
+  const { fastForwardSec: forwardSec, rewindSec } = controlState.value;
+
+  const updateDirect = async (delay: 1 | -1) => {
+    const newTime = currentTime + delay;
+    const { error } = await updateCutV2("seekTime", formatTime(newTime));
+    if (!error) video.value.currentTime = newTime;
+  };
+
   switch (event.key) {
     case "ArrowUp":
     case "ArrowDown":
@@ -44,8 +51,7 @@ const KeyPressArrow = async (event: any) => {
 
     case "ArrowLeft":
       if ((video.value.paused || video.value.ended) && event.ctrlKey) {
-        await updateCut("seekTime", formatTime(video.value.currentTime - 1));
-        video.value.currentTime = video.value.currentTime - 1;
+        updateDirect(-1);
         return;
       }
       video.value.currentTime = Math.max(currentTime - rewindSec, 0);
@@ -53,16 +59,12 @@ const KeyPressArrow = async (event: any) => {
 
     case "ArrowRight":
       if ((video.value.paused || video.value.ended) && event.ctrlKey) {
-        await updateCut("seekTime", formatTime(video.value.currentTime + 1));
-        video.value.currentTime = video.value.currentTime + 1;
+        updateDirect(+1);
         return;
       }
 
       if (video.value.paused || video.value.ended || event.ctrlKey) {
-        video.value.currentTime = Math.min(
-          currentTime + fastForwardSec,
-          duration
-        );
+        video.value.currentTime = Math.min(currentTime + forwardSec, duration);
         return;
       }
 
@@ -72,7 +74,7 @@ const KeyPressArrow = async (event: any) => {
         video.value.playbackRate = highSpeed;
         setTimeout(() => {
           video.value.playbackRate = videoStore.value.currSpeed;
-        }, (1000 / 8) * fastForwardSec);
+        }, (1000 / 8) * forwardSec);
         return;
       }
 

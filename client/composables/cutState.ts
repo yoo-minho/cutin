@@ -180,6 +180,7 @@ export const updateCut = async (
   if ("seekTime" === type) {
     const alreadyRecordedTime =
       cutStore.value.filter((c) => c.seekTime === value).length > 0;
+
     if (alreadyRecordedTime) {
       Notify.create(`이미 기록된 시간입니다!`);
       return;
@@ -205,14 +206,13 @@ export const updateCut = async (
   }
 
   const updateData = { ...cut, [type]: value } as CutType;
-  cutStore.value = cutStore.value.map((c) =>
-    c.seekTime === cutTime ? updateData : c
-  );
-
   await useFetch("/api/highlights/sync", {
     method: "post",
     body: { videoName, seekTime: cutTime, seekArr: [updateData] },
   });
+  cutStore.value = cutStore.value.map((c) =>
+    c.seekTime === cutTime ? updateData : c
+  );
 };
 
 export const updateCutV2 = async (
@@ -221,34 +221,30 @@ export const updateCutV2 = async (
   targetTime?: string
 ) => {
   const target = await getTargetByVideo();
-  if (!target) return;
+  if (!target) return { error: true };
 
   const { targetCut, targetVideoName } = target;
+
   if ("mainPlayer" === type) {
     if (targetCut.subPlayer === value) {
       Notify.create(`서브 선수와 다른 메인 선수를 입력해주세요`);
-      return;
+      return { error: true };
     }
   }
 
   if ("subPlayer" === type) {
     if (!targetCut.mainPlayer) {
       Notify.create(`메인 선수를 먼저 입력해주세요`);
-      return;
+      return { error: true };
     }
     if (targetCut.mainPlayer === value) {
       Notify.create(`메인 선수와 다른 서브 선수를 입력해주세요`);
-      return;
+      return { error: true };
     }
   }
 
   const updateData = { ...targetCut, [type]: value } as CutType;
-  const cutStore = await useCutStore(targetVideoName);
-  cutStore.value = cutStore.value.map((c) =>
-    c.seekTime === targetCut?.seekTime ? updateData : c
-  );
-
-  await useFetch("/api/highlights/sync", {
+  const { error } = await useFetch("/api/highlights/sync", {
     method: "post",
     body: {
       videoName: targetVideoName,
@@ -256,6 +252,16 @@ export const updateCutV2 = async (
       seekArr: [updateData],
     },
   });
+  if (error.value) {
+    Notify.create(error.value.data.message);
+    return { error: true };
+  }
+
+  const cutStore = await useCutStore(targetVideoName);
+  cutStore.value = cutStore.value.map((c) =>
+    c.seekTime === targetCut?.seekTime ? updateData : c
+  );
+  return { error: false };
 };
 
 export const moveNextCut = async (n: 1 | 0 | -1) => {

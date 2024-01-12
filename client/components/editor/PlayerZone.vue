@@ -38,7 +38,9 @@ const _addTeam = () => {
 const _addPlayer = (teamName: string) => {
   Dialog.create({
     title: "선수 추가",
-    message: "가나다 순으로 추가됩니다!",
+    message:
+      "1. 가나다 순으로 추가됩니다! <br>2. ','컴마로 여러명 추가 가능합니다.",
+    html: true,
     prompt: {
       type: "text",
     },

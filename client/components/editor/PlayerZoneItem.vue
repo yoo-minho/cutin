@@ -5,12 +5,13 @@ const props = defineProps<{
   teamName: string;
 }>();
 
-const _updateCut = async (
-  type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl" | "seekTime",
-  value: string
-) => {
-  await updateCutV2(type, value);
-  // videoProps.value.videoEl?.focus();
+const _updateCut = async (e: any) => {
+  if (e.ctrlKey) {
+    await updateCutV2("subPlayer", props.playerName);
+  } else {
+    await updateCutV2("mainPlayer", props.playerName);
+  }
+  (document.activeElement as HTMLBodyElement).blur();
 };
 
 const _removePlayer = (name: string) => {
@@ -24,7 +25,25 @@ const _removePlayer = (name: string) => {
 };
 </script>
 <template>
-  <q-btn-dropdown
+  <q-btn dense text-color="white" color="grey-9" @click="_updateCut">
+    {{ playerName }}
+    <q-btn
+      flat
+      round
+      dense
+      color="primary"
+      icon="clear"
+      text-color="white"
+      size="xs"
+      @click="
+        (e) => {
+          e.stopPropagation();
+          _removePlayer(playerName);
+        }
+      "
+    />
+  </q-btn>
+  <!-- <q-btn-dropdown
     padding="6px 0 6px 6px"
     text-color="white"
     color="grey-9"
@@ -34,7 +53,7 @@ const _removePlayer = (name: string) => {
       <q-item
         clickable
         v-close-popup
-        @click="_updateCut('mainPlayer', playerName)"
+        @click="(e) => _updateCut(e, 'mainPlayer', playerName)"
       >
         <q-item-section>메인플레이어로 기록</q-item-section>
         <q-item-section side>
@@ -44,7 +63,7 @@ const _removePlayer = (name: string) => {
       <q-item
         clickable
         v-close-popup
-        @click="_updateCut('subPlayer', playerName)"
+        @click="(e) => _updateCut(e, 'subPlayer', playerName)"
       >
         <q-item-section>서브플레이어로 기록</q-item-section>
         <q-item-section side>
@@ -59,7 +78,7 @@ const _removePlayer = (name: string) => {
         </q-item-section>
       </q-item>
     </q-list>
-  </q-btn-dropdown>
+  </q-btn-dropdown> -->
 </template>
 <style lang="scss" scoped>
 .q-btn-dropdown--split .q-btn-dropdown__arrow-container {
