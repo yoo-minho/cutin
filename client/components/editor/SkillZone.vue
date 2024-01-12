@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { defaultSkill } from "@/composables/constants";
 
-const videoProps = useVideoPropsStore();
-
 const _updateCut = async (
   type: "mainPlayer" | "subPlayer" | "skill" | "videoUrl" | "seekTime",
   value?: string
@@ -13,9 +11,9 @@ const _updateCut = async (
       message: "스킬이 지정되어 있지 않습니다.",
     });
   } else {
-    await updateCut(type, value);
+    await updateCutV2(type, value);
   }
-  videoProps.value.videoEl?.focus();
+  (document.activeElement as HTMLBodyElement).blur();
 };
 </script>
 

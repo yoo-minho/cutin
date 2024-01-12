@@ -27,7 +27,6 @@ const togglePlayer = () => {
 
 const movePlayer = (time: string) => {
   video.value.currentTime = time2sec(time);
-  stopPlayer();
 };
 
 const uploadVideo = (e: any) => uploader.value.pickFiles(e);
@@ -92,6 +91,7 @@ const submitVideo = async (f: File) => {
       video,
       videoName: f.name,
       togglePlayer,
+      stopPlayer,
       movePlayer,
       KeyPressArrow,
     });

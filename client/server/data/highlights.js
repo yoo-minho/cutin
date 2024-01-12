@@ -22,14 +22,24 @@ export async function getHighlightByVideo(videoName) {
 export async function getHighlightByVideoByGameNo(clubCode, playDate, gameNo) {
   const highlights = await prisma.highlight.findMany({
     include: { mainTeam: { select: { teamName: true } } },
-    where: { clubCode, playDate, gameNo: +gameNo },
+    where: {
+      clubCode,
+      playDate,
+      gameNo: +gameNo,
+    },
     orderBy: [{ gameNo: "asc" }, { quaterNo: "asc" }, { seekTime: "asc" }],
   });
-  return highlights.map(({ mainTeam, ...rest }) => ({
-    ...rest,
-    team: mainTeam.teamName,
-    skill: rest.skill || "득점&어시",
-  }));
+  return highlights
+    .filter((v) => !["쿼터시작", "쿼터끝"].includes(v.skill))
+    .map((v) => {
+      console.log({ v });
+      const { mainTeam, ...rest } = v;
+      return {
+        ...rest,
+        team: mainTeam.teamName,
+        skill: rest.skill || "득점&어시",
+      };
+    });
 }
 
 export async function getHighlightUrlByPlayer(

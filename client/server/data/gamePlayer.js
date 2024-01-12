@@ -3,8 +3,23 @@ import prisma from "./prisma";
 export async function getGamePlayer(clubCode, playDate) {
   const highlights = await prisma.gamePlayer.findMany({
     where: { clubCode, playDate },
-    orderBy: [{ player: "asc" }],
+    orderBy: { player: "asc" },
   });
+  for (const h of highlights) {
+    if (!h.player) continue;
+    const data = await prisma.highlight.groupBy({
+      by: ["playDate"],
+      _count: true,
+      where: {
+        clubCode,
+        OR: [{ mainPlayer: h.player }, { subPlayer: h.player }],
+      },
+    });
+    const countArray = data.map((item) => item._count);
+    const totalCount = countArray.reduce((sum, count) => sum + count, 0);
+    h.avgCount = totalCount / countArray.length;
+  }
+  highlights.sort((a, b) => b.avgCount - a.avgCount);
   return highlights;
 }
 

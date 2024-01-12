@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { getSyncTime } from "@/composables/videoState";
 import type { CutType } from "@/types";
-import { Loading, QSpinner } from "quasar";
+import { Loading, QSpinner, QTable } from "quasar";
+import { findPlusElements } from "@/utils/commUtil";
 
 const props = defineProps<{ videoNo: number }>();
 const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
 
 const videoStore = useVideoStore();
 const videoElem = ref();
+const recTable = ref<QTable>();
 
 let cutStore: Ref<CutType[]>;
 const videoCurrTime = ref(0);
@@ -16,11 +18,23 @@ watch(
   async () => {
     videoElem.value = videoStore.value.videoElems[props.videoNo];
 
-    if (videoElem.value) {
+    if (videoElem.value && !cutStore) {
       cutStore = await useCutStore(videoElem.value?.videoName);
       videoElem.value.video.addEventListener("timeupdate", () => {
         videoCurrTime.value = videoElem.value.video.currentTime;
       });
+
+      watch(
+        () => cutStore.value.map((cut) => cut.seekTime),
+        (newVal: string[], oldVal: string[]) => {
+          const [seekTime] = findPlusElements(oldVal, newVal);
+          if (seekTime) {
+            const i = newVal.findIndex((v) => v === seekTime);
+            console.log("recTable", seekTime, i);
+            recTable.value?.scrollTo(i);
+          }
+        }
+      );
     }
 
     //갱신??
@@ -201,10 +215,12 @@ const movePlayer = (time: string) => {
     if (props.videoNo === idx) return;
     const syncTime = getSyncTime();
     const targetSec = time2sec(time);
-    const timeBySync = formatTime(targetSec + syncTime);
+    const timeBySync = formatTime(targetSec + (idx === 0 ? -1 : 1) * syncTime);
     elem.movePlayer(timeBySync);
+    elem.stopPlayer();
   });
   videoElem.value.movePlayer(time);
+  videoElem.value.stopPlayer();
 };
 </script>
 <template>
@@ -254,6 +270,7 @@ const movePlayer = (time: string) => {
     </div>
     <div class="row items-center col">
       <q-table
+        ref="recTable"
         dark
         flat
         dense
@@ -265,6 +282,7 @@ const movePlayer = (time: string) => {
         :filter-method="filterMethod"
         :rows-per-page-options="[0]"
         :hide-pagination="true"
+        virtual-scroll
       >
         <template #no-data>
           <div>

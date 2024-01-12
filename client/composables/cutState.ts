@@ -9,7 +9,7 @@ export const useCutStore = async (videoName: string) => {
   return state;
 };
 
-const getTargetByVideo = async () => {
+export const getTargetByVideo = async () => {
   const videoStore = useVideoStore();
   if (videoStore.value.videoElems.length === 0) {
     Notify.create(`영상 등록해주세요!`);
@@ -126,6 +126,10 @@ export const addCutV2 = async (videoNo: number) => {
     (a, b) => time2sec(a.seekTime) - time2sec(b.seekTime)
   );
 
+  videoStore.value.videoElems.forEach((el: any) => {
+    el.stopPlayer();
+  });
+
   await useFetch("/api/highlights", {
     method: "post",
     body: { videoName: elem.videoName, seekArr: [createData] },
@@ -224,6 +228,12 @@ export const updateCutV2 = async (
   if (!target) return { error: true };
 
   const { targetCut, targetVideoName } = target;
+
+  if ("seekTime" === type) {
+    if (Math.abs(time2sec(targetCut.seekTime) - time2sec(value)) > 3) {
+      return { error: false };
+    }
+  }
 
   if ("mainPlayer" === type) {
     if (targetCut.subPlayer === value) {

@@ -48,6 +48,7 @@ async function handleKeyPress(event: any) {
   const isCommandSpace = " " === event.key;
   const keyIdx1 = keySet.first.indexOf(event.key);
   const keyIdx2 = keySet.second.indexOf(event.key?.toUpperCase());
+
   const isCommand123890 = keyIdx1 > -1;
   const isCommanQWEIOP = keyIdx2 > -1;
   const isCommandArrow = event.key.indexOf("Arrow") === 0;
@@ -109,8 +110,17 @@ async function handleKeyPress(event: any) {
     }
     if (isCommand123890 || isCommanQWEIOP) {
       const type = isCommandA ? "subPlayer" : "mainPlayer";
-      if (row1[keyIdx1 + 1]) return updateCutV2(type, row1[keyIdx1 + 1].name);
-      if (row2[keyIdx2 + 1]) return updateCutV2(type, row2[keyIdx2 + 1].name);
+      if (isCommand123890) {
+        const set1 = row1[keyIdx1 + 1];
+        if (!set1.name) return;
+        return updateCutV2(type, set1.name);
+      }
+
+      if (isCommanQWEIOP) {
+        const set2 = row2[keyIdx2];
+        if (!set2.name) return;
+        return updateCutV2(type, set2.name);
+      }
     }
     if (isCommandSpace) return togglePlayers();
     if (isCommandArrow) return KeyPressArrow(event);

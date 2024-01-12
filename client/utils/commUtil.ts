@@ -76,3 +76,13 @@ export function formatDate(inputDate: string) {
   }).format(date);
   return `${year}-${month}-${day}(${dayOfWeek})`;
 }
+
+export function findPlusElements(previousArray: any[], currentArray: any[]) {
+  const changedElements = [];
+  for (let i = 0; i < currentArray.length; i++) {
+    if (!previousArray.includes(currentArray[i])) {
+      changedElements.push(currentArray[i]);
+    }
+  }
+  return changedElements;
+}
