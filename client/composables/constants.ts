@@ -221,6 +221,7 @@ export const skillExpression = (
       }
       break;
     case "자유투":
+    case "자유투1점":
       mainExpression = `${mainPlayer}의 자유투!!!`;
       if (subPlayer) {
         subExpression = `${subPlayer}의 어시!`;
