@@ -26,7 +26,12 @@ watch(idx, () => {
 const loadedVideoElem = (elem: HTMLVideoElement) => {
   video.value = elem;
   video.value.autoplay = false;
-  video.value.playbackRate = 1;
+  const skillPoints = getSkillPoints(props.cuts[idx.value].skill);
+  if (skillPoints.main.pts > 0) {
+    video.value.playbackRate = 1;
+  } else {
+    video.value.playbackRate = 2;
+  }
 };
 
 const endedVideoElem = (elem: HTMLVideoElement) => {

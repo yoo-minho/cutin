@@ -11,6 +11,13 @@ export function getTeams(id) {
         method: "[5vs5] 8대8 2파전, 10분 4쿼터 2경기",
       },
       {
+        id: "turnover",
+        name: "턴오버",
+        place: "랜덤",
+        cycle: "랜덤",
+        method: "[5vs5]",
+      },
+      {
         id: "noname",
         name: "이름없는농구팀",
         place: "랜덤",

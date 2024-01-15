@@ -116,7 +116,7 @@ export const defaultSkill = [
   { key: "4", name: "속공", main: { pts: 2 }, sub: { ast: 1 } },
   { key: "5", name: "앤드원", main: { pts: 3 }, sub: { ast: 1 } },
   { key: "6", name: "풋백앤드원", main: { pts: 3, reb: 1, orb: 1 } },
-  { key: "7" },
+  { key: "7", name: "자유투1점", main: { pts: 1 }, sub: { ast: 1 } },
   { key: "8" },
   { key: "9", name: "쿼터시작" },
   { key: "0", name: "쿼터끝" },
