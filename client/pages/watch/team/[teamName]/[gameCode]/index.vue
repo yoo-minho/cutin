@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VsType, RecordType } from "@/types";
+import { type VsType, type RecordType, type CutType } from "@/types";
 import GameItem from "../../components/GameItem.vue";
 
 definePageMeta({
@@ -14,7 +14,7 @@ const getAllGameCuts = async () => {
   return allGameCuts;
 };
 
-const cuts = ref(await getAllGameCuts());
+const cuts = ref<CutType[]>(await getAllGameCuts());
 
 const route = useRoute();
 const { teamName: clubCode, gameCode } = route.params;
@@ -43,10 +43,18 @@ if (currentVsState.value.length > 0) {
 }
 
 const videoViewerOn = ref(false);
+const openGameVideo = () => {
+  const isReadyHighlight = cuts.value.filter((v) => !!v.videoUrl).length > 0;
+  if (!isReadyHighlight) {
+    Notify.create("영상을 준비중입니다!");
+    return;
+  }
+  videoViewerOn.value = true;
+};
 </script>
 <template>
   <ViewerGameVideo v-model="videoViewerOn" :cuts="cuts" />
-  <GameItem :vs="currentVs" type="MATCH" @click-btn="videoViewerOn = true" />
+  <GameItem :vs="currentVs" type="MATCH" @click-btn="openGameVideo" />
   <q-separator color="#ccc" />
   <div class="text-center q-mt-md text-orange-5">
     * 정렬조건 : KBL 선수공헌도 높은순<br />

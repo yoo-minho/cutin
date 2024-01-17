@@ -60,41 +60,41 @@ const columns = [
 const filter = ref("");
 const options = [
   {
-    label: "경기순 (전체)",
+    label: "누적경기순",
     value: "play",
   },
   {
-    label: "평균득점순 (게스트 제외)",
+    label: "평균득점순",
     value: "pts",
     type: "avg",
   },
   {
-    label: "평균리바순 (게스트 제외)",
+    label: "평균리바순",
     value: "reb",
     type: "avg",
   },
   {
-    label: "평균어시스트순 (게스트 제외)",
+    label: "평균어시스트순",
     value: "ast",
     type: "avg",
   },
   {
-    label: "평균3점순 (게스트 제외)",
+    label: "평균3점순",
     value: "tpm",
     type: "avg",
   },
   {
-    label: "평균공격리바순 (게스트 제외)",
+    label: "평균공격리바순",
     value: "orb",
     type: "avg",
   },
   {
-    label: "평균스틸순 (게스트 제외)",
+    label: "평균스틸순",
     value: "stl",
     type: "avg",
   },
   {
-    label: "평균블록순 (게스트 제외)",
+    label: "평균블록순",
     value: "blk",
     type: "avg",
   },
@@ -104,9 +104,10 @@ const getSortPlayerStat = () => {
   if (sort.value.value === "play") return props.playerStat;
   const { type, value } = sort.value;
   return [...props.playerStat]
-    .filter((v) => !v.guest)
+    .filter((v) => !v.guest && v.play >= 4)
     .sort((a: any, b: any) => {
-      if (type === "avg") return +b[value] / b.play - +a[value] / a.play;
+      if (type === "avg")
+        return +getAvgStat(b, value, true) - +getAvgStat(a, value, true);
       return +b[value] - +a[value];
     });
 };
@@ -152,7 +153,7 @@ const getPlayerGroupByGame = async (player: string) => {
         dense
         options-dense
         stack-label
-        label="정렬필터"
+        label="팀내랭킹🏆"
       />
     </template>
     <template #body="props">
@@ -176,11 +177,12 @@ const getPlayerGroupByGame = async (player: string) => {
             contents2="선수 상세보기"
             @click="getPlayerGroupByGame(props.row.name)"
           />
+          {{}}
         </q-td>
         <q-td key="play" :props="props" class="play">
           <TableItemStatCell
             :contents1="props.row.play"
-            :contents2="`(${formatSimpletGameDate(props.row.playDate)})`"
+            :contents2="`${formatSimpletGameDate(props.row.playDate)}`"
           />
         </q-td>
         <template

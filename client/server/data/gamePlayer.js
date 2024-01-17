@@ -17,9 +17,11 @@ export async function getGamePlayer(clubCode, playDate) {
     });
     const countArray = data.map((item) => item._count);
     const totalCount = countArray.reduce((sum, count) => sum + count, 0);
-    h.avgCount = totalCount / countArray.length;
+    console.log(h.player, totalCount, countArray.length);
+    h.avgCount = countArray.length === 0 ? 0 : totalCount / countArray.length;
   }
-  highlights.sort((a, b) => b.avgCount - a.avgCount);
+
+  highlights.sort((a, b) => Math.round(b.avgCount) - Math.round(a.avgCount));
   return highlights;
 }
 

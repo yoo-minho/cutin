@@ -12,9 +12,14 @@ defineProps<{
     </div>
   </q-btn>
 </template>
+<style lang="scss">
+th:first-child {
+  width: 80px;
+}
+</style>
 <style lang="scss" scoped>
 .dotdotdot {
-  width: 100px;
+  width: 80px;
   white-space: nowrap; /* 텍스트가 한 줄로 표시되도록 설정 */
   overflow: hidden; /* 컨테이너를 벗어나는 부분을 감춤 */
   text-overflow: ellipsis; /* 잘린 부분에 대해 ellipsis(...)를 표시 */
