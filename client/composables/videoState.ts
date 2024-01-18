@@ -39,7 +39,7 @@ export const useVideoStore = () => {
   return useState<any>(`VideoStore`, () => ({
     videoElems: [],
     currSpeed: 1.5,
-    syncTime: 0,
+    syncedTime: 0,
   }));
 };
 

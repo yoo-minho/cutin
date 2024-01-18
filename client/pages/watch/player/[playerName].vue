@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TeamInfoType } from "~/types";
+import type { TeamInfoType, VsType } from "@/types";
 
 definePageMeta({
   layout: "watch-detail",
@@ -19,9 +19,9 @@ const { data: stats } = await useFetch<any>(
 );
 watch(
   stats,
-  (newData) => {
-    if (!newData) return;
-    _stats.value = newData;
+  (arr) => {
+    if (!arr) return;
+    _stats.value = arr;
   },
   { immediate: true }
 );

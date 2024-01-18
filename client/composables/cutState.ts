@@ -21,7 +21,9 @@ export const getTargetByVideo = async () => {
   for (const elem of videoStore.value.videoElems) {
     const cutStore = await useCutStore(elem.videoName);
     const cutTime = elem.video.currentTime;
-    const cut = cutStore.value.find((c) => time2sec(c.seekTime) === cutTime);
+    const cut = cutStore.value.find((c) => {
+      return c.seekTime === formatTime(cutTime);
+    });
     if (cut) {
       targetVideoNameArr.push(elem.videoName);
       targetCutArr.push(cut);

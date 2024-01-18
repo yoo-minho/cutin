@@ -153,7 +153,7 @@ const getPlayerGroupByGame = async (player: string) => {
         dense
         options-dense
         stack-label
-        label="팀내랭킹🏆"
+        label="팀내랭킹"
       />
     </template>
     <template #body="props">
@@ -177,7 +177,6 @@ const getPlayerGroupByGame = async (player: string) => {
             contents2="선수 상세보기"
             @click="getPlayerGroupByGame(props.row.name)"
           />
-          {{}}
         </q-td>
         <q-td key="play" :props="props" class="play">
           <TableItemStatCell

@@ -98,10 +98,6 @@ const submitVideo = async (f: File) => {
     video.value.playbackRate = videoStore.value.currSpeed;
     // playPlayer();
   });
-
-  video.value.addEventListener("timeupdate", () => {
-    videoStore.value.syncTime = getSyncTime();
-  });
 };
 </script>
 <template>

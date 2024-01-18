@@ -17,6 +17,26 @@ const isCommand = (_code: string) =>
   [...pressedCodes].filter((code) => _code === code).length > 0;
 
 onMounted(() => {
+  watch(
+    () => videoStore.value.videoElems.length,
+    () => {
+      const videoElems = videoStore.value.videoElems;
+      if (videoElems.length === 2) {
+        videoElems[0].video.addEventListener("timeupdate", () => {
+          const syncedTime = getSyncTime();
+          if (!videoStore.value.syncedTime) {
+            videoStore.value.syncedTime = syncedTime;
+          }
+          if (videoStore.value.syncedTime === syncedTime) return;
+
+          Notify.create("두 비디오 보정중입니다.");
+          videoElems[1].video.currentTime =
+            videoElems[0].video.currentTime + videoStore.value.syncedTime;
+        });
+      }
+    }
+  );
+
   document.addEventListener("keydown", (event) => {
     const focusedElement = document.activeElement;
     if (focusedElement?.tagName.toLowerCase() !== "body") {
@@ -133,7 +153,9 @@ const syncTime = (sec: number, type: "앞으로" | "뒤로") => {
     return;
   }
   const video2 = videoStore.value.videoElems[1].video;
-  video2.currentTime = video2.currentTime + (type === "앞으로" ? -1 : 1) * sec;
+  const gapSec = (type === "앞으로" ? -1 : 1) * sec;
+  videoStore.value.syncedTime = videoStore.value.syncedTime + gapSec;
+  video2.currentTime = video2.currentTime + gapSec;
   video2.focus();
 };
 </script>
@@ -191,7 +213,7 @@ const syncTime = (sec: number, type: "앞으로" | "뒤로") => {
             -
           </q-btn>
           <q-btn color="pink" textColor="white">
-            {{ videoStore.syncTime }}초
+            {{ videoStore.syncedTime }}초
           </q-btn>
           <q-btn
             color="pink"

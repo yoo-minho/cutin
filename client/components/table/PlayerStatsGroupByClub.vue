@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TeamInfoType } from "~/types";
+import type { TeamInfoType } from "@/types";
 
 const route = useRoute();
 const { playerName: _playerName } = route.params;

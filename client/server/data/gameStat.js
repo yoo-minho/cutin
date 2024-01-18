@@ -97,6 +97,7 @@ export async function getStatGroupByGameByClubNPlayer(clubCode, playerName) {
           select
             "playDate",
             "gameNo",
+            "teamName",
             "출전쿼터"::numeric qt,
             "득점"::numeric pts,
             "리바"::numeric reb,
@@ -109,6 +110,7 @@ export async function getStatGroupByGameByClubNPlayer(clubCode, playerName) {
             select
               hl."playDate",
               hl."gameNo",
+              gp."teamName",
               count(distinct hl."quaterNo") "출전쿼터",
               sum(CASE 
               WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 
@@ -125,7 +127,7 @@ export async function getStatGroupByGameByClubNPlayer(clubCode, playerName) {
             from "GamePlayer" AS gp
             Inner join "Highlight" as hl ON gp."clubCode" = hl."clubCode" AND gp."playDate" = hl."playDate" AND (gp."player" = hl."mainPlayer" OR gp."player" = hl."subPlayer")
             WHERE gp."clubCode" = ${clubCode}  AND "player" = ${playerName}
-            GROUP BY hl."playDate", hl."gameNo"
+            GROUP BY hl."playDate", hl."gameNo", gp."teamName"
           ) t
           ORDER BY ("playDate", "gameNo") desc
       `;
