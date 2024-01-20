@@ -13,12 +13,19 @@ const backEvent = async () => {
     });
   }
 };
+
+function setScreenSize() {
+  let vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty("--vh", `${vh}px`);
+}
+
+onMounted(() => {
+  setScreenSize();
+  window.addEventListener("resize", setScreenSize);
+});
 </script>
 <template>
-  <q-layout
-    class="column bg-white"
-    style="display: flex; flex-direction: column; height: 100vh"
-  >
+  <q-layout class="column bg-white detail-layout">
     <WatchHeader
       type="DETAIL"
       title=""
@@ -29,7 +36,12 @@ const backEvent = async () => {
   </q-layout>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.detail-layout {
+  display: flex;
+  flex-direction: column;
+  height: calc(var(--vh, 1vh) * 100);
+}
 body {
   overflow: hidden;
 }
