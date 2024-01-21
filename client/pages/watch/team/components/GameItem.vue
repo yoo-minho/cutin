@@ -10,7 +10,7 @@ const { score: bScore, teamName: bTeamName } = props.vs.match?.[1] || {};
 const whoWin = bScore > aScore ? "b" : "a";
 </script>
 <template>
-  <q-item-label class="q-ma-sm">
+  <q-item-label>
     <q-item class="q-px-sm q-py-none">
       <q-item-section>
         <q-item-label
@@ -20,14 +20,23 @@ const whoWin = bScore > aScore ? "b" : "a";
           <div class="teamName flex-center">
             {{ aTeamName }}
           </div>
-          <div class="score flex-center">{{ aScore }}</div>
+          <div
+            class="score flex-center"
+            :class="{ 'text-orange-5': bScore < aScore }"
+          >
+            {{ aScore }}
+          </div>
           <div class="center-wrap flex-center" style="flex: 2">
-            <div class="dateInfo">{{ vs.dateInfo }}</div>
-            <q-btn text-color="orange-5" class="btn" @click="emits('clickBtn')">
+            <q-btn class="btn" @click="emits('clickBtn')">
               {{ `${type === "TEAM" ? "기록 & 영상 보기" : "영상 보기"}` }}
             </q-btn>
           </div>
-          <div class="score flex-center">{{ bScore }}</div>
+          <div
+            class="score flex-center"
+            :class="{ 'text-orange-5': bScore > aScore }"
+          >
+            {{ bScore }}
+          </div>
           <div class="teamName flex-center">
             {{ bTeamName }}
           </div>

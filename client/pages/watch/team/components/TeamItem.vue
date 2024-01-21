@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TeamInfoType } from "@/types";
 
-defineProps<{ team: TeamInfoType }>();
+defineProps<{ team: TeamInfoType; type?: "main" | "detail" }>();
 </script>
 <template>
   <q-item-label class="q-mx-sm cursor-pointer q-mt-sm">
@@ -22,7 +22,7 @@ defineProps<{ team: TeamInfoType }>();
         <q-item-label class="teamInfo">
           📅 최근 : {{ formatGameDate(team.lastPlayDate) }}
         </q-item-label>
-        <q-item-label class="teamInfo">
+        <q-item-label v-if="type === 'main'" class="teamInfo">
           👤 멤버 : {{ team.memberCount }}명 (게스트 : {{ team.guestCount }}명)
         </q-item-label>
       </q-item-section>
@@ -40,5 +40,6 @@ defineProps<{ team: TeamInfoType }>();
 
 .teamInfo {
   color: #999;
+  font-size: 12px;
 }
 </style>

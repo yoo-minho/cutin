@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { QTable } from "quasar";
+
 const props = defineProps<{ playerStat: any }>();
 const getSelectedPlayerStat = (playerName: string) =>
   props.playerStat.find((v: { name: string }) => v.name === playerName) || {};
@@ -82,9 +84,12 @@ const openViewer = async (player: string) => {
   selectedPlayer.value = player;
   videoViewerOn.value = true;
 };
+
+const statTable = ref<QTable>();
 </script>
 <template>
   <q-table
+    ref="statTable"
     class="stat-table"
     flat
     dense
@@ -110,6 +115,14 @@ const openViewer = async (player: string) => {
             >
               {{ props.row.name }}
             </q-btn>
+            <q-badge
+              v-if="props.row.guest"
+              color="yellow"
+              text-color="black"
+              label="guest"
+              transparent
+              floating
+            />
           </template>
         </q-td>
         <q-td key="pts" :props="props"> {{ props.row.pts }} </q-td>

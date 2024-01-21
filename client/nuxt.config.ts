@@ -65,9 +65,9 @@ export default defineNuxtConfig({
   gtag: {
     id: "G-J9Z1XZREM2",
   },
-  googleAdsense: {
-    id: "ca-pub-7259356170238927",
-  },
+  // googleAdsense: {
+  //   id: "ca-pub-7259356170238927",
+  // },
   pwa: {
     registerType: "autoUpdate",
     injectRegister: "auto", //default

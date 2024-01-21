@@ -38,7 +38,7 @@ const showTeamGame = (teamId: string) => {
   <BannerCampaignBanner />
   <q-separator class="q-mb-sm" />
   <div v-for="team in currentTeamState" @click="showTeamGame(team.id)">
-    <TeamItem :team="team" />
+    <TeamItem :team="team" :type="'main'" />
     <q-separator class="q-my-sm" />
   </div>
 </template>

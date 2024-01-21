@@ -140,7 +140,6 @@ const matchResult = (props: any) => {
 };
 
 const moveGame = (playDate: string, gameNo: number) => {
-  console.log("moveGame", { playDate, gameNo });
   navigateTo(`/watch/team/${clubCode}/${clubCode}_${playDate}_${gameNo}`);
 };
 </script>

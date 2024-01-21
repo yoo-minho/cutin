@@ -42,6 +42,7 @@ onMounted(() => {
   flex-direction: column;
   height: calc(var(--vh, 1vh) * 100);
 }
+
 body {
   overflow: hidden;
 }

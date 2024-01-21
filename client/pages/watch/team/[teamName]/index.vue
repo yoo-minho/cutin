@@ -33,19 +33,31 @@ if (currentTeamState.value.length > 0) {
   );
 }
 
+let tempDate = "";
 const { data: games } = await useFetch<VsType[]>(`/api/club/${clubCode}/game`);
 const currentVsState = useState<VsType[]>("currentVsState", () => []);
 watch(
   games,
   (newData) => {
     if (!newData) return;
-    currentVsState.value = newData.map((vs) => {
-      return {
-        ...vs,
-        dateInfo: formatGameDate(vs.playDate, vs.gameNo),
-        gameCode: `${clubCode}_${vs.playDate}_${vs.gameNo}`,
-      };
-    });
+    currentVsState.value = newData
+      .map((vs) => {
+        return {
+          ...vs,
+          dateInfo: formatGameDate(vs.playDate, vs.gameNo),
+          gameCode: `${clubCode}_${vs.playDate}_${vs.gameNo}`,
+        };
+      })
+      .map((v: any) => {
+        if (tempDate === v.playDate) {
+          tempDate = v.playDate;
+          return { ...v, label: false };
+        } else {
+          tempDate = v.playDate;
+          return { ...v, label: true };
+        }
+      });
+    tempDate = "";
   },
   { immediate: true }
 );
@@ -65,9 +77,12 @@ watch(refTab, () => {
   const router = useRouter();
   router.replace({ query: { tab: refTab.value } });
 });
+
+const clubPlayer = computed(() => players.value?.filter((v) => !v.guest));
+const guestPlayer = computed(() => players.value?.filter((v) => v.guest));
 </script>
 <template>
-  <TeamItem :team="currentTeam" />
+  <TeamItem :team="currentTeam" :type="'detail'" />
   <q-separator color="#ccc" class="q-mt-sm" />
   <q-tabs
     v-model="refTab"
@@ -76,24 +91,36 @@ watch(refTab, () => {
     :active-color="`orange-5`"
     :indicator-color="`orange-5`"
   >
-    <q-tab name="player" :label="`경기기록 (멤버+게스트)`" style="flex: 1" />
     <q-tab
       name="match"
-      :label="`최근경기 (${currentVsState.length}게임)`"
+      :label="`최근경기 (${currentVsState.length})`"
+      style="flex: 1"
+    />
+    <q-tab
+      name="player"
+      :label="`멤버 기록 (${clubPlayer?.length})`"
+      style="flex: 1"
+    />
+    <q-tab
+      name="guest"
+      :label="`게스트 기록 (${guestPlayer?.length})`"
       style="flex: 1"
     />
   </q-tabs>
   <q-tab-panels v-model="refTab" style="flex: 1; width: 100%">
     <q-tab-panel name="player" class="q-pa-none">
-      <TableAllPlayerByClub :player-stat="players" />
+      <TableAllPlayerByClub :player-stat="clubPlayer" :guest="false" />
+    </q-tab-panel>
+    <q-tab-panel name="guest" class="q-pa-none">
+      <TableAllPlayerByClub :player-stat="guestPlayer" :guest="true" />
     </q-tab-panel>
     <q-tab-panel name="match" class="q-pa-none">
-      <div class="text-center q-mt-md text-orange-5">
-        * 정렬조건 : 경기일자 최근순
-      </div>
       <q-list>
         <q-separator />
         <template v-for="vs in currentVsState">
+          <div v-if="vs.label" style="background-color: #eee; padding: 4px">
+            📅 {{ formatGameDate(vs.playDate) }}
+          </div>
           <GameItem
             v-if="vs.gameCode"
             :vs="vs"

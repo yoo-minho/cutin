@@ -26,6 +26,7 @@ export type VsType = {
   dateInfo?: string;
   guest?: boolean;
   match: [VsInfoType, VsInfoType];
+  label?: boolean;
 };
 
 export type VsInfoType = {

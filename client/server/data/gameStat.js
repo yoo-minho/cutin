@@ -233,3 +233,61 @@ export async function getStatByClubNPlayer(playerName, clubCode) {
     await prisma.$disconnect();
   }
 }
+
+//팀 내 스탯 베스트
+export async function 팀내스탯베스트(playerName, clubCode) {
+  try {
+    return await prisma.$queryRaw`
+          with stat_t as (
+	select 
+	  "player",
+	  hl."playDate",
+	  hl."gameNo",
+	  coalesce(sum(CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN hl.skill in ('3점슛','앤드원','풋백앤드원') THEN 3 WHEN hl.skill in ('자유투1점') THEN 1 ELSE 2 END) filter (WHERE gp."player" = hl."mainPlayer"), 0) "득점",
+	  count(1) filter (where hl.skill in ('오펜스리바','리바운드','풋백','블락&리바','득점&OREB','3점슛&OREB','풋백앤드원')) "리바",
+	  count(1) filter (where gp."player" = hl."subPlayer") "어시",
+	  count(1) filter (where hl.skill in ('3점슛','3점슛&OREB') AND gp."player" = hl."mainPlayer") "3점",
+	  count(1) filter (where hl.skill in ('오펜스리바','풋백','득점&OREB','3점슛&OREB','풋백앤드원')) "공리",
+	  count(1) filter (where hl.skill in ('스틸')) "스틸",
+	  count(1) filter (where hl.skill in ('블락','블락&리바')) "블락"
+	from "GamePlayer" AS gp
+	Inner join "Highlight" as hl ON gp."clubCode" = hl."clubCode" AND gp."playDate" = hl."playDate" AND (gp."player" = hl."mainPlayer" OR gp."player" = hl."subPlayer")
+	WHERE gp."clubCode" = 'gba' and not gp.guest
+	GROUP BY gp."clubCode", "player", hl."playDate", hl."gameNo"
+)
+(select '득점' his, * from stat_t order by "득점" desc, "playDate" desc limit 1) union
+(select '리바' his, * from stat_t order by "리바" desc, "playDate" desc limit 1) union
+(select '어시' his, * from stat_t order by "어시" desc, "playDate" desc limit 1) union
+(select '3점' his, * from stat_t order by "3점" desc, "playDate" desc limit 1) union
+(select '공리' his, * from stat_t order by "공리" desc, "playDate" desc limit 1) union
+(select '스틸' his, * from stat_t order by "스틸" desc, "playDate" desc limit 1) union
+(select '블락' his, * from stat_t order by "블락" desc, "playDate" desc limit 1)
+order by his;
+      `;
+  } catch (error) {
+    console.error("Error executing raw query:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function 콤비베스트(playerName, clubCode) {
+  try {
+    return await prisma.$queryRaw`
+          select 
+  hl."playDate",
+  hl."gameNo",
+  (case when hl."mainPlayer" > hl."subPlayer" then hl."mainPlayer"||'_'||hl."subPlayer" else hl."subPlayer"||'_'||hl."mainPlayer" end),
+  count(1)
+from "GamePlayer" AS gp
+Inner join "Highlight" as hl ON gp."clubCode" = hl."clubCode" AND gp."playDate" = hl."playDate" AND (gp."player" = hl."mainPlayer" OR gp."player" = hl."subPlayer")
+WHERE gp."clubCode" = 'gba' and not gp.guest and hl."subPlayer" != ''
+GROUP BY hl."playDate", hl."gameNo", (case when hl."mainPlayer" > hl."subPlayer" then hl."mainPlayer"||'_'||hl."subPlayer" else hl."subPlayer"||'_'||hl."mainPlayer" end)
+order by hl."playDate" desc, hl."gameNo" desc, count desc;
+      `;
+  } catch (error) {
+    console.error("Error executing raw query:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}

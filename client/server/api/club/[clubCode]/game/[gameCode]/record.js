@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
       playerStatsMap.set(p.player, {
         name: p.player,
         team: p.teamName,
+        guest: p.guest,
         ...initializePlayerStats(),
       });
     });

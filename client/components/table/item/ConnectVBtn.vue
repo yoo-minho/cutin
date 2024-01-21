@@ -19,7 +19,7 @@ th:first-child {
 </style>
 <style lang="scss" scoped>
 .dotdotdot {
-  width: 80px;
+  width: 72px;
   white-space: nowrap; /* 텍스트가 한 줄로 표시되도록 설정 */
   overflow: hidden; /* 컨테이너를 벗어나는 부분을 감춤 */
   text-overflow: ellipsis; /* 잘린 부분에 대해 ellipsis(...)를 표시 */
@@ -33,7 +33,7 @@ th:first-child {
 .sub {
   color: #777;
   text-align: left;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: lighter;
 }
 </style>

@@ -94,18 +94,6 @@ body {
   font-style: normal;
 }
 
-td {
-  padding: 0 !important;
-}
-td:first-child,
-th:first-child {
-  padding: 0 12px !important;
-}
-td:last-child,
-th:last-child {
-  padding: 0 12px !important;
-}
-
 h1,
 h2,
 h3 {

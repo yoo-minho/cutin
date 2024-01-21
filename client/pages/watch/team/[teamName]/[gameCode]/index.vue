@@ -51,25 +51,75 @@ const openGameVideo = () => {
   }
   videoViewerOn.value = true;
 };
+
+const confirmInfo = () => {
+  Dialog.create({
+    title: "KBL선수공헌도",
+    html: true,
+    message: `
+    한국프로농구에서 선수 공헌도를 나타낼때 사용되는 공식. 보통 팀내 연봉 산출에 있어서 구단들에서 애용하는 스탯으로 알려져 있다. 기록을 보면 출전시간이 길면 상당히 유리하고 빅맨에게 상당히 유리한 스탯이다.<br><br>
+
+    KBL Efficiency(가산점 항목) = <br>
+    (득점+스틸+블록슛+수비 리바운드)x1.0+<br>
+    (공격 리바운드+어시스트+굿디펜스)x1.5+<br>
+    출전시간(분)÷4<br><br>
+
+    KBL Efficiency(감점 항목) = <br>
+    턴오버x1.5+<br>
+    2점 슛 실패x1.0+<br>
+    3점 슛 실패x0.9+<br>
+    자유투 실패x0.8<br><br>
+    
+    <hr><br>
+
+    <b style="color:#fb8c00">
+    KBL Efficiency In Cutin = <br>
+    (득점+스틸+블록슛+수비 리바운드)x1.0+<br>
+    (공격 리바운드+어시스트)x1.5+<br>
+    </b>
+    `,
+    position: "top",
+  })
+    .onOk(() => {
+      // console.log('>>>> OK')
+    })
+    .onCancel(() => {
+      // console.log('>>>> Cancel')
+    })
+    .onDismiss(() => {
+      // console.log('I am triggered on both OK and Cancel')
+    });
+};
 </script>
 <template>
   <ViewerGameVideo v-model="videoViewerOn" :cuts="cuts" />
   <GameItem :vs="currentVs" type="MATCH" @click-btn="openGameVideo" />
   <q-separator color="#ccc" />
-  <div class="text-center q-mt-md text-orange-5">
-    * 정렬조건 : KBL 선수공헌도 높은순<br />
-    (득점+스틸+블록+수비리바)x1.0 + (공격리바+어시)x1.5
+  <div class="row justify-center q-my-xs">
+    <q-chip
+      dense
+      size="md"
+      class="q-px-md"
+      color="orange-7"
+      text-color="white"
+      clickable
+      @click="confirmInfo()"
+    >
+      정렬조건 :
+      <span class="text-bold q-mx-xs">KBL선수공헌도</span>높은순
+      <q-icon name="help_outline" size="16px" />
+    </q-chip>
   </div>
   <div
     class="column items-center align-center"
     style="flex: 1; overflow-y: auto; flex-wrap: nowrap"
   >
     <template v-if="aTeam">
-      <div class="text-h6 q-mt-md">{{ aTeam.teamName }}</div>
+      <div class="text-h6 q-mt-xs">{{ aTeam.teamName }}</div>
       <StatTable :player-stat="aTeam.playerStat" />
     </template>
     <template v-if="bTeam" class="q-mt-md">
-      <div class="text-h6 q-mt-md">{{ bTeam.teamName }}</div>
+      <div class="text-h6 q-mt-xs">{{ bTeam.teamName }}</div>
       <StatTable :player-stat="bTeam.playerStat" />
     </template>
   </div>
