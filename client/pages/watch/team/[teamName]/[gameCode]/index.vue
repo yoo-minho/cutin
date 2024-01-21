@@ -75,7 +75,7 @@ const confirmInfo = () => {
     <b style="color:#fb8c00">
     KBL Efficiency In Cutin = <br>
     (득점+스틸+블록슛+수비 리바운드)x1.0+<br>
-    (공격 리바운드+어시스트)x1.5+<br>
+    (공격 리바운드+어시스트)x1.5<br>
     </b>
     `,
     position: "top",

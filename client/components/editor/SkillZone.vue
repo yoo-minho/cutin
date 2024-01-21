@@ -18,17 +18,13 @@ const _updateCut = async (
 </script>
 
 <template>
-  <div class="bg-dark" style="height: 100%">
-    <q-btn
-      clickable
-      color="yellow"
-      text-color="black"
-      class="q-ma-md"
-      style="min-height: 8px"
-    >
-      스킬 🏀
+  <div class="bg-dark row" style="overflow-y: auto; height: 100%">
+    <q-btn clickable color="yellow" text-color="black" class="q-ma-md">
+      스<br />
+      킬<br />
+      🏀
     </q-btn>
-    <div class="row justify-center" style="gap: 12px">
+    <div class="row col q-my-md" style="gap: 12px">
       <q-btn
         v-for="skill in defaultSkill"
         clickable
@@ -39,8 +35,13 @@ const _updateCut = async (
         @click="_updateCut('skill', skill.name)"
       >
         <div>
-          <div style="font-weight: 600; color: yellow">S + {{ skill.key }}</div>
-          <div style="font-size: 11px">{{ skill.name || "-" }}</div>
+          <div style="letter-spacing: -0.5px">
+            <q-icon name="keyboard" class="q-px-xs" size="xs" />S +
+            {{ skill.key }}
+          </div>
+          <div style="font-size: 11px; color: yellow; letter-spacing: -0.5px">
+            {{ skill.name || "-" }}
+          </div>
         </div>
       </q-btn>
     </div>

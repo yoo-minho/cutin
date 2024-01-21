@@ -38,7 +38,7 @@ export const getCutVideoPath = (videoName: string, seekTime: string) => {
 export const useVideoStore = () => {
   return useState<any>(`VideoStore`, () => ({
     videoElems: [],
-    currSpeed: 1.5,
+    currSpeed: 1.25,
     syncedTime: 0,
   }));
 };

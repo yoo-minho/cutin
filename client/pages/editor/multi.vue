@@ -231,11 +231,11 @@ const syncTime = (sec: number, type: "앞으로" | "뒤로") => {
           <EditorPlayingVideo />
         </div>
       </div>
-      <div class="row col">
-        <div class="col">
+      <div class="row col" style="overflow: hidden; position: relative">
+        <div class="col" style="height: 100%">
           <EditorRecTable :video-no="0" />
         </div>
-        <div style="width: 960px" class="column">
+        <div style="width: 960px; height: 100%" class="column">
           <div class="col">
             <EditorPlayerZone />
           </div>

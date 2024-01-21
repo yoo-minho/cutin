@@ -48,7 +48,42 @@ const boxState = calculateBackboardPosition();
           {{ seekTime }}
         </div>
         <div class="col">
-          <SpeedSelector :video="video" />
+          <div>
+            <q-btn color="white" flat dense>
+              <q-icon name="fast_rewind" class="q-px-xs" size="16px" />
+              3초 뒤로 감기
+              <span style="font-size: 12px; display: flex; align-items: center">
+                (<q-icon name="keyboard" class="q-px-xs" size="16px" /> ←)
+              </span>
+            </q-btn>
+            <q-btn color="white" flat dense>
+              <q-icon name="move_down" class="q-px-xs" size="16px" />
+              3초 뒤로 옮기기
+              <span style="font-size: 12px; display: flex; align-items: center">
+                (<q-icon name="keyboard" class="q-px-xs" size="16px" /> Ctrl +
+                ←)
+              </span>
+            </q-btn>
+          </div>
+          <div>
+            <q-btn color="white" flat dense>
+              <q-icon name="fast_forward" class="q-px-xs" size="16px" />
+              3초 빨리 감기
+              <span style="font-size: 12px; display: flex; align-items: center">
+                (<q-icon name="keyboard" class="q-px-xs" size="16px" /> →)
+              </span>
+            </q-btn>
+            <q-btn color="white" flat dense>
+              <q-icon name="move_up" class="q-px-xs" size="16px" />
+              15초 앞으로 옮기기
+              <span style="font-size: 12px; display: flex; align-items: center">
+                (<q-icon name="keyboard" class="q-px-xs" size="16px" /> Ctrl +
+                →)
+              </span>
+            </q-btn>
+          </div>
+
+          <!-- <SpeedSelector :video="video" /> -->
         </div>
         <div class="text-white backboard-info">
           <div>top: {{ boxState.top }}</div>

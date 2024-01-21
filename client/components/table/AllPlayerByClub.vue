@@ -187,7 +187,7 @@ const getPlayerGroupByGame = async (player: string) => {
         </q-td>
         <q-td key="play" :props="props" class="play playDate">
           <TableItemStatCell
-            style="width: 32px"
+            style="width: 36px"
             :contents1="props.row.play"
             :contents2="`${formatSimpletGameDate(props.row.playDate)}`"
           />

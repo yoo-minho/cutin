@@ -30,8 +30,10 @@ watch(
           const [seekTime] = findPlusElements(oldVal, newVal);
           if (seekTime) {
             const i = newVal.findIndex((v) => v === seekTime);
-            console.log("recTable", seekTime, i);
-            recTable.value?.scrollTo(i);
+            //그려지는 동안 스크롤하면 안됨
+            setTimeout(() => {
+              recTable.value?.scrollTo(i);
+            }, 0);
           }
         }
       );
@@ -229,8 +231,8 @@ const movePlayer = (time: string) => {
     v-model="videoViewerOn"
     :cut="seletedCut"
   />
-  <div class="column">
-    <div class="row bg-dark items-center col">
+  <div class="column" style="height: 100%">
+    <div class="row bg-dark items-center">
       <div style="flex: 1">
         <q-tabs
           v-model="gameTab"
@@ -282,11 +284,21 @@ const movePlayer = (time: string) => {
         :filter-method="filterMethod"
         :rows-per-page-options="[0]"
         :hide-pagination="true"
-        virtual-scroll
       >
+        <template #bottom>
+          <div>
+            <span>
+              <q-icon name="keyboard" class="q-px-xs" size="xs" /> 'C' 단축키를
+              눌러 득점 순간을 기록하세요!
+            </span>
+          </div>
+        </template>
         <template #no-data>
           <div>
-            <span> 'C' 단축키를 눌러 득점 순간을 기록하세요! </span>
+            <span>
+              <q-icon name="keyboard" class="q-px-xs" size="xs" />'C' 단축키를
+              눌러 득점 순간을 기록하세요!
+            </span>
           </div>
         </template>
         <template #body="props">
@@ -341,28 +353,23 @@ const movePlayer = (time: string) => {
 </style>
 <style lang="sass">
 .my-sticky-header-table
-  /* height or max-height is important */
-  height: 420px
+  height: 100%
 
   .q-table__top,
   .q-table__bottom,
   thead tr:first-child th
-    /* bg color is important for th; just specify one */
     background-color: #333
 
   thead tr th
     position: sticky
     z-index: 1
+
   thead tr:first-child th
     top: 0
 
-  /* this is when the loading indicator appears */
   &.q-table--loading thead tr:last-child th
-    /* height of all previous header rows */
     top: 48px
 
-  /* prevent scrolling behind sticky top row on focus */
   tbody
-    /* height of all previous header rows */
     scroll-margin-top: 48px
 </style>

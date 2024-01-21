@@ -85,25 +85,27 @@ export async function addPlayerOnTeam(
   teamName: string,
   playerName: string
 ) {
+  const playerNameArr = playerName.includes(",")
+    ? playerName.split(",")
+    : [playerName];
+
   const { gameCode: videoCode } = getGameInfo(videoName);
+  await useFetch("/api/gamePlayer", {
+    method: "post",
+    body: {
+      videoCode,
+      playerArr: playerNameArr.map((player) => ({ teamName, player })),
+    },
+  });
+
   const teamStore = await useTeamStore(videoName);
   teamStore.value = teamStore.value.map((v) => {
     if (v.name === teamName) {
-      v.players = [...new Set([...v.players.map((p) => p.name), playerName])]
-        .sort((a, b) => a.localeCompare(b))
-        .map((name) => ({ name }));
+      v.players = [
+        ...new Set([...v.players.map((p) => p.name), ...playerNameArr]),
+      ].map((name) => ({ name }));
     }
     return v;
-  });
-  let playerArr;
-  if (playerName.includes(",")) {
-    playerArr = playerName.split(",").map((player) => ({ teamName, player }));
-  } else {
-    playerArr = [{ teamName, player: playerName }];
-  }
-  await useFetch("/api/gamePlayer", {
-    method: "post",
-    body: { videoCode, playerArr },
   });
 }
 

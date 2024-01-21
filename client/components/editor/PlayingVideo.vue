@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { getSyncTime } from "@/composables/videoState";
-
-const controlState = useControlState();
 const videoStore = useVideoStore();
 
 const video = ref();
@@ -9,6 +6,10 @@ const file = ref();
 const uploader = ref();
 const videoUrl = ref("");
 const videoPlayOn = ref(false);
+
+const skipForwardSec = 15;
+const forwardSec = 3;
+const rewindSec = 3;
 
 const playPlayer = () => {
   video.value.play();
@@ -34,8 +35,6 @@ const uploadVideo = (e: any) => uploader.value.pickFiles(e);
 const KeyPressArrow = async (event: any) => {
   const currentTime = video.value.currentTime;
   const duration = video.value.duration;
-
-  const { fastForwardSec: forwardSec, rewindSec } = controlState.value;
 
   const updateDirect = async (delay: 1 | -1) => {
     const newTime = currentTime + delay;
@@ -63,7 +62,10 @@ const KeyPressArrow = async (event: any) => {
       }
 
       if (video.value.paused || video.value.ended || event.ctrlKey) {
-        video.value.currentTime = Math.min(currentTime + forwardSec, duration);
+        video.value.currentTime = Math.min(
+          currentTime + skipForwardSec,
+          duration
+        );
         return;
       }
 
