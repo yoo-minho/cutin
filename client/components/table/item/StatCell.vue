@@ -12,7 +12,7 @@ defineProps<{
 </template>
 <style lang="scss" scoped>
 .main {
-  font-size: 16px;
+  font-size: 14px;
   margin-bottom: -4px;
   letter-spacing: -0.5px;
 }
