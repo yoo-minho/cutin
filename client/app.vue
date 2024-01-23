@@ -98,10 +98,11 @@ h1,
 h2,
 h3 {
   font-size: 20px;
-  font-weight: 900;
+  /* font-weight: 900; */
   line-height: 24px;
   margin: 0;
   display: inline-block;
+  font-family: "Noto Sans KR", Arial, Helvetica, sans-serif;
 }
 
 .max-width {

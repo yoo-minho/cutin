@@ -6,6 +6,26 @@ definePageMeta({
   layout: "watch-detail",
 });
 
+const route = useRoute();
+const { gameCode } = route.params;
+const [clubCode, playDate, gameNo] = (gameCode as string).split("_");
+const { data } = await useFetch<{ name: string }>(`/api/club/${clubCode}`);
+const { name } = data.value || {};
+const title = `${name}'s stat | ${formatGameDate(playDate, gameNo)}`;
+const layoutState = useState<any>("layoutState", () => ({ title }));
+layoutState.value.title = title;
+
+const _desc = "농구 영상 편집 & 스탯 기록 & 배포를 쉽게 하는 플랫폼";
+
+useSeoMeta({
+  title,
+  ogTitle: title,
+  description: _desc,
+  ogDescription: _desc,
+  ogImage: "https://cutin.cc/og-image.png",
+  twitterCard: "summary_large_image",
+});
+
 const getAllGameCuts = async () => {
   const route = useRoute();
   const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
@@ -14,9 +34,6 @@ const getAllGameCuts = async () => {
 };
 
 const cuts = ref<CutType[]>(await getAllGameCuts());
-
-const route = useRoute();
-const { teamName: clubCode, gameCode } = route.params;
 const { data: record } = await useFetch<[RecordType, RecordType]>(
   `/api/club/${clubCode}/game/${gameCode}/record`
 );

@@ -6,8 +6,30 @@ definePageMeta({
   layout: "watch-detail",
 });
 
+const route = useRoute();
+const { gameCode } = route.params;
+const [clubCode, playDate, gameNo] = (gameCode as string).split("_");
+const { data } = await useFetch<{ name: string }>(`/api/club/${clubCode}`);
+const { name } = data.value || {};
+const title = `${name}'s video | ${formatGameDate(playDate, gameNo)}`;
+const layoutState = useState<any>("layoutState", () => ({ title }));
+layoutState.value.title = title;
+
+const _desc = "농구 영상 편집 & 스탯 기록 & 배포를 쉽게 하는 플랫폼";
+
+useSeoMeta({
+  title,
+  ogTitle: title,
+  description: _desc,
+  ogDescription: _desc,
+  ogImage: "https://cutin.cc/og-image.png",
+  twitterCard: "summary_large_image",
+});
+
+const { tab = "1q" } = route.query;
+const refTab = ref(String(tab) || "1q");
+
 const getAllGameCuts = async () => {
-  const route = useRoute();
   const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
   const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo }); //매번 불러오는 비효율
   return allGameCuts;
@@ -56,10 +78,6 @@ const endedVideoElem = (elem?: HTMLVideoElement) => {
     }
   }, 0);
 };
-
-const route = useRoute();
-const { tab = "1q" } = route.query;
-const refTab = ref(String(tab) || "1q");
 </script>
 <template>
   <div
@@ -72,15 +90,24 @@ const refTab = ref(String(tab) || "1q");
       @loaded-video-url="loadedVideoElem"
       @ended-video-url="endedVideoElem"
     />
-    <div class="row bg-grey-3" style="height: 20px">
+    <div
+      class="row bg-dark items-center"
+      style="height: 20px; margin: 4px 10px"
+    >
       <template v-for="index in cuts.length">
         <div
           v-if="idx + 1 === index"
-          style="font-size: 18px; line-height: 20px"
+          style="
+            display: flex;
+            justify-content: center;
+            width: 20px;
+            font-size: 18px;
+            line-height: 20px;
+          "
         >
           🏀
         </div>
-        <div style="flex: 1; background-color: rgba(0, 0, 0, 0)"></div>
+        <div style="flex: 1; background-color: white; height: 4px"></div>
       </template>
     </div>
     <div

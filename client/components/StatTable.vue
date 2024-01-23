@@ -55,12 +55,12 @@ const columns = [
     field: "blk",
     align: "center",
   },
-  {
-    label: "공헌",
-    name: "kbl",
-    field: "kbl",
-    align: "center",
-  },
+  // {
+  //   label: "공헌",
+  //   name: "kbl",
+  //   field: "kbl",
+  //   align: "center",
+  // },
 ] as any;
 
 const videoViewerOn = ref(false);
