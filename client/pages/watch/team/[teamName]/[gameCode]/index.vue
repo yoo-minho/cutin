@@ -10,7 +10,6 @@ const getAllGameCuts = async () => {
   const route = useRoute();
   const [clubCode, playDate, gameNo] = String(route.params.gameCode).split("_");
   const allGameCuts = await fetchAllGameCut({ clubCode, playDate, gameNo }); //매번 불러오는 비효율
-  console.log({ allGameCuts });
   return allGameCuts;
 };
 
@@ -42,14 +41,14 @@ if (currentVsState.value.length > 0) {
   }
 }
 
-const videoViewerOn = ref(false);
 const openGameVideo = () => {
   const isReadyHighlight = cuts.value.filter((v) => !!v.videoUrl).length > 0;
   if (!isReadyHighlight) {
     Notify.create("영상을 준비중입니다!");
     return;
   }
-  videoViewerOn.value = true;
+  const route = useRoute();
+  navigateTo({ path: `${route.path}/video` });
 };
 
 const confirmInfo = () => {
@@ -92,7 +91,6 @@ const confirmInfo = () => {
 };
 </script>
 <template>
-  <ViewerGameVideo v-model="videoViewerOn" :cuts="cuts" />
   <GameItem :vs="currentVs" type="MATCH" @click-btn="openGameVideo" />
   <q-separator color="#ccc" />
   <div class="row justify-center q-my-xs">

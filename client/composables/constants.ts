@@ -23,6 +23,13 @@ const segmentSet = {
 
 export const wrapDefSkill = (skill?: string) => skill || "득점&어시";
 
+export const getSkillContents = (skill?: string) => {
+  skill = wrapDefSkill(skill);
+  if (skill === "득점&어시") return "2 Point";
+  if (skill === "3점슛") return "3 Point";
+  return skill;
+};
+
 export const getSegment = (_skill?: string, subPlayer?: string) => {
   _skill = wrapDefSkill(_skill);
   if (!!subPlayer) return segmentSet.deep;

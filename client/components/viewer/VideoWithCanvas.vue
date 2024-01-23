@@ -2,13 +2,13 @@
 import type { CutType } from "@/types";
 
 const props = defineProps<{
-  cut: CutType;
+  cut?: CutType;
   widthLimit?: boolean;
   routine?: boolean;
 }>();
 const emits = defineEmits<{
-  (e: "loadedVideoUrl", elem: HTMLVideoElement): void;
-  (e: "endedVideoUrl", elem: HTMLVideoElement): void;
+  (e: "loadedVideoUrl", elem?: HTMLVideoElement): void;
+  (e: "endedVideoUrl", elem?: HTMLVideoElement): void;
 }>();
 
 const video = ref<HTMLVideoElement>();
@@ -17,21 +17,20 @@ const loadingScreen = ref(true);
 const tick = ref(0);
 const goal = ref(false);
 
-const videoUrl = ref(props.cut.videoUrl);
+const videoUrl = ref(props.cut?.videoUrl);
 watch(
-  () => props.cut.videoUrl,
-  (url) => {
-    videoUrl.value = url;
-  }
+  () => props.cut?.videoUrl,
+  (url) => (videoUrl.value = url)
 );
 
 onMounted(() => {
+  loadedVideoUrl();
   video.value?.addEventListener("play", playListener);
-  video.value?.addEventListener("ended", () => {
+  video.value?.addEventListener("pause", () => {
     tick.value = 0;
     goal.value = false;
+    emits("endedVideoUrl", video.value);
     if (video.value) {
-      emits("endedVideoUrl", video.value);
       if (props.routine) video.value.play();
     }
   });
@@ -39,13 +38,11 @@ onMounted(() => {
 
 const loadedVideoUrl = () => {
   loadingScreen.value = true;
-  if (video.value) {
-    emits("loadedVideoUrl", video.value);
-  }
+  emits("loadedVideoUrl", video.value);
 };
 
 const playListener = () => {
-  const _vsScore = { ...props.cut.vsScore };
+  const _vsScore = { ...props.cut?.vsScore };
   const convertCut = JSON.parse(JSON.stringify(props.cut));
   const { subPlayer, team = "team", skill, vsScore } = convertCut;
   vsScore[team] = _vsScore[team];
@@ -86,9 +83,8 @@ const loadVideoCallback = () => {
 };
 </script>
 <template>
-  <div style="max-width: 100%; position: relative">
+  <div style="max-width: 100%; position: relative; aspect-ratio: 16/9">
     <video
-      v-if="videoUrl"
       ref="video"
       class="miniVideo"
       :class="{ 'max-width': widthLimit }"
@@ -96,6 +92,7 @@ const loadVideoCallback = () => {
       height="540"
       tabindex="-1"
       autoplay
+      muted
       webkit-playsinline
       playsinline
       controlslist="nodownload"
