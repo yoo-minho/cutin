@@ -33,7 +33,7 @@ watch(
             //그려지는 동안 스크롤하면 안됨
             setTimeout(() => {
               recTable.value?.scrollTo(i);
-            }, 0);
+            }, 100);
           }
         }
       );
@@ -284,6 +284,7 @@ const movePlayer = (time: string) => {
         :filter-method="filterMethod"
         :rows-per-page-options="[0]"
         :hide-pagination="true"
+        virtual-scroll
       >
         <template #bottom>
           <div>

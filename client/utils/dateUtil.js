@@ -11,5 +11,5 @@ export function formatGameDate(playDate, gameNo) {
 
 export function formatSimpletGameDate(playDate) {
   const parsedDate = dayjs(playDate, { strict: false });
-  return parsedDate.format(`'YY/M/D`);
+  return parsedDate.format(`YY/M/D`);
 }

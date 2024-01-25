@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{ type: "DETAIL" | "MAIN"; title: string }>();
+const props = defineProps<{ type: "DETAIL" | "MAIN"; title?: string }>();
 const emits = defineEmits<{ (e: "backEvent"): void }>();
 </script>
 <template>

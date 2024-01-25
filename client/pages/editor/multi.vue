@@ -243,7 +243,7 @@ const syncTime = (sec: number, type: "앞으로" | "뒤로") => {
             <EditorSkillZone />
           </div>
         </div>
-        <div class="col">
+        <div class="col" style="height: 100%">
           <EditorRecTable :video-no="1" />
         </div>
       </div>

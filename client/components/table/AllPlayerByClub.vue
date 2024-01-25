@@ -118,13 +118,15 @@ const getSortPlayerStat = () => {
   }
   if (sort.value.value === "play") return props.playerStat;
   const { type, value } = sort.value;
-  return [...props.playerStat]
-    .filter((v) => (props.guest ? true : v.play >= 4))
-    .sort((a: any, b: any) => {
-      if (type === "avg")
-        return +getAvgStat(b, value, true) - +getAvgStat(a, value, true);
-      return +b[value] - +a[value];
-    });
+  return (
+    [...props.playerStat]
+      // .filter((v) => (props.guest ? true : v.play >= 4))
+      .sort((a: any, b: any) => {
+        if (type === "avg")
+          return +getAvgStat(b, value, true) - +getAvgStat(a, value, true);
+        return +b[value] - +a[value];
+      })
+  );
 };
 const getPlayerGroupByGame = async (player: string) => {
   const route = useRoute();
@@ -187,7 +189,6 @@ const getPlayerGroupByGame = async (player: string) => {
         </q-td>
         <q-td key="play" :props="props" class="play playDate">
           <TableItemStatCell
-            style="width: 36px"
             :contents1="props.row.play"
             :contents2="`${formatSimpletGameDate(props.row.playDate)}`"
           />

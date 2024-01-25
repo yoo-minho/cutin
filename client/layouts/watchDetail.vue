@@ -4,7 +4,10 @@ import WatchHeader from "./components/WatchHeader.vue";
 const layoutState = useState<any>("layoutState");
 
 const backEvent = async () => {
-  layoutState.value.title = "";
+  if (layoutState.value) {
+    layoutState.value.title = "";
+  }
+
   if (history.state.back) {
     const router = useRouter();
     router.back();

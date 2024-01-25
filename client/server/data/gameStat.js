@@ -209,7 +209,8 @@ export async function getStatByClubNPlayer(playerName, clubCode) {
               RANK() OVER (ORDER BY "스틸"::numeric/"경기수" DESC)::numeric AS stl_rank,
               RANK() OVER (ORDER BY "블락"::numeric/"경기수" DESC)::numeric AS blk_rank
             FROM stat_t
-            WHERE "경기수" > 2 AND NOT "guest"
+            WHERE NOT "guest"
+            -- AND "경기수" > 2
           )
           select
             "경기수" play,
