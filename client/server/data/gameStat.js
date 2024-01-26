@@ -292,3 +292,33 @@ order by hl."playDate" desc, hl."gameNo" desc, count desc;
     await prisma.$disconnect();
   }
 }
+
+/*
+with stat_t as (
+	select 
+	  "player",
+	  hl."playDate",
+	  hl."gameNo",
+	  coalesce(sum(CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN hl.skill in ('3점슛','앤드원','풋백앤드원') THEN 3 WHEN hl.skill in ('자유투1점') THEN 1 ELSE 2 END) filter (WHERE gp."player" = hl."mainPlayer"), 0) "득점",
+	  count(1) filter (where hl.skill in ('오펜스리바','리바운드','풋백','블락&리바','득점&OREB','3점슛&OREB','풋백앤드원')) "리바",
+	  count(1) filter (where gp."player" = hl."subPlayer") "어시",
+	  count(1) filter (where hl.skill in ('3점슛','3점슛&OREB') AND gp."player" = hl."mainPlayer") "3점",
+	  count(1) filter (where hl.skill in ('오펜스리바','풋백','득점&OREB','3점슛&OREB','풋백앤드원')) "공리",
+	  count(1) filter (where hl.skill in ('스틸')) "스틸",
+	  count(1) filter (where hl.skill in ('블락','블락&리바')) "블락"
+	from "GamePlayer" AS gp
+	Inner join "Highlight" as hl ON gp."clubCode" = hl."clubCode" AND gp."playDate" = hl."playDate" AND (gp."player" = hl."mainPlayer" OR gp."player" = hl."subPlayer")
+	WHERE gp."clubCode" = 'gba' and not gp.guest
+	GROUP BY gp."clubCode", "player", hl."playDate", hl."gameNo"
+)
+select '투투포인트', * from stat_t where "득점" >= 22 order by "playDate" desc, "gameNo" desc
+select '더블더블', * from stat_t where ("득점" >= 10 and "리바" >= 10) OR ("득점" >= 10 and "어시" >= 10) OR ("리바" >= 10 and "어시" >= 10)  order by "playDate" desc, "gameNo" desc
+select '포쓰리', * from stat_t where "3점" >= 4 order by "playDate" desc, "gameNo" desc
+select '트리플식스', * from stat_t where (("득점" >=6 AND "어시" >=6 AND "스틸" >= 6) OR ("득점" >=6 AND "리바" >=6 AND "어시" >= 6) OR ("득점" >=6 AND "리바" >=6 AND "스틸" >= 6) OR ("어시" >=6 AND "리바" >=6 AND "스틸" >= 6)) order by "playDate" desc, "gameNo" desc
+select '나인어시', * from stat_t where "어시" >= 9
+select '세븐오리', * from stat_t where "공리" >= 7
+select '퓨어디펜더', * from stat_t where "리바" + "스틸" + "블락" >= 15 and "득점" < 10
+
+
+
+*/

@@ -56,10 +56,11 @@ const loadedVideoElem = (elem?: HTMLVideoElement) => {
   video.value = elem;
   video.value.autoplay = false;
   const skillPoints = getSkillPoints(currentCut.value?.skill);
+  const build = 1; //빌드할때만
   if (skillPoints.main.pts > 0) {
-    video.value.playbackRate = 1;
+    video.value.playbackRate = build * 1;
   } else {
-    video.value.playbackRate = 2;
+    video.value.playbackRate = build * 2;
   }
   video.value.play();
 };
