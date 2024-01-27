@@ -55,6 +55,12 @@ const columns = [
     field: "blk",
     align: "center",
   },
+  // {
+  //   label: "공헌",
+  //   name: "kbl",
+  //   field: "kbl",
+  //   align: "center",
+  // },
 ] as any;
 
 const filter = ref("");
@@ -204,6 +210,9 @@ const getPlayerGroupByGame = async (player: string) => {
             />
           </q-td>
         </template>
+        <!-- <q-td key="kbl" :props="props">
+          <TableItemStatCell :contents1="getKblAvgStat(props.row)" />
+        </q-td> -->
       </q-tr>
     </template>
   </q-table>
