@@ -297,6 +297,7 @@ order by hl."playDate" desc, hl."gameNo" desc, count desc;
 with stat_t as (
 	select 
 	  "player",
+	  gp."clubCode",
 	  hl."playDate",
 	  hl."gameNo",
 	  coalesce(sum(CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN hl.skill in ('3점슛','앤드원','풋백앤드원') THEN 3 WHEN hl.skill in ('자유투1점') THEN 1 ELSE 2 END) filter (WHERE gp."player" = hl."mainPlayer"), 0) "득점",
@@ -311,13 +312,28 @@ with stat_t as (
 	WHERE gp."clubCode" = 'gba' and not gp.guest
 	GROUP BY gp."clubCode", "player", hl."playDate", hl."gameNo"
 )
-select '투투포인트', * from stat_t where "득점" >= 22 order by "playDate" desc, "gameNo" desc
-select '더블더블', * from stat_t where ("득점" >= 10 and "리바" >= 10) OR ("득점" >= 10 and "어시" >= 10) OR ("리바" >= 10 and "어시" >= 10)  order by "playDate" desc, "gameNo" desc
-select '포쓰리', * from stat_t where "3점" >= 4 order by "playDate" desc, "gameNo" desc
-select '트리플식스', * from stat_t where (("득점" >=6 AND "어시" >=6 AND "스틸" >= 6) OR ("득점" >=6 AND "리바" >=6 AND "어시" >= 6) OR ("득점" >=6 AND "리바" >=6 AND "스틸" >= 6) OR ("어시" >=6 AND "리바" >=6 AND "스틸" >= 6)) order by "playDate" desc, "gameNo" desc
-select '나인어시', * from stat_t where "어시" >= 9
-select '세븐오리', * from stat_t where "공리" >= 7
-select '퓨어디펜더', * from stat_t where "리바" + "스틸" + "블락" >= 15 and "득점" < 10
+-- select '득점-TOP5', *, (select "clubCode"||'_'||"playDate"||'_'||"gameNo" "videoCode" from stat_t t1 where t.player = t1.player and t1."득점" = max order by "playDate" desc, "gameNo" desc limit 1) from (select player, max("득점") from stat_t group by player order by max DESC LIMIT 5) t
+-- select '리바-TOP5', *, (select "clubCode"||'_'||"playDate"||'_'||"gameNo" "videoCode" from stat_t t1 where t.player = t1.player and t1."리바" = max order by "playDate" desc, "gameNo" desc limit 1) from (select player, max("리바") from stat_t group by player order by max DESC LIMIT 5) t
+-- select '어시-TOP5', *, (select "clubCode"||'_'||"playDate"||'_'||"gameNo" "videoCode" from stat_t t1 where t.player = t1.player and t1."어시" = max order by "playDate" desc, "gameNo" desc limit 1) from (select player, max("어시") from stat_t group by player order by max DESC LIMIT 5) t
+-- select '3점-TOP5', *, (select "clubCode"||'_'||"playDate"||'_'||"gameNo" "videoCode" from stat_t t1 where t.player = t1.player and t1."3점" = max order by "playDate" desc, "gameNo" desc limit 1) from (select player, max("3점") from stat_t group by player order by max DESC LIMIT 5) t
+-- select '공리-TOP5', *, (select "clubCode"||'_'||"playDate"||'_'||"gameNo" "videoCode" from stat_t t1 where t.player = t1.player and t1."공리" = max order by "playDate" desc, "gameNo" desc limit 1) from (select player, max("공리") from stat_t group by player order by max DESC LIMIT 5) t
+-- select '스틸-TOP5', *, (select "clubCode"||'_'||"playDate"||'_'||"gameNo" "videoCode" from stat_t t1 where t.player = t1.player and t1."스틸" = max order by "playDate" desc, "gameNo" desc limit 1) from (select player, max("스틸") from stat_t group by player order by max DESC LIMIT 5) t
+-- select '블락-TOP5', *, (select "clubCode"||'_'||"playDate"||'_'||"gameNo" "videoCode" from stat_t t1 where t.player = t1.player and t1."블락" = max order by "playDate" desc, "gameNo" desc limit 1) from (select player, max("블락") from stat_t group by player order by max DESC LIMIT 5) t
+
+-- (select '더블더블', '득점+리바', * from stat_t where "득점" >= 10 and "리바" >= 10) union
+-- (select '더블더블', '득점+어시', * from stat_t where "득점" >= 10 and "어시" >= 10) union
+-- (select '더블더블', '리바+어시', * from stat_t where "리바" >= 10 and "어시" >= 10) union
+
+-- (select '트리플6', '득점+리바+어시', * from stat_t where "득점" >=6 AND "리바" >=6 AND "어시" >= 6) union
+-- (select '트리플6', '득점+리바+스틸', * from stat_t where "득점" >=6 AND "리바" >=6 AND "스틸" >= 6) union
+-- (select '트리플6', '득점+어시+스틸', * from stat_t where "득점" >=6 AND "어시" >=6 AND "스틸" >= 6) union
+-- (select '트리플6', '어시+리바+스틸', * from stat_t where "어시" >=6 AND "리바" >=6 AND "스틸" >= 6) union
+
+-- (select '쿼드러플4', '득점+리바+어시+스틸', * from stat_t where "득점" >=4 AND "어시" >=4 AND "스틸" >= 4 AND "리바" >= 4) 
+
+
+
+
 
 
 
