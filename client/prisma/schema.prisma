@@ -7,6 +7,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model GameInfo {
+  gameId      Int           @id @default(autoincrement())
+  clubCode    String        @db.VarChar(50)
+  playDate    String        @db.VarChar(8)
+  gameNo      Int           @db.SmallInt
+  syncedTime  String?       @db.VarChar(20)
+  aTeamName   String?       @db.VarChar(20)
+  bTeamName   String?       @db.VarChar(20)
+  aScore      String?       @db.VarChar(20)
+  bScore      String?       @db.VarChar(20)
+  gamePlayers GamePlayer2[]
+  highlights  Highlight2[]
+
+  @@unique([clubCode, playDate, gameNo])
+}
+
+model Highlight2 {
+  gameId       Int
+  quaterNo     Int                @db.SmallInt
+  seekTime     String             @db.VarChar(7)
+  skill        String?            @db.VarChar(100)
+  mainPlayer   String?            @db.VarChar(6)
+  subPlayer    String?            @db.VarChar(6)
+  videoUrl     String?            @db.VarChar(100)
+  videoName    String             @db.VarChar(100)
+  thumbnailUrl String?            @db.VarChar(100)
+  duration     String?            @db.VarChar(100)
+  focusArea    HighlightFocusArea @default(CENTER)
+  highlightId  Int                @id @default(autoincrement())
+  views        Int?
+  game         GameInfo           @relation(fields: [gameId], references: [gameId])
+  mainTeam     GamePlayer2?       @relation(fields: [gameId, mainPlayer], references: [gameId, player])
+
+  @@unique([videoName, seekTime])
+}
+
+model GamePlayer2 {
+  gameId     Int
+  teamName   String       @db.VarChar(20)
+  player     String       @db.VarChar(6)
+  guest      Boolean      @default(false)
+  game       GameInfo     @relation(fields: [gameId], references: [gameId])
+  highlights Highlight2[]
+
+  @@id([gameId, player])
+}
+
 model Highlight {
   clubCode   String      @db.VarChar(50)
   playDate   String      @db.VarChar(8)
@@ -28,8 +75,14 @@ model GamePlayer {
   playDate   String      @db.VarChar(8)
   teamName   String      @db.VarChar(20)
   player     String      @db.VarChar(6)
-  guest      Boolean     @db.Boolean @default(false)
+  guest      Boolean     @default(false)
   highlights Highlight[]
 
   @@id([clubCode, playDate, player])
+}
+
+enum HighlightFocusArea {
+  LEFT
+  CENTER
+  RIGHT
 }

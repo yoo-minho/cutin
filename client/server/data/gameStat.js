@@ -1,5 +1,30 @@
 import prisma from "./prisma";
 
+export async function getMatchByClubCodeV2(clubCode) {
+  try {
+    return await prisma.$queryRaw`
+        SELECT gi."playDate", gi."gameNo", json_agg(jsonb_build_object('teamName',"teamName",'score',"score") ORDER BY "teamName") as match FROM (
+            SELECT 
+                hl."playDate", hl."gameNo", gp."teamName", 
+                SUM((CASE WHEN hl.skill in ('스틸','오펜스리바','리바운드','블락','블락&리바') THEN 0 WHEN hl.skill in ('3점슛','앤드원') THEN 3 WHEN hl.skill in ('자유투1점') THEN 1 ELSE 2 END)) score
+            FROM (
+              SELECT * FROM "GameInfo"  WHERE "clubCode" = ${clubCode} 
+            )  as gi
+            INNER JOIN "Highlight" as hl ON gi."gameId" = hl."gameId"
+            INNER JOIN "GamePlayer" AS gp  ON gi."gameId" = gp."gameId" AND hl."mainPlayer" = gp."player"
+            GROUP by gi."playDate", gi."gameNo", gp."teamName"
+            ORDER by gp."teamName" DESC
+        ) t
+        GROUP by ("playDate", "gameNo")
+        ORDER by ("playDate", "gameNo") DESC
+    `;
+  } catch (error) {
+    console.error("Error executing raw query:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 export async function getMatchByClubCode(clubCode) {
   try {
     return await prisma.$queryRaw`

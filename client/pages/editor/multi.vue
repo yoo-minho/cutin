@@ -19,21 +19,33 @@ const isCommand = (_code: string) =>
 onMounted(() => {
   watch(
     () => videoStore.value.videoElems.length,
-    () => {
+    async () => {
       const videoElems = videoStore.value.videoElems;
-      if (videoElems.length === 2) {
-        videoElems[0].video.addEventListener("timeupdate", () => {
-          const syncedTime = getSyncTime();
-          if (!videoStore.value.syncedTime) {
-            videoStore.value.syncedTime = syncedTime;
-          }
-          if (videoStore.value.syncedTime === syncedTime) return;
+      if (videoElems.length < 2) return;
+      const video0 = videoElems[0];
+      const video1 = videoElems[1];
+      const cutStore = await useCutStore(video1.videoName);
 
-          Notify.create("두 비디오 보정중입니다.");
-          videoElems[1].video.currentTime =
-            videoElems[0].video.currentTime + videoStore.value.syncedTime;
-        });
-      }
+      video1.video.addEventListener("timeupdate", () => {
+        const syncedTimeSaved = videoStore.value.syncedTime;
+        const syncedTimeCalculated = getSyncTime();
+        if (!syncedTimeSaved) {
+          videoStore.value.syncedTime = syncedTimeSaved || syncedTimeCalculated;
+        }
+
+        if (syncedTimeSaved === syncedTimeCalculated) return;
+
+        const isRightVideoActive = cutStore.value.filter(
+          (c) => c.seekTime === formatTime(video1.video.currentTime)
+        );
+
+        Notify.create("두 비디오 보정중입니다.");
+        if (isRightVideoActive) {
+          video0.video.currentTime = video1.video.currentTime - syncedTimeSaved;
+        } else {
+          video1.video.currentTime = video0.video.currentTime + syncedTimeSaved;
+        }
+      });
     }
   );
 

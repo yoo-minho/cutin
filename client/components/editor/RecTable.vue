@@ -54,6 +54,7 @@ watch(currGame, () => {
   const [gameNo, quaterNo] = currGame.value.split(/g|q/g, 2);
   gameTab.value = gameNo;
   quaterTab.value = quaterNo;
+  (document.activeElement as HTMLBodyElement).blur();
 });
 
 const videoProps = useVideoPropsStore();

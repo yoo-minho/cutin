@@ -17,7 +17,6 @@ export async function getGamePlayer(clubCode, playDate) {
     });
     const countArray = data.map((item) => item._count);
     const totalCount = countArray.reduce((sum, count) => sum + count, 0);
-    console.log(h.player, totalCount, countArray.length);
     h.avgCount = countArray.length === 0 ? 0 : totalCount / countArray.length;
   }
 
@@ -39,6 +38,7 @@ export async function createManyGamePlayer(dataArr) {
 }
 
 export async function deleteGamePlayer(clubCode, playDate, teamName, player) {
+  console.log("xxx", prisma.gamePlayers1);
   await prisma.gamePlayer.deleteMany({
     where: { clubCode, playDate, teamName, player },
   });
