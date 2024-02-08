@@ -44,8 +44,10 @@ onMounted(() => {
   watch(
     idx,
     () => {
-      currentCut.value = cuts.value[idx.value];
-      refTab.value = currentCut.value.quaterNo + "q";
+      if (cuts.value[idx.value]) {
+        currentCut.value = cuts.value[idx.value];
+        refTab.value = currentCut.value.quaterNo + "q";
+      }
     },
     { immediate: true }
   );

@@ -120,7 +120,9 @@ export function drawVideoBanners(canvas, cut, tick = 0, waitSec = 0) {
 
   const [name, date] = videoName.split("_");
   const vsScoreArr = Object.entries(vsScore);
-  if (vsScoreArr.length !== 2) throw "vsScore가 2개가 아니네";
+  if (vsScoreArr.length !== 2) {
+    throw { error: "vsScore가 2개가 아니네", vsScoreArr };
+  }
   const [aName, aScore] = vsScoreArr[0];
   const [bName, bScore] = vsScoreArr[1];
   const [mainExpression, subExpression] = skillExpression(

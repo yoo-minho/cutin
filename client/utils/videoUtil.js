@@ -90,3 +90,22 @@ export const chunkArray = (array, chunkSize) => {
   }
   return chunkedArray;
 };
+
+export const ffmpegPromise2 = ({ inputPath, outputPath }) => {
+  return new Promise((resolve, reject) => {
+    ffmpeg()
+      .input(inputPath)
+      .videoFilters(`setpts=${speed}*PTS`)
+      .fps(24)
+      .videoCodec("libx264")
+      .output(outputPath)
+      .on("end", () => {
+        resolve();
+      })
+      .on("error", (x, y, z) => {
+        console.log("uuu", x, y, z);
+        reject();
+      })
+      .run();
+  });
+};
