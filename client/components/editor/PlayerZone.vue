@@ -62,6 +62,7 @@ watch(
                 v.subPlayer && order[1].add(v.subPlayer);
               });
             const mergeOrder = new Set([...order[0], ...order[1]]);
+            console.log({ mergeOrder });
             if (mergeOrder.size === 0) {
               teamStore.value = teamStoreMemory;
               return;
