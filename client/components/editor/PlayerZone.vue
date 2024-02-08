@@ -1,20 +1,82 @@
 <script setup lang="ts">
 const videoStore = useVideoStore();
-const teams = ref();
+const teams = ref<any>();
 const videoName = ref("");
 const videoCode = ref("");
 
+const orderPlayers = (players: any, order: any) => [
+  ...players
+    .filter((player: { name: string }) => order.has(player.name))
+    .map((player: { name: string }) => ({ ...player, in: true })),
+  ...players
+    .filter(
+      (player: { name: string }) => !!player.name && !order.has(player.name)
+    )
+    .map((player: { name: string }) => ({ ...player, in: false })),
+];
+
 watch(
-  () => videoStore.value.videoElems?.[0]?.videoName,
-  async (name) => {
-    if (!name) return;
-    videoName.value = name;
-    const [clubCode, playDate] = name.split("_");
-    videoCode.value = clubCode + playDate;
-    const teamStore = await useTeamStore(name);
-    watch(teamStore, () => (teams.value = teamStore.value), {
-      immediate: true,
-    });
+  () => videoStore.value.videoElems.length,
+  async () => {
+    const videoElems = videoStore.value.videoElems;
+    if (videoElems.length > 0) {
+      const name = videoElems?.[0]?.videoName;
+      videoName.value = name;
+      const [clubCode, playDate] = name.split("_");
+      videoCode.value = clubCode + playDate;
+
+      const teamStore = await useTeamStore(name);
+      const teamStoreMemory = teamStore.value;
+
+      if (videoElems.length === 1) {
+        watch(
+          teamStore,
+          () => {
+            teams.value = teamStore.value;
+          },
+          {
+            immediate: true,
+          }
+        );
+      }
+
+      if (videoElems.length === 2) {
+        const cutStore0 = await useCutStore(videoElems?.[0]?.videoName);
+        const cutStore1 = await useCutStore(videoElems?.[1]?.videoName);
+        const currGame = useCurrGame();
+        watch(
+          [cutStore0, cutStore1, currGame],
+          () => {
+            const order = [new Set<string>(), new Set<string>()];
+            const [gameNo, quaterNo] = currGame.value.split(/g|q/g, 2);
+            cutStore0.value
+              .filter((v) => +v.gameNo === +gameNo && v.quaterNo === +quaterNo)
+              .forEach((v) => {
+                v.mainPlayer && order[0].add(v.mainPlayer);
+                v.subPlayer && order[0].add(v.subPlayer);
+              });
+            cutStore1.value
+              .filter((v) => +v.gameNo === +gameNo && v.quaterNo === +quaterNo)
+              .forEach((v) => {
+                v.mainPlayer && order[1].add(v.mainPlayer);
+                v.subPlayer && order[1].add(v.subPlayer);
+              });
+            const mergeOrder = new Set([...order[0], ...order[1]]);
+            if (mergeOrder.size === 0) {
+              teamStore.value = teamStoreMemory;
+              return;
+            }
+            teamStore.value = teamStoreMemory.map((t: any) => ({
+              ...t,
+              players: orderPlayers(t.players, mergeOrder),
+            }));
+          },
+          {
+            immediate: true,
+          }
+        );
+      }
+    }
   }
 );
 
@@ -110,6 +172,7 @@ const getShortKey = (teamIdx: number, playerIdx: number) => {
               v-for="(player, playerIdx) in team.players?.filter((v:any) => !!v.name) || []"
             >
               <EditorPlayerZoneItem
+                :class="{ 'text-orange-3': player.in }"
                 :playerName="player.name"
                 :teamName="team.name"
                 :videoName="videoName"

@@ -32,11 +32,10 @@ export async function getHighlightByVideoByGameNo(clubCode, playDate, gameNo) {
   return highlights
     .filter((v) => !["쿼터시작", "쿼터끝"].includes(v.skill))
     .map((v) => {
-      console.log({ v });
       const { mainTeam, ...rest } = v;
       return {
         ...rest,
-        team: mainTeam.teamName,
+        team: mainTeam?.teamName,
         skill: rest.skill || "득점&어시",
       };
     });

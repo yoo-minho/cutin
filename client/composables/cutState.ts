@@ -137,7 +137,13 @@ export const addCutV2 = async (videoNo: number) => {
     body: { videoName: elem.videoName, seekArr: [createData] },
   });
 
-  elem.movePlayer(cutTime);
+  //보정시간
+  const gapTime = elem.video.currentTime - time2sec(cutTime);
+  videoStore.value.videoElems.forEach((el: any) => {
+    const time = formatTime(el.video.currentTime - gapTime);
+    console.log({ time });
+    el.movePlayer(time);
+  });
 };
 
 export const addCuts = async (props: {

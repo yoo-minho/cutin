@@ -35,14 +35,18 @@ onMounted(() => {
 
         if (syncedTimeSaved === syncedTimeCalculated) return;
 
-        const isRightVideoActive = cutStore.value.filter(
-          (c) => c.seekTime === formatTime(video1.video.currentTime)
-        );
+        const isRightVideoActive =
+          cutStore.value.filter(
+            (c) => c.seekTime === formatTime(video1.video.currentTime)
+          ).length > 0;
 
-        Notify.create("두 비디오 보정중입니다.");
         if (isRightVideoActive) {
+          Notify.create("두 비디오 보정중입니다. [왼쪽변경]" + syncedTimeSaved);
           video0.video.currentTime = video1.video.currentTime - syncedTimeSaved;
         } else {
+          Notify.create(
+            "두 비디오 보정중입니다. [오른쪽변경]" + syncedTimeSaved
+          );
           video1.video.currentTime = video0.video.currentTime + syncedTimeSaved;
         }
       });
@@ -143,7 +147,7 @@ async function handleKeyPress(event: any) {
     if (isCommand123890 || isCommanQWEIOP) {
       const type = isCommandA ? "subPlayer" : "mainPlayer";
       if (isCommand123890) {
-        const set1 = row1[keyIdx1 + 1];
+        const set1 = row1[keyIdx1];
         if (!set1.name) return;
         return updateCutV2(type, set1.name);
       }
