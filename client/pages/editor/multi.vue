@@ -13,8 +13,7 @@ const innerHeight = ref("100vh");
 
 const pressedCodes = new Set<string>();
 const pressedKeys = new Set<string>();
-const isCommand = (_code: string) =>
-  [...pressedCodes].filter((code) => _code === code).length > 0;
+const isCommand = (_code: string) => [...pressedCodes].filter((code) => _code === code).length > 0;
 
 onMounted(() => {
   watch(
@@ -27,6 +26,8 @@ onMounted(() => {
       const cutStore = await useCutStore(video1.videoName);
 
       video1.video.addEventListener("timeupdate", () => {
+        if (videoStore.value.isMediaRecording) return;
+
         const syncedTimeSaved = videoStore.value.syncedTime;
         const syncedTimeCalculated = getSyncTime();
         if (!syncedTimeSaved) {
@@ -36,17 +37,13 @@ onMounted(() => {
         if (syncedTimeSaved === syncedTimeCalculated) return;
 
         const isRightVideoActive =
-          cutStore.value.filter(
-            (c) => c.seekTime === formatTime(video1.video.currentTime)
-          ).length > 0;
+          cutStore.value.filter((c) => c.seekTime === formatTime(video1.video.currentTime)).length > 0;
 
         if (isRightVideoActive) {
-          Notify.create("두 비디오 보정중입니다. [왼쪽변경]" + syncedTimeSaved);
+          Notify.create("두 비디오 보정중입니다. [왼쪽변경]");
           video0.video.currentTime = video1.video.currentTime - syncedTimeSaved;
         } else {
-          Notify.create(
-            "두 비디오 보정중입니다. [오른쪽변경]" + syncedTimeSaved
-          );
+          Notify.create("두 비디오 보정중입니다. [오른쪽변경]");
           video1.video.currentTime = video0.video.currentTime + syncedTimeSaved;
         }
       });
@@ -123,9 +120,7 @@ async function handleKeyPress(event: any) {
       const message =
         pressedKeys.size === 1
           ? replaceSet(event.key)
-          : [...pressedKeys]
-              .map((key: string) => (key === " " ? "Space" : replaceSet(key)))
-              .join(" + ");
+          : [...pressedKeys].map((key: string) => (key === " " ? "Space" : replaceSet(key))).join(" + ");
       Notify.create({
         timeout: 1000,
         position: "bottom-right",
@@ -174,92 +169,56 @@ const syncTime = (sec: number, type: "앞으로" | "뒤로") => {
   video2.currentTime = video2.currentTime + gapSec;
   video2.focus();
 };
+
+const _makeVideosByAllVideoElem = async () => {
+  if (videoStore.value.videoElems.length !== 2) {
+    Notify.create("두 개의 영상이 필요합니다!");
+    return;
+  }
+  await makeVideosByAllVideoElem();
+};
 </script>
 <template>
   <div
-    style="
-      display: flex;
-      justify-content: center;
-      background: #ddd;
-      align-items: center;
-      width: 100vw;
-    "
+    style="display: flex; justify-content: center; background: #ddd; align-items: center; width: 100vw"
     :style="{ height: innerHeight }"
   >
-    <div
-      style="
-        max-width: 1920px;
-        min-width: 1280px;
-        max-height: 1080px;
-        min-height: 720px;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 10px 10px 20px #888888;
-        border-radius: 20px;
-        overflow: hidden;
-      "
-      :style="{ height: innerHeight }"
-    >
-      <div
-        style="
-          position: relative;
-          border-top-left-radius: 20px;
-          border-top-right-radius: 20px;
-          color: white;
-        "
-        class="bg-orange-5"
-        elevated
-      >
+    <div class="wrap" :style="{ height: innerHeight }">
+      <div class="header bg-orange-5" elevated>
         <q-toolbar>
-          <q-toolbar-title
-            style="font-size: 24px; letter-spacing: -1px; font-weight: bold"
-          >
-            cutin video editor 🏀
-          </q-toolbar-title>
+          <q-toolbar-title class="title"> cutin video editor 🏀 </q-toolbar-title>
+          <q-btn color="dark" @click="_makeVideosByAllVideoElem()">일괄작업</q-btn>
         </q-toolbar>
       </div>
-      <div class="row justify-center" style="position: relative">
-        <div style="position: absolute; z-index: 1">
-          <q-btn
-            color="pink"
-            textColor="white"
-            @click="syncTime(1, '앞으로')"
-            clickable
-          >
-            -
-          </q-btn>
-          <q-btn color="pink" textColor="white">
-            {{ videoStore.syncedTime }}초
-          </q-btn>
-          <q-btn
-            color="pink"
-            textColor="white"
-            @click="syncTime(1, '뒤로')"
-            clickable
-          >
-            +
-          </q-btn>
+      <div class="row justify-center relative-position">
+        <div class="absolute" style="z-index: 1">
+          <q-btn color="pink" textColor="white" @click="syncTime(1, '앞으로')" clickable> - </q-btn>
+          <q-btn color="pink" textColor="white"> {{ videoStore.syncedTime }}초 </q-btn>
+          <q-btn color="pink" textColor="white" @click="syncTime(1, '뒤로')" clickable> + </q-btn>
         </div>
-        <div class="col" style="position: relative">
+        <div class="col relative-position">
           <EditorPlayingVideo />
         </div>
-        <div class="col" style="position: relative">
+        <div class="col relative-position">
           <EditorPlayingVideo />
         </div>
       </div>
-      <div class="row col" style="overflow: hidden; position: relative">
-        <div class="col" style="height: 100%">
+      <div class="row col relative-position overflow-hidden">
+        <div class="col full-height">
           <EditorRecTable :video-no="0" />
         </div>
-        <div style="width: 960px; height: 100%" class="column">
-          <div class="col">
+        <div class="column full-height" style="width: 960px">
+          <div class="col-1">
+            <EditorGameQuaterTabArea />
+          </div>
+          <div class="col-7">
             <EditorPlayerZone />
           </div>
-          <div class="col">
+          <div class="col-4">
             <EditorSkillZone />
           </div>
         </div>
-        <div class="col" style="height: 100%">
+        <div class="col full-height">
           <EditorRecTable :video-no="1" />
         </div>
       </div>
@@ -267,6 +226,29 @@ const syncTime = (sec: number, type: "앞으로" | "뒤로") => {
   </div>
 </template>
 <style lang="scss" scoped>
+.wrap {
+  max-width: 1920px;
+  min-width: 1280px;
+  max-height: 1080px;
+  min-height: 720px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 10px 20px #888888;
+  border-radius: 20px;
+  overflow: hidden;
+  .header {
+    position: relative;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    color: white;
+
+    .title {
+      font-size: 24px;
+      letter-spacing: -1px;
+      font-weight: bold;
+    }
+  }
+}
 :focus-visible {
   outline: 0;
 }

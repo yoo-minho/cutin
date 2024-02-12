@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import SpeedSelector from "./SpeedSelector.vue";
-const props = defineProps<{ video: HTMLVideoElement; playOn: boolean }>();
+const props = defineProps<{ video: HTMLVideoElement; videoName?: string; playOn: boolean }>();
 const emits = defineEmits<{ (e: "togglePlayPause"): void }>();
 const videoProps = useVideoPropsStore();
 
@@ -21,7 +20,13 @@ const seek = (x: any) => {
   props.video.currentTime = (x / 100) * props.video.duration;
 };
 
-const boxState = calculateBackboardPosition();
+let boxState = ref({ top: 0, left: 0, width: 0, height: 0 });
+watch(
+  () => props.videoName,
+  () => {
+    boxState = calculateBackboardPosition(props.videoName);
+  }
+);
 </script>
 <template>
   <div class="control-bar">
@@ -37,12 +42,7 @@ const boxState = calculateBackboardPosition();
       />
       <div class="row items-center">
         <div style="width: 64px">
-          <q-btn
-            flat
-            color="white"
-            :icon="playOn ? 'pause' : 'play_arrow'"
-            @click="() => emits('togglePlayPause')"
-          />
+          <q-btn flat color="white" :icon="playOn ? 'pause' : 'play_arrow'" @click="() => emits('togglePlayPause')" />
         </div>
         <div class="text-h5 text-white text-center" style="width: 240px">
           {{ seekTime }}
@@ -60,8 +60,7 @@ const boxState = calculateBackboardPosition();
               <q-icon name="move_down" class="q-px-xs" size="16px" />
               3초 뒤로 옮기기
               <span style="font-size: 12px; display: flex; align-items: center">
-                (<q-icon name="keyboard" class="q-px-xs" size="16px" /> Ctrl +
-                ←)
+                (<q-icon name="keyboard" class="q-px-xs" size="16px" /> Ctrl + ←)
               </span>
             </q-btn>
           </div>
@@ -77,8 +76,7 @@ const boxState = calculateBackboardPosition();
               <q-icon name="move_up" class="q-px-xs" size="16px" />
               15초 앞으로 옮기기
               <span style="font-size: 12px; display: flex; align-items: center">
-                (<q-icon name="keyboard" class="q-px-xs" size="16px" /> Ctrl +
-                →)
+                (<q-icon name="keyboard" class="q-px-xs" size="16px" /> Ctrl + →)
               </span>
             </q-btn>
           </div>

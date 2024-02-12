@@ -1,21 +1,18 @@
 import type { CutType, PlayerStatType } from "@/types";
 
 const segmentSet = {
-  //8초 => 6초
   deep: [
-    { sec: 3, speed: 1.5, zoom: 1 }, //0.5초
-    { sec: 3, speed: 0.8, zoom: 1 }, //3.5초
-    { sec: 2, speed: 1.5, zoom: 1 }, //1초
+    { sec: 3, speed: 1.5, zoom: 1 },
+    { sec: 3, speed: 0.8, zoom: 1 },
+    { sec: 2, speed: 1.5, zoom: 1 },
   ],
-  //8초 => 5초
   wide: [
     { sec: 3, speed: 1.5, zoom: 1 },
     { sec: 2, speed: 0.8, zoom: 1 },
     { sec: 3, speed: 1.5, zoom: 1 },
   ],
-  //5초 => 3초
   short: [
-    { sec: 2, speed: 1.5, zoom: 1 }, //1
+    { sec: 2, speed: 1.5, zoom: 1 },
     { sec: 1.5, speed: 1, zoom: 1 },
     { sec: 1.5, speed: 1.5, zoom: 1 },
   ],
@@ -33,22 +30,9 @@ export const getSkillContents = (skill?: string) => {
 export const getSegment = (_skill?: string, subPlayer?: string) => {
   _skill = wrapDefSkill(_skill);
   if (!!subPlayer) return segmentSet.deep;
-  if (
-    [
-      "오펜스리바",
-      "리바운드",
-      "스틸",
-      "자유투",
-      "속공",
-      "블락",
-      "블락&리바",
-    ].includes(_skill)
-  )
+  if (["오펜스리바", "리바운드", "스틸", "자유투", "속공", "블락", "블락&리바"].includes(_skill))
     return segmentSet.short;
-  if (
-    ["득점&어시", "풋백", "풋백앤드원", "앤드원", "득점&OREB"].includes(_skill)
-  )
-    return segmentSet.deep;
+  if (["득점&어시", "풋백", "풋백앤드원", "앤드원", "득점&OREB"].includes(_skill)) return segmentSet.deep;
   if (["3점슛", "3점슛&OREB"].includes(_skill)) return segmentSet.wide;
   return segmentSet.wide;
 };
@@ -160,11 +144,7 @@ export const getRecordName = (recordType: string) =>
     tpm: "3점",
   }[recordType] || "");
 
-export const isMyHighlight = (
-  areYouMainPlayer: boolean,
-  skill: string,
-  record: string
-) => {
+export const isMyHighlight = (areYouMainPlayer: boolean, skill: string, record: string) => {
   skill = wrapDefSkill(skill);
   const stat = [...defaultSkill, pts].find((v) => v.name === skill);
   if (areYouMainPlayer) {
@@ -186,11 +166,7 @@ export const getSkillPoints = (skill?: string): any => {
   return [...defaultSkill, pts].find((k) => k.name === skill);
 };
 
-export const skillExpression = (
-  skill: string,
-  mainPlayer: string,
-  subPlayer: string
-) => {
+export const skillExpression = (skill: string, mainPlayer: string, subPlayer: string) => {
   let mainExpression = "";
   let subExpression = "";
   switch (skill) {
@@ -255,8 +231,7 @@ export const skillExpression = (
 
 //일반 cuts 데이터에서 순간 스탯들을 더한다.
 export const convertCutsWithMomentStat = (allGameCuts: CutType[]) => {
-  const uniqueTeam = (cuts: CutType[]) =>
-    Array.from(new Set(cuts.map((v) => v.team)));
+  const uniqueTeam = (cuts: CutType[]) => Array.from(new Set(cuts.map((v) => v.team)));
 
   const vsScore = {} as { [key: string]: number };
   uniqueTeam(allGameCuts).forEach((name) => {

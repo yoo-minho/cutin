@@ -21,8 +21,8 @@ export const useBackVideoState = () => {
   return useState<HTMLVideoElement>("BackVideo");
 };
 
-export const useBackboardPositionState = () => {
-  return useState<Position>("BackboardPostion", () => ({
+export const useBackboardPositionState = (name: string = "") => {
+  return useState<Position>(`${name}BackboardPostion`, () => ({
     top: 0,
     left: 0,
     width: 0,
@@ -33,8 +33,8 @@ export const useBackboardPositionState = () => {
 const calX = (x: number) => Math.round((1920 * x) / 960);
 const calY = (x: number) => Math.round((1080 * x) / 540);
 
-export const calculateBackboardPosition = () => {
-  const state = useBackboardPositionState();
+export const calculateBackboardPosition = (name: string = "") => {
+  const state = useBackboardPositionState(name);
   return computed(() => {
     const { top, left, width, height } = state.value;
     return {

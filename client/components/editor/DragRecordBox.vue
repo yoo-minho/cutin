@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Dialog } from "quasar";
 
-const props = defineProps<{ video?: HTMLVideoElement }>();
-const backboardPositionState = useBackboardPositionState();
+const props = defineProps<{ video?: HTMLVideoElement; videoName: string }>();
 
 const transform = ref("");
 const top = ref(0);
@@ -17,6 +16,15 @@ const initSize = () => {
   height.value = 0;
 };
 
+let backboardPositionState: any;
+
+watch(
+  () => props.videoName,
+  () => {
+    backboardPositionState = useBackboardPositionState(props.videoName);
+  }
+);
+
 watch([top, left, width, height], () => {
   backboardPositionState.value = {
     top: top.value,
@@ -30,6 +38,7 @@ watch(
   () => props.video,
   () => {
     if (!props.video) return;
+
     props.video.addEventListener("mousedown", (e: any) => {
       if (!props.video) return;
       isDragging = true;
@@ -67,7 +76,8 @@ watch(
         .onOk(() => {})
         .onCancel(() => initSize());
     });
-  }
+  },
+  { immediate: true }
 );
 </script>
 <template>

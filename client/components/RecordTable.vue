@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CutType } from "@/types";
 import { Loading, QSpinner } from "quasar";
+import { json2Form } from "~/utils/commUtil";
 
 const emits = defineEmits<{ (e: "moveSeekPoint", time: string): void }>();
 
@@ -70,44 +71,37 @@ const downGameData = () => {
 };
 
 const filterMethod = (rows: readonly any[]) => {
-  return rows?.filter(
-    (row) =>
-      row.gameNo === +gameTab.value &&
-      row.quaterNo === +quaterTab.value &&
-      !!row.seekTime
-  );
+  return rows?.filter((row) => row.gameNo === +gameTab.value && row.quaterNo === +quaterTab.value && !!row.seekTime);
+};
+
+const downVideo = async (cut: CutType) => {
+  const { videoName } = videoProps.value;
+  const { file } = await createCaptureVideo(cut);
+  const fileReader = new FileReader();
+  fileReader.onload = function (event) {
+    if (!event.target?.result) return;
+    const blob = new Blob([event.target.result], { type: file.type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = cut.seekTime + videoName;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  fileReader.readAsArrayBuffer(file);
 };
 
 const makeVideo = async (cut: CutType) => {
-  const { seekTime, skill, subPlayer } = cut;
-  emits("moveSeekPoint", seekTime);
-
-  const { videoName, videoSize } = videoProps.value;
-  const backboardPositionState = useBackboardPositionState();
-  const seekSec = time2sec(seekTime);
-  const segment = getSegment(skill, subPlayer);
-
-  const { file } = await createCaptureVideo(
-    videoSize,
-    seekSec,
-    segment,
-    backboardPositionState.value
-  );
-  if (file === null) return;
-
-  const body = new FormData();
-  body.append("file", file);
-  body.append("path", getCutVideoPath(videoName, seekTime));
-  body.append("videoName", videoName);
-  body.append("seekTime", seekTime);
-  const { data } = await useFetch("/api/upload", { method: "POST", body });
-  if (!data.value) return;
-
-  const { error, videoUrl } = data.value;
-  if (error) {
-    console.error("에러닷");
-    return;
-  }
+  const { videoName } = videoProps.value;
+  const { file, duration } = await createCaptureVideo(cut);
+  const seekTime = cut.seekTime;
+  const path = getCutVideoPath(videoName, seekTime);
+  const { data } = await useFetch("/api/upload", {
+    method: "POST",
+    body: json2Form({ file, path, videoName, seekTime, duration }),
+  });
+  if (!data.value) throw { message: "에러다!!" };
+  const { videoUrl } = data.value;
   updateCutWithoutFetch("videoUrl", videoUrl, seekTime);
 };
 
@@ -158,6 +152,16 @@ const makeAllVideo = async () => {
     ok: "확인",
     cancel: false,
   });
+};
+
+const downloadVideoWithLoading = async (cut: CutType) => {
+  Loading.show({
+    message: "다운로드중입니다",
+    boxClass: "bg-grey-2 text-grey-9",
+    spinnerColor: "primary",
+  });
+  await downVideo(cut);
+  Loading.hide();
 };
 
 const makeVideoWithLoading = async (cut: CutType) => {
@@ -222,26 +226,10 @@ const columns = [
 ] as any;
 </script>
 <template>
-  <ViewerSimpleVideo
-    v-if="seletedCut"
-    v-model="videoViewerOn"
-    :cut="seletedCut"
-  />
+  <ViewerSimpleVideo v-if="seletedCut" v-model="videoViewerOn" :cut="seletedCut" />
   <div class="row bg-dark" style="gap: 12px; padding: 12px">
-    <q-btn
-      color="pink"
-      text-color="white"
-      icon-right="file_download"
-      @click="makeAllVideo"
-    >
-      일괄 업로드
-    </q-btn>
-    <q-btn
-      color="green"
-      text-color="white"
-      icon-right="file_download"
-      @click="downGameData"
-    >
+    <q-btn color="pink" text-color="white" icon-right="file_download" @click="makeAllVideo"> 일괄 업로드 </q-btn>
+    <q-btn color="green" text-color="white" icon-right="file_download" @click="downGameData">
       JSON 내려받기
       <q-file
         ref="uploader"
@@ -253,35 +241,16 @@ const columns = [
         style="display: none"
       />
     </q-btn>
-    <q-btn
-      color="green"
-      text-color="white"
-      icon-right="file_upload"
-      @click="upGameData"
-    >
-      JSON 업로드
-    </q-btn>
+    <q-btn color="green" text-color="white" icon-right="file_upload" @click="upGameData"> JSON 업로드 </q-btn>
   </div>
   <q-separator color="grey-7" size="0.5px" />
-  <q-tabs
-    v-model="gameTab"
-    dense
-    class="text-grey bg-dark"
-    active-color="white"
-    align="left"
-  >
+  <q-tabs v-model="gameTab" dense class="text-grey bg-dark" active-color="white" align="left">
     <q-tab name="1" label="1게임" />
     <q-tab name="2" label="2게임" />
     <q-tab name="3" label="3게임" />
     <q-tab name="4" label="4게임" />
   </q-tabs>
-  <q-tabs
-    v-model="quaterTab"
-    dense
-    class="text-grey bg-dark"
-    active-color="white"
-    align="left"
-  >
+  <q-tabs v-model="quaterTab" dense class="text-grey bg-dark" active-color="white" align="left">
     <q-tab name="1" label="1쿼터" />
     <q-tab name="2" label="2쿼터" />
     <q-tab name="3" label="3쿼터" />
@@ -308,15 +277,9 @@ const columns = [
       </div>
     </template>
     <template #body="props">
-      <q-tr
-        :props="props"
-        :class="props.row.seekTime === currTime ? 'text-green' : ''"
-      >
+      <q-tr :props="props" :class="props.row.seekTime === currTime ? 'text-green' : ''">
         <q-td key="seekTime" :props="props">
-          <div
-            class="text-pre-wrap cursor-pointer"
-            @click="emits('moveSeekPoint', String(props.row.seekTime))"
-          >
+          <div class="text-pre-wrap cursor-pointer" @click="emits('moveSeekPoint', String(props.row.seekTime))">
             {{ props.row.seekTime }}
           </div>
         </q-td>
@@ -330,19 +293,9 @@ const columns = [
           {{ props.row.subPlayer }}
         </q-td>
         <q-td key="videoUrl" :props="props">
-          <q-btn
-            :icon="'movie_edit'"
-            size="xs"
-            :style="{ padding: '4px 8px' }"
-            @click="makeVideoWithLoading(props.row)"
-          />
-          <q-btn
-            :icon="'smart_display'"
-            :disable="!props.row.videoUrl"
-            size="xs"
-            :style="{ padding: '4px 8px' }"
-            @click="openViewer(props.row)"
-          />
+          <AtomXsBtn icon="download" @click="downloadVideoWithLoading(props.row)" />
+          <AtomXsBtn icon="movie_edit" @click="makeVideoWithLoading(props.row)" />
+          <AtomXsBtn icon="smart_display" @click="openViewer(props.row)" />
         </q-td>
       </q-tr>
     </template>

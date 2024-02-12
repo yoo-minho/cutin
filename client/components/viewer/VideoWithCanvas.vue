@@ -79,7 +79,13 @@ const loadVideoCallback = () => {
   loadingScreen.value = false;
   tick.value = 0;
   goal.value = false;
-  video.value?.play();
+  if (video.value) {
+    if (video.value.duration < 3) {
+      Notify.create({ type: "negative", message: "비정상적인 파일입니다!", position: "top" });
+      return;
+    }
+    video.value.play();
+  }
 };
 </script>
 <template>
@@ -99,6 +105,7 @@ const loadVideoCallback = () => {
       :src="videoUrl"
       @loadstart="loadedVideoUrl"
       @loadedmetadata="loadVideoCallback"
+      @error="loadVideoCallback"
     />
     <canvas
       ref="canvas"

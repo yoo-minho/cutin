@@ -33,7 +33,7 @@ model Highlight2 {
   videoUrl     String?            @db.VarChar(100)
   videoName    String             @db.VarChar(100)
   thumbnailUrl String?            @db.VarChar(100)
-  duration     String?            @db.VarChar(100)
+  duration     Int?            @db.Integer @default(0)
   focusArea    HighlightFocusArea @default(CENTER)
   highlightId  Int                @id @default(autoincrement())
   views        Int?
@@ -65,6 +65,7 @@ model Highlight {
   subPlayer  String?     @db.VarChar(6)
   videoUrl   String?     @db.VarChar(100)
   videoName  String      @db.VarChar(100)
+  duration     Int?            @db.Integer @default(0)
   mainTeam   GamePlayer? @relation(fields: [clubCode, playDate, mainPlayer], references: [clubCode, playDate, player])
 
   @@id([videoName, seekTime])

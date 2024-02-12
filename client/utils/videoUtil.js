@@ -64,8 +64,11 @@ export const convertLocal = ({ inputPath, outputPath, speed = 1 }) => {
 export const ffprobePromise = (inputPath) => {
   return new Promise((resolve, reject) => {
     ffmpeg.ffprobe(inputPath, (err, metadata) => {
-      if (err) reject();
-      else resolve(metadata);
+      if (err) {
+        reject();
+      } else {
+        resolve(metadata);
+      }
     });
   });
 };

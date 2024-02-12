@@ -38,8 +38,7 @@ function moveSeekPoint(time: string) {
 }
 
 async function handleKeyPress(event: any, pressedKeys: any) {
-  const isCommand = (_code: string) =>
-    [...pressedKeys].filter((code) => _code === code).length > 0;
+  const isCommand = (_code: string) => [...pressedKeys].filter((code) => _code === code).length > 0;
 
   const isCommandS = isCommand("KeyS");
   const isCommandA = isCommand("KeyA");
@@ -51,15 +50,7 @@ async function handleKeyPress(event: any, pressedKeys: any) {
   const isCommanQWEIOP = keyIdx2 > -1;
   const isCommandArrow = event.key.indexOf("Arrow") === 0;
 
-  if (
-    isCommandS ||
-    isCommandA ||
-    isCommandC ||
-    isCommandSpace ||
-    isCommandArrow ||
-    isCommand123890 ||
-    isCommanQWEIOP
-  ) {
+  if (isCommandS || isCommandA || isCommandC || isCommandSpace || isCommandArrow || isCommand123890 || isCommanQWEIOP) {
     event.preventDefault();
 
     const teamStore = await useTeamStore(videoProps.value.videoName);
@@ -124,10 +115,7 @@ async function handleArrowKeyPress(event: any) {
       }
 
       if (video.value.paused || video.value.ended || event.ctrlKey) {
-        video.value.currentTime = Math.min(
-          currentTime + fastForwardSec,
-          duration
-        );
+        video.value.currentTime = Math.min(currentTime + fastForwardSec, duration);
         return;
       }
 
@@ -168,13 +156,7 @@ function togglePlayPause() {
 </script>
 <template>
   <div
-    style="
-      display: flex;
-      justify-content: center;
-      background: #ddd;
-      align-items: center;
-      width: 100vw;
-    "
+    style="display: flex; justify-content: center; background: #ddd; align-items: center; width: 100vw"
     :style="{ height: innerHeight }"
   >
     <div
@@ -192,19 +174,12 @@ function togglePlayPause() {
       :style="{ height: innerHeight }"
     >
       <div
-        style="
-          position: relative;
-          border-top-left-radius: 20px;
-          border-top-right-radius: 20px;
-          color: white;
-        "
+        style="position: relative; border-top-left-radius: 20px; border-top-right-radius: 20px; color: white"
         class="bg-orange-5"
         elevated
       >
         <q-toolbar>
-          <q-toolbar-title
-            style="font-size: 24px; letter-spacing: -1px; font-weight: bold"
-          >
+          <q-toolbar-title style="font-size: 24px; letter-spacing: -1px; font-weight: bold">
             cutin video editor 🏀
           </q-toolbar-title>
           <StopWatch />
@@ -222,14 +197,7 @@ function togglePlayPause() {
           <!-- <back-video @moveSeekPoint="moveSeekPoint" /> -->
         </div>
         <div style="width: 960px">
-          <div
-            class="column"
-            style="
-              height: 100vh;
-              max-height: calc(1080px - 50px);
-              min-height: calc(720px - 50px);
-            "
-          >
+          <div class="column" style="height: 100vh; max-height: calc(1080px - 50px); min-height: calc(720px - 50px)">
             <div style="height: 540px; position: relative" class="column">
               <drag-box :video="video" />
               <video

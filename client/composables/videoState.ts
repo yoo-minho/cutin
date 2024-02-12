@@ -29,9 +29,7 @@ export const getCutVideoPath = (videoName: string, seekTime: string) => {
     clubCode,
     playDate,
     currGame.value,
-    seekTime.replace(/:/g, "") +
-      "_" +
-      rest.join("_").replace(".mp4", "").replace(".MOV", ""),
+    seekTime.replace(/:/g, "") + "_" + rest.join("_").replace(".mp4", "").replace(".MOV", ""),
   ].join("/");
 };
 
@@ -40,6 +38,7 @@ export const useVideoStore = () => {
     videoElems: [],
     currSpeed: 1.25,
     syncedTime: 0,
+    isMediaRecording: false,
   }));
 };
 
@@ -47,7 +46,5 @@ export const getSyncTime = () => {
   const videoStore = useVideoStore();
   const videoElems = videoStore.value.videoElems;
   if (videoElems.length < 2) return 0;
-  return Math.round(
-    videoElems[1].video.currentTime - videoElems[0].video.currentTime
-  );
+  return Math.round(videoElems[1].video.currentTime - videoElems[0].video.currentTime);
 };

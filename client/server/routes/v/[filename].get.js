@@ -21,18 +21,16 @@ export default defineEventHandler(async (event) => {
   const existsOld = existsSync(oldFilePath);
 
   let buffer;
+
   if (!existsNew && !existsOld) {
     const reqUrl = String(getRequestURL(event)); //ex) http://localhost:3000/v/gba-20231230-2g2q-00450_B_2.mp4
     const isLocal = reqUrl.indexOf("http://localhost:3000/") === 0;
 
     if (isLocal) {
       const response = await fetch(`${DOMAIN}/v/${filename}?compile=no`);
-      if (response.ok) {
-        writeFileSync(
-          TEMP_INPUT_PATH,
-          Buffer.from(await response.arrayBuffer())
-        );
 
+      if (response.ok) {
+        writeFileSync(TEMP_INPUT_PATH, Buffer.from(await response.arrayBuffer()));
         const codecName = await getCodecName(TEMP_INPUT_PATH);
         if ("h264" === codecName) {
           buffer = readFileSync(TEMP_INPUT_PATH);
@@ -50,12 +48,12 @@ export default defineEventHandler(async (event) => {
           }
         }
 
-        if (!buffer) return "No File";
+        if (!buffer) throw "No File";
       } else {
-        return "No File";
+        throw "No File";
       }
     } else {
-      return "No File";
+      throw "No File";
     }
   } else {
     if (compile === "no") {
@@ -74,19 +72,20 @@ export default defineEventHandler(async (event) => {
 
   setHeader(event, "cache-control", "no-cache");
   setHeader(event, "connection", "keep-alive");
-  setHeader(
-    event,
-    "Content-Disposition",
-    `attachment; filename="${newFileName}`
-  );
+  setHeader(event, "Content-Disposition", `attachment; filename="${newFileName}`);
   setHeader(event, "content-type", "video/mp4");
 
   return buffer;
 });
 
 async function getCodecName(path) {
-  const metadata = await ffprobePromise(path);
-  return metadata.streams[0].codec_name;
+  try {
+    const metadata = await ffprobePromise(path);
+    return metadata.streams[0].codec_name;
+  } catch (e) {
+    console.error("getCodecName", e);
+    return "";
+  }
 }
 
 async function convertLocalNUdt({ path, speed, filename }) {

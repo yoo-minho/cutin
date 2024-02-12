@@ -10,8 +10,7 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: "ko" },
       charset: "utf-8",
-      viewport:
-        "user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width",
+      viewport: "user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width",
       title: _title,
       meta: [
         { hid: "description", name: "description", content: _desc },
@@ -59,7 +58,7 @@ export default defineNuxtConfig({
     "nuxt-quasar-ui",
     "@vite-pwa/nuxt",
     "nuxt-gtag",
-    "@nuxtjs/google-adsense",
+    // "@nuxtjs/google-adsense",
     "@nuxt/content",
   ],
   gtag: {
