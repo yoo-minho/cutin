@@ -184,12 +184,6 @@ async function createCaptureVideo(cut: CutType): Promise<RecordFileType> {
       videoElem.muted = false;
       videoElem.currentTime = seekSec;
       videoElem.playbackRate = originSpeed;
-
-      //이거 풀면 싱크 맞추려고 해버려!
-      setTimeout(() => {
-        videoStore.value.isMediaRecording = false;
-      }, 500);
-
       const file = new File([new Blob(chunks, { type })], "temp.webm", { type });
       if (file === null) throw "의미 있나?";
       if (file.size < 10 * 1024) throw "10KB 이하일수는 없지!";

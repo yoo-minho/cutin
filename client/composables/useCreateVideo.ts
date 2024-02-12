@@ -58,7 +58,7 @@ export const makeVideosByAllVideoElem = async () => {
   for (const videoObject of videoStore.value.videoElems) {
     const { videoName } = videoObject;
     const cuts = await fetchHighlightsByVideoName(videoName);
-    allCuts = [...allCuts, ...cuts];
+    allCuts = [...allCuts, ...cuts.filter((cut) => !!cut.mainPlayer)];
   }
 
   const totalSize = allCuts.length;
